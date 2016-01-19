@@ -10,11 +10,11 @@
 	import Darwin
 	import Foundation
 #elseif os(Linux)
-	//import Foundation
+	import Foundation
 	import Glibc
 #endif
 
-// MARK: Extensions to String for dealing with C strings
+// MARK: String Extensions
 
 public extension String {
 	
@@ -49,6 +49,37 @@ public extension String {
 	public func toCString() ->UnsafeMutablePointer<Int8> {
 		
 		return strdup(self)
+	}
+
+	///
+	/// Bridge function from String to NSString
+	///
+	/// - Returns: NSString
+	///
+	public func bridgeTo() -> NSString {
+		#if os(Linux)
+			return self.bridge()
+		#else
+			return self as NSString
+		#endif
+	}
+}
+
+// MARK: NSString Extensions
+
+public extension NSString {
+
+	///
+	/// Bridge function from NSString to String
+	///
+	/// - Returns: String
+	///
+	public func bridgeTo() -> String {
+		#if os(Linux)
+			return self.bridge()
+		#else
+			return self as String
+		#endif
 	}
 }
 

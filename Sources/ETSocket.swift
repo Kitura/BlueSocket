@@ -114,6 +114,7 @@ public class ETSocket: ETReader, ETWriter {
 	public static let SOCKET_ERR_GET_FCNTL_FAILED			= -9981
 	public static let SOCKET_ERR_SET_FCNTL_FAILED			= -9980
 	public static let SOCKET_ERR_NOT_IMPLEMENTED			= -9979
+	public static let SOCKET_ERR_INTERNAL					= -9978
 	
 	// MARK: Enums
 	
@@ -694,6 +695,29 @@ public class ETSocket: ETReader, ETWriter {
 		
 		return returnCount
 	}
+	
+	///
+	/// Read a string from the socket
+	///
+	/// - Returns: String containing the data read from the socket.
+	///
+	public func readString() throws -> String? {
+		
+		guard let data: NSMutableData = NSMutableData(capacity: 2000)! else {
+			
+			throw ETSocketError(code: ETSocket.SOCKET_ERR_INTERNAL, reason: "Unable to create temporary NSData...")
+		}
+		
+		try self.readData(data)
+		
+		guard let str: NSString = NSString(data: data, encoding: NSUTF8StringEncoding)! else {
+			
+			throw ETSocketError(code: ETSocket.SOCKET_ERR_INTERNAL, reason: "Unable to convert data to NSString.")
+		}
+		
+		return str.bridgeTo()
+	}
+
 
 	///
 	/// Read data from the socket.

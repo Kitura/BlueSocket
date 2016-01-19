@@ -10,14 +10,14 @@ import Foundation
 
 public protocol ETReader {
 	
-	func readData(buffer: UnsafeMutablePointer<CChar>, bufSize: Int) throws ->Int
+	func readString() throws ->String?
 	
 	func readData(data: NSMutableData) throws ->Int
 }
 
 public protocol ETWriter {
 	
-	func writeData(buffer: UnsafePointer<Void>, bufSize: Int) throws
-	
 	func writeData(data: NSData) throws
+
+	func writeString(string: String) throws
 }
