@@ -51,36 +51,6 @@ public extension String {
 		return strdup(self)
 	}
 
-	///
-	/// Bridge function from String to NSString
-	///
-	/// - Returns: NSString
-	///
-	public func bridgeTo() -> NSString {
-		#if os(Linux)
-			return self.bridge()
-		#else
-			return self as NSString
-		#endif
-	}
-}
-
-// MARK: NSString Extensions
-
-public extension NSString {
-
-	///
-	/// Bridge function from NSString to String
-	///
-	/// - Returns: String
-	///
-	public func bridgeTo() -> String {
-		#if os(Linux)
-			return self.bridge()
-		#else
-			return self as String
-		#endif
-	}
 }
 
 #if os(Linux)

@@ -715,7 +715,12 @@ public class ETSocket: ETReader, ETWriter {
 			throw ETSocketError(code: ETSocket.SOCKET_ERR_INTERNAL, reason: "Unable to convert data to NSString.")
 		}
 		
-		return str.bridgeTo()
+		#if os(Linux)
+			return str.bridge()
+		#else
+			return str as String
+		#endif
+		
 	}
 
 
