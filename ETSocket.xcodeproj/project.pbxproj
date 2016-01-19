@@ -11,6 +11,9 @@
 		8C0F4C051C4E8630008B2B0A /* ETProtocols.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C0F4C021C4E8630008B2B0A /* ETProtocols.swift */; };
 		8C0F4C061C4E8630008B2B0A /* ETSocket.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C0F4C031C4E8630008B2B0A /* ETSocket.swift */; };
 		8C0F4C071C4E8630008B2B0A /* ETUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C0F4C041C4E8630008B2B0A /* ETUtils.swift */; };
+		8CC36DF81C4EA1BE00BAA659 /* ETProtocols.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C0F4C021C4E8630008B2B0A /* ETProtocols.swift */; };
+		8CC36DF91C4EA1BE00BAA659 /* ETSocket.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C0F4C031C4E8630008B2B0A /* ETSocket.swift */; };
+		8CC36DFA1C4EA1BE00BAA659 /* ETUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C0F4C041C4E8630008B2B0A /* ETUtils.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -21,10 +24,19 @@
 		8C0F4C031C4E8630008B2B0A /* ETSocket.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ETSocket.swift; sourceTree = "<group>"; };
 		8C0F4C041C4E8630008B2B0A /* ETUtils.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ETUtils.swift; sourceTree = "<group>"; };
 		8C0F4C081C4E866E008B2B0A /* Package.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Package.swift; sourceTree = "<group>"; };
+		8CC36E021C4EA1BE00BAA659 /* ETSocket.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = ETSocket.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		8CC36E041C4EA34700BAA659 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		8C0F4BF21C4E84CC008B2B0A /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		8CC36DFB1C4EA1BE00BAA659 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -37,6 +49,7 @@
 		8C0F4BEC1C4E84CC008B2B0A = {
 			isa = PBXGroup;
 			children = (
+				8CC36E041C4EA34700BAA659 /* README.md */,
 				8C0F4C081C4E866E008B2B0A /* Package.swift */,
 				8C0F4BF81C4E84CC008B2B0A /* Sources */,
 				8C0F4BF71C4E84CC008B2B0A /* Products */,
@@ -47,6 +60,7 @@
 			isa = PBXGroup;
 			children = (
 				8C0F4BF61C4E84CC008B2B0A /* ETSocket.framework */,
+				8CC36E021C4EA1BE00BAA659 /* ETSocket.framework */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -82,6 +96,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		8CC36DFC1C4EA1BE00BAA659 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXHeadersBuildPhase section */
 
 /* Begin PBXNativeTarget section */
@@ -103,6 +124,24 @@
 			productReference = 8C0F4BF61C4E84CC008B2B0A /* ETSocket.framework */;
 			productType = "com.apple.product-type.framework";
 		};
+		8CC36DF61C4EA1BE00BAA659 /* ETSocket-iOS */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 8CC36DFF1C4EA1BE00BAA659 /* Build configuration list for PBXNativeTarget "ETSocket-iOS" */;
+			buildPhases = (
+				8CC36DF71C4EA1BE00BAA659 /* Sources */,
+				8CC36DFB1C4EA1BE00BAA659 /* Frameworks */,
+				8CC36DFC1C4EA1BE00BAA659 /* Headers */,
+				8CC36DFE1C4EA1BE00BAA659 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "ETSocket-iOS";
+			productName = ETSocket;
+			productReference = 8CC36E021C4EA1BE00BAA659 /* ETSocket.framework */;
+			productType = "com.apple.product-type.framework";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -114,6 +153,9 @@
 				TargetAttributes = {
 					8C0F4BF51C4E84CC008B2B0A = {
 						CreatedOnToolsVersion = 7.2;
+					};
+					8CC36DF61C4EA1BE00BAA659 = {
+						DevelopmentTeam = 2ZB889ETZ7;
 					};
 				};
 			};
@@ -130,12 +172,20 @@
 			projectRoot = "";
 			targets = (
 				8C0F4BF51C4E84CC008B2B0A /* ETSocket */,
+				8CC36DF61C4EA1BE00BAA659 /* ETSocket-iOS */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
 		8C0F4BF41C4E84CC008B2B0A /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		8CC36DFE1C4EA1BE00BAA659 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -152,6 +202,16 @@
 				8C0F4C051C4E8630008B2B0A /* ETProtocols.swift in Sources */,
 				8C0F4C061C4E8630008B2B0A /* ETSocket.swift in Sources */,
 				8C0F4C071C4E8630008B2B0A /* ETUtils.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		8CC36DF71C4EA1BE00BAA659 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				8CC36DF81C4EA1BE00BAA659 /* ETProtocols.swift in Sources */,
+				8CC36DF91C4EA1BE00BAA659 /* ETSocket.swift in Sources */,
+				8CC36DFA1C4EA1BE00BAA659 /* ETUtils.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -254,7 +314,7 @@
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				FRAMEWORK_VERSION = A;
-				INFOPLIST_FILE = ETSocket/Info.plist;
+				INFOPLIST_FILE = "$(SRCROOT)/Sources/Info.plist";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.ibm.ios.ibmSwift.ETSocket;
@@ -274,11 +334,56 @@
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				FRAMEWORK_VERSION = A;
-				INFOPLIST_FILE = ETSocket/Info.plist;
+				INFOPLIST_FILE = "$(SRCROOT)/Sources/Info.plist";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.ibm.ios.ibmSwift.ETSocket;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+			};
+			name = Release;
+		};
+		8CC36E001C4EA1BE00BAA659 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				COMBINE_HIDPI_IMAGES = YES;
+				DEFINES_MODULE = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				FRAMEWORK_VERSION = A;
+				INFOPLIST_FILE = "$(SRCROOT)/Sources/Info.plist";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 9.2;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.ibm.ios.ibmSwift.ETSocket;
+				PRODUCT_NAME = ETSocket;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		8CC36E011C4EA1BE00BAA659 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				COMBINE_HIDPI_IMAGES = YES;
+				DEFINES_MODULE = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				FRAMEWORK_VERSION = A;
+				INFOPLIST_FILE = "$(SRCROOT)/Sources/Info.plist";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 9.2;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.ibm.ios.ibmSwift.ETSocket;
+				PRODUCT_NAME = ETSocket;
+				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
 			};
 			name = Release;
@@ -300,6 +405,15 @@
 			buildConfigurations = (
 				8C0F4BFF1C4E84CC008B2B0A /* Debug */,
 				8C0F4C001C4E84CC008B2B0A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		8CC36DFF1C4EA1BE00BAA659 /* Build configuration list for PBXNativeTarget "ETSocket-iOS" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				8CC36E001C4EA1BE00BAA659 /* Debug */,
+				8CC36E011C4EA1BE00BAA659 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

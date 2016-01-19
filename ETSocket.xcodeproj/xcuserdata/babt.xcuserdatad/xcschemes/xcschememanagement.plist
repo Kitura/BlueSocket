@@ -4,6 +4,11 @@
 <dict>
 	<key>SchemeUserState</key>
 	<dict>
+		<key>ETSocket-iOS.xcscheme</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>1</integer>
+		</dict>
 		<key>ETSocket.xcscheme</key>
 		<dict>
 			<key>orderHint</key>
@@ -13,6 +18,11 @@
 	<key>SuppressBuildableAutocreation</key>
 	<dict>
 		<key>8C0F4BF51C4E84CC008B2B0A</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>8CC36DF61C4EA1BE00BAA659</key>
 		<dict>
 			<key>primary</key>
 			<true/>
