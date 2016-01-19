@@ -10,8 +10,6 @@ import PackageDescription
 
 let package = Package(
 	name: "ETSocket",
-	targets: [Target(name: "ETSocket", dependencies: [])],
-	exclude: [],
-	dependencies: [],
-	testDependencies: []
+	targets: [Target(name: "ETSocket")],
+	exclude: ["ETSocket.xcodeproj", "ETSocket.xcworkspace", "README.md", "Sources/Info.plist"]
 )
