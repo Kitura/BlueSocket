@@ -703,14 +703,14 @@ public class ETSocket: ETReader, ETWriter {
 	///
 	public func readString() throws -> String? {
 
-		guard let data: NSMutableData = NSMutableData(capacity: 2000)! else {
+		guard let data = NSMutableData(capacity: 2000) else {
 
 			throw ETSocketError(code: ETSocket.SOCKET_ERR_INTERNAL, reason: "Unable to create temporary NSData...")
 		}
 
 		try self.readData(data)
 
-		guard let str: NSString = NSString(data: data, encoding: NSUTF8StringEncoding)! else {
+		guard let str = NSString(data: data, encoding: NSUTF8StringEncoding) else {
 
 			throw ETSocketError(code: ETSocket.SOCKET_ERR_INTERNAL, reason: "Unable to convert data to NSString.")
 		}
