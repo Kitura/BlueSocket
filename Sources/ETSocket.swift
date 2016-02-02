@@ -455,21 +455,27 @@ public class ETSocket: ETReader, ETWriter {
 	/// Closes the current socket.
 	///
 	public func close() {
-
+		
 		if self.socketfd != Int32(ETSocket.SOCKET_INVALID_DESCRIPTOR) {
 			#if os(Linux)
+				if self.listening {
+					Glibc.shutdown(self.socketfd, Int32(SHUT_RDWR))
+				}
 				Glibc.close(self.socketfd)
 			#else
+				if self.listening {
+					Darwin.shutdown(self.socketfd, Int32(SHUT_RDWR))
+				}
 				Darwin.close(self.socketfd)
 			#endif
 			self.socketfd = Int32(ETSocket.SOCKET_INVALID_DESCRIPTOR)
 		}
-
+		
 		self.remoteHostName = ETSocket.NO_HOSTNAME
 		self.connected = false
 		self.listening = false
 	}
-
+	
 	///
 	/// Connects to the named host on the specified port.
 	///
@@ -585,14 +591,8 @@ public class ETSocket: ETReader, ETWriter {
 
 		// Set a flag so that this address can be re-used immediately after the connection
 		// closes.  (TCP normally imposes a delay before an address can be re-used.)
-		//	- NOTE: On Linux, we need to also reuse the port so we set an extra flag.
 		var on: Int32 = 1
-		#if os(Linux)
-			let flags = SO_REUSEADDR | SO_REUSEPORT
-		#else
-			let flags = SO_REUSEADDR
-		#endif
-		if setsockopt(self.socketfd, SOL_SOCKET, flags, &on, socklen_t(sizeof(Int32))) < 0 {
+		if setsockopt(self.socketfd, SOL_SOCKET, SO_REUSEADDR, &on, socklen_t(sizeof(Int32))) < 0 {
 			
 			throw ETSocketError(code: ETSocket.SOCKET_ERR_SETSOCKOPT_FAILED, reason: self.lastError())
 		}
