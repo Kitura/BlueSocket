@@ -858,8 +858,6 @@ public class ETSocket: ETReader, ETWriter {
 	///
 	/// Set blocking mode for socket.
 	///
-	/// **WARNING: This function currently not implemented. Will throw an exception.**
-	///
 	/// - Parameter shouldBlock: True to block, false to not.
 	///
 	public func setBlocking(shouldBlock: Bool) throws {
