@@ -1,4 +1,4 @@
-# ETSocket
+# BlueSocket
 
 ## Overview
 Socket framework for Swift using the Swift Package Manager. Works on OS X and Linux.
