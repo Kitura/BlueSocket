@@ -7,24 +7,24 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		8C0F4BFA1C4E84CC008B2B0A /* ETSocket.h in Headers */ = {isa = PBXBuildFile; fileRef = 8C0F4BF91C4E84CC008B2B0A /* ETSocket.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		8C0F4C051C4E8630008B2B0A /* ETProtocols.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C0F4C021C4E8630008B2B0A /* ETProtocols.swift */; };
-		8C0F4C061C4E8630008B2B0A /* ETSocket.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C0F4C031C4E8630008B2B0A /* ETSocket.swift */; };
-		8C0F4C071C4E8630008B2B0A /* ETUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C0F4C041C4E8630008B2B0A /* ETUtils.swift */; };
-		8CC36DF81C4EA1BE00BAA659 /* ETProtocols.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C0F4C021C4E8630008B2B0A /* ETProtocols.swift */; };
-		8CC36DF91C4EA1BE00BAA659 /* ETSocket.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C0F4C031C4E8630008B2B0A /* ETSocket.swift */; };
-		8CC36DFA1C4EA1BE00BAA659 /* ETUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C0F4C041C4E8630008B2B0A /* ETUtils.swift */; };
+		8C0F4BFA1C4E84CC008B2B0A /* BlueSocket.h in Headers */ = {isa = PBXBuildFile; fileRef = 8C0F4BF91C4E84CC008B2B0A /* BlueSocket.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		8C0F4C051C4E8630008B2B0A /* BlueSocketProtocols.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C0F4C021C4E8630008B2B0A /* BlueSocketProtocols.swift */; };
+		8C0F4C061C4E8630008B2B0A /* BlueSocket.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C0F4C031C4E8630008B2B0A /* BlueSocket.swift */; };
+		8C0F4C071C4E8630008B2B0A /* BlueSocketUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C0F4C041C4E8630008B2B0A /* BlueSocketUtils.swift */; };
+		8CC36DF81C4EA1BE00BAA659 /* BlueSocketProtocols.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C0F4C021C4E8630008B2B0A /* BlueSocketProtocols.swift */; };
+		8CC36DF91C4EA1BE00BAA659 /* BlueSocket.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C0F4C031C4E8630008B2B0A /* BlueSocket.swift */; };
+		8CC36DFA1C4EA1BE00BAA659 /* BlueSocketUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C0F4C041C4E8630008B2B0A /* BlueSocketUtils.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		8C0F4BF61C4E84CC008B2B0A /* ETSocket.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = ETSocket.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		8C0F4BF91C4E84CC008B2B0A /* ETSocket.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ETSocket.h; sourceTree = "<group>"; };
+		8C0F4BF61C4E84CC008B2B0A /* BlueSocket.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = BlueSocket.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		8C0F4BF91C4E84CC008B2B0A /* BlueSocket.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = BlueSocket.h; sourceTree = "<group>"; };
 		8C0F4BFB1C4E84CC008B2B0A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		8C0F4C021C4E8630008B2B0A /* ETProtocols.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ETProtocols.swift; sourceTree = "<group>"; };
-		8C0F4C031C4E8630008B2B0A /* ETSocket.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ETSocket.swift; sourceTree = "<group>"; };
-		8C0F4C041C4E8630008B2B0A /* ETUtils.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ETUtils.swift; sourceTree = "<group>"; };
+		8C0F4C021C4E8630008B2B0A /* BlueSocketProtocols.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BlueSocketProtocols.swift; sourceTree = "<group>"; };
+		8C0F4C031C4E8630008B2B0A /* BlueSocket.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BlueSocket.swift; sourceTree = "<group>"; };
+		8C0F4C041C4E8630008B2B0A /* BlueSocketUtils.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BlueSocketUtils.swift; sourceTree = "<group>"; };
 		8C0F4C081C4E866E008B2B0A /* Package.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Package.swift; sourceTree = "<group>"; };
-		8CC36E021C4EA1BE00BAA659 /* ETSocket.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = ETSocket.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		8CC36E021C4EA1BE00BAA659 /* BlueSocket.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = BlueSocket.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		8CC36E041C4EA34700BAA659 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -59,8 +59,8 @@
 		8C0F4BF71C4E84CC008B2B0A /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				8C0F4BF61C4E84CC008B2B0A /* ETSocket.framework */,
-				8CC36E021C4EA1BE00BAA659 /* ETSocket.framework */,
+				8C0F4BF61C4E84CC008B2B0A /* BlueSocket.framework */,
+				8CC36E021C4EA1BE00BAA659 /* BlueSocket.framework */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -68,9 +68,9 @@
 		8C0F4BF81C4E84CC008B2B0A /* Sources */ = {
 			isa = PBXGroup;
 			children = (
-				8C0F4C021C4E8630008B2B0A /* ETProtocols.swift */,
-				8C0F4C031C4E8630008B2B0A /* ETSocket.swift */,
-				8C0F4C041C4E8630008B2B0A /* ETUtils.swift */,
+				8C0F4C021C4E8630008B2B0A /* BlueSocketProtocols.swift */,
+				8C0F4C031C4E8630008B2B0A /* BlueSocket.swift */,
+				8C0F4C041C4E8630008B2B0A /* BlueSocketUtils.swift */,
 				8C0F4C011C4E85F7008B2B0A /* Supporting Files */,
 			);
 			path = Sources;
@@ -79,7 +79,7 @@
 		8C0F4C011C4E85F7008B2B0A /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
-				8C0F4BF91C4E84CC008B2B0A /* ETSocket.h */,
+				8C0F4BF91C4E84CC008B2B0A /* BlueSocket.h */,
 				8C0F4BFB1C4E84CC008B2B0A /* Info.plist */,
 			);
 			name = "Supporting Files";
@@ -92,7 +92,7 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				8C0F4BFA1C4E84CC008B2B0A /* ETSocket.h in Headers */,
+				8C0F4BFA1C4E84CC008B2B0A /* BlueSocket.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -106,9 +106,9 @@
 /* End PBXHeadersBuildPhase section */
 
 /* Begin PBXNativeTarget section */
-		8C0F4BF51C4E84CC008B2B0A /* ETSocket */ = {
+		8C0F4BF51C4E84CC008B2B0A /* BlueSocket */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 8C0F4BFE1C4E84CC008B2B0A /* Build configuration list for PBXNativeTarget "ETSocket" */;
+			buildConfigurationList = 8C0F4BFE1C4E84CC008B2B0A /* Build configuration list for PBXNativeTarget "BlueSocket" */;
 			buildPhases = (
 				8C0F4BF11C4E84CC008B2B0A /* Sources */,
 				8C0F4BF21C4E84CC008B2B0A /* Frameworks */,
@@ -119,14 +119,14 @@
 			);
 			dependencies = (
 			);
-			name = ETSocket;
+			name = BlueSocket;
 			productName = ETSocket;
-			productReference = 8C0F4BF61C4E84CC008B2B0A /* ETSocket.framework */;
+			productReference = 8C0F4BF61C4E84CC008B2B0A /* BlueSocket.framework */;
 			productType = "com.apple.product-type.framework";
 		};
-		8CC36DF61C4EA1BE00BAA659 /* ETSocket-iOS */ = {
+		8CC36DF61C4EA1BE00BAA659 /* BlueSocket-iOS */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 8CC36DFF1C4EA1BE00BAA659 /* Build configuration list for PBXNativeTarget "ETSocket-iOS" */;
+			buildConfigurationList = 8CC36DFF1C4EA1BE00BAA659 /* Build configuration list for PBXNativeTarget "BlueSocket-iOS" */;
 			buildPhases = (
 				8CC36DF71C4EA1BE00BAA659 /* Sources */,
 				8CC36DFB1C4EA1BE00BAA659 /* Frameworks */,
@@ -137,9 +137,9 @@
 			);
 			dependencies = (
 			);
-			name = "ETSocket-iOS";
+			name = "BlueSocket-iOS";
 			productName = ETSocket;
-			productReference = 8CC36E021C4EA1BE00BAA659 /* ETSocket.framework */;
+			productReference = 8CC36E021C4EA1BE00BAA659 /* BlueSocket.framework */;
 			productType = "com.apple.product-type.framework";
 		};
 /* End PBXNativeTarget section */
@@ -159,7 +159,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 8C0F4BF01C4E84CC008B2B0A /* Build configuration list for PBXProject "ETSocket" */;
+			buildConfigurationList = 8C0F4BF01C4E84CC008B2B0A /* Build configuration list for PBXProject "BlueSocket" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
@@ -171,8 +171,8 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				8C0F4BF51C4E84CC008B2B0A /* ETSocket */,
-				8CC36DF61C4EA1BE00BAA659 /* ETSocket-iOS */,
+				8C0F4BF51C4E84CC008B2B0A /* BlueSocket */,
+				8CC36DF61C4EA1BE00BAA659 /* BlueSocket-iOS */,
 			);
 		};
 /* End PBXProject section */
@@ -199,9 +199,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				8C0F4C051C4E8630008B2B0A /* ETProtocols.swift in Sources */,
-				8C0F4C061C4E8630008B2B0A /* ETSocket.swift in Sources */,
-				8C0F4C071C4E8630008B2B0A /* ETUtils.swift in Sources */,
+				8C0F4C051C4E8630008B2B0A /* BlueSocketProtocols.swift in Sources */,
+				8C0F4C061C4E8630008B2B0A /* BlueSocket.swift in Sources */,
+				8C0F4C071C4E8630008B2B0A /* BlueSocketUtils.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -209,9 +209,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				8CC36DF81C4EA1BE00BAA659 /* ETProtocols.swift in Sources */,
-				8CC36DF91C4EA1BE00BAA659 /* ETSocket.swift in Sources */,
-				8CC36DFA1C4EA1BE00BAA659 /* ETUtils.swift in Sources */,
+				8CC36DF81C4EA1BE00BAA659 /* BlueSocketProtocols.swift in Sources */,
+				8CC36DF91C4EA1BE00BAA659 /* BlueSocket.swift in Sources */,
+				8CC36DFA1C4EA1BE00BAA659 /* BlueSocketUtils.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -317,8 +317,8 @@
 				INFOPLIST_FILE = "$(SRCROOT)/Sources/Info.plist";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = com.ibm.ios.ibmSwift.ETSocket;
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_BUNDLE_IDENTIFIER = com.ibm.ios.ibmSwift.BlueSocket;
+				PRODUCT_NAME = BlueSocket;
 				SKIP_INSTALL = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
@@ -337,8 +337,8 @@
 				INFOPLIST_FILE = "$(SRCROOT)/Sources/Info.plist";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = com.ibm.ios.ibmSwift.ETSocket;
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_BUNDLE_IDENTIFIER = com.ibm.ios.ibmSwift.BlueSocket;
+				PRODUCT_NAME = BlueSocket;
 				SKIP_INSTALL = YES;
 			};
 			name = Release;
@@ -359,7 +359,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 9.2;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.ibm.ios.ibmSwift.ETSocket;
-				PRODUCT_NAME = ETSocket;
+				PRODUCT_NAME = BlueSocket;
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
@@ -382,7 +382,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 9.2;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.ibm.ios.ibmSwift.ETSocket;
-				PRODUCT_NAME = ETSocket;
+				PRODUCT_NAME = BlueSocket;
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
 			};
@@ -391,7 +391,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		8C0F4BF01C4E84CC008B2B0A /* Build configuration list for PBXProject "ETSocket" */ = {
+		8C0F4BF01C4E84CC008B2B0A /* Build configuration list for PBXProject "BlueSocket" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				8C0F4BFC1C4E84CC008B2B0A /* Debug */,
@@ -400,7 +400,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		8C0F4BFE1C4E84CC008B2B0A /* Build configuration list for PBXNativeTarget "ETSocket" */ = {
+		8C0F4BFE1C4E84CC008B2B0A /* Build configuration list for PBXNativeTarget "BlueSocket" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				8C0F4BFF1C4E84CC008B2B0A /* Debug */,
@@ -409,7 +409,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		8CC36DFF1C4EA1BE00BAA659 /* Build configuration list for PBXNativeTarget "ETSocket-iOS" */ = {
+		8CC36DFF1C4EA1BE00BAA659 /* Build configuration list for PBXNativeTarget "BlueSocket-iOS" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				8CC36E001C4EA1BE00BAA659 /* Debug */,

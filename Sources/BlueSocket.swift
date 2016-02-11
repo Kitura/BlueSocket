@@ -1,10 +1,21 @@
 //
-//  ETSocket.swift
-//  ETSocket
+//  BlueSocket.swift
+//  BlueSocket
 //
 //  Created by Bill Abt on 11/9/15.
-//  Copyright © 2015 IBM. All rights reserved.
+//  Copyright © 2016 IBM. All rights reserved.
 //
+// 	Licensed under the Apache License, Version 2.0 (the "License");
+// 	you may not use this file except in compliance with the License.
+// 	You may obtain a copy of the License at
+//
+// 	http://www.apache.org/licenses/LICENSE-2.0
+//
+// 	Unless required by applicable law or agreed to in writing, software
+// 	distributed under the License is distributed on an "AS IS" BASIS,
+// 	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// 	See the License for the specific language governing permissions and
+// 	limitations under the License.
 //
 
 #if os(OSX) || os(iOS) || os(tvOS) || os(watchOS)
@@ -15,12 +26,12 @@
 	import Glibc
 #endif
 
-// MARK: ETSocketError
+// MARK: BlueSocketError
 
-public class ETSocketError: ErrorType, CustomStringConvertible {
+public class BlueSocketError: ErrorType, CustomStringConvertible {
 
 	///
-	/// The error code: **see ETSocket for possible errors**
+	/// The error code: **see BlueSocket for possible errors**
 	///
 	public var errorCode: Int32
 
@@ -46,12 +57,12 @@ public class ETSocketError: ErrorType, CustomStringConvertible {
 	public var bufferSizeNeeded: Int32
 
 	///
-	/// Initializes an ETSocketError Instance
+	/// Initializes an BlueSocketError Instance
 	///
 	/// - Parameter code:	Error code
 	/// - Parameter reason:	Optional Error Reason
 	///
-	/// - Returns: ETSocketError instance
+	/// - Returns: BlueSocketError instance
 	///
 	init(code: Int, reason: String?) {
 
@@ -61,24 +72,24 @@ public class ETSocketError: ErrorType, CustomStringConvertible {
 	}
 
 	///
-	/// Initializes an ETSocketError Instance for a too small receive buffer error.
+	/// Initializes an BlueSocketError Instance for a too small receive buffer error.
 	///
 	///	- Parameter bufferSize:	Required buffer size
 	///
-	///	- Returns: ETSocketError Instance
+	///	- Returns: BlueSocketError Instance
 	///
 	convenience init(bufferSize: Int) {
 
-		self.init(code: ETSocket.SOCKET_ERR_RECV_BUFFER_TOO_SMALL, reason: nil)
+		self.init(code: BlueSocket.SOCKET_ERR_RECV_BUFFER_TOO_SMALL, reason: nil)
 		self.bufferSizeNeeded = Int32(bufferSize)
 	}
 }
 
-public class ETSocket: ETReader, ETWriter {
+public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 
 	// MARK: Constants
 
-	public static let ETSOCKET_DOMAIN						= "ETSocket.ErrorDomain"
+	public static let BlueSocket_DOMAIN						= "BlueSocket.ErrorDomain"
 
 	public static let SOCKET_MINIMUM_READ_BUFFER_SIZE		= 1024
 	public static let SOCKET_DEFAULT_READ_BUFFER_SIZE		= 4096
@@ -121,7 +132,7 @@ public class ETSocket: ETReader, ETWriter {
 	///
 	/// Socket Protocol Family Values
 	///
-	public enum SocketProtocolFamily {
+	public enum BlueSocketProtocolFamily {
 
 		case INET, INET6
 
@@ -141,7 +152,7 @@ public class ETSocket: ETReader, ETWriter {
 	///
 	/// **Note:** Only `STREAM`, i.e. `SOCK_STREAM`, supported at this time.
 	///
-	public enum SocketType {
+	public enum BlueSocketType {
 
 		case STREAM
 
@@ -162,7 +173,7 @@ public class ETSocket: ETReader, ETWriter {
 	///
 	/// **Note:** Only `TCP`, i.e. `IPROTO_TCP`, supported at this time.
 	///
-	public enum SocketProtocol {
+	public enum BlueSocketProtocol {
 		case TCP
 
 		func valueOf() -> Int32 {
@@ -182,12 +193,12 @@ public class ETSocket: ETReader, ETWriter {
 	/// 	**Note:** The readBuffer is actually allocating unmanaged memory that'll
 	///			be deallocated when we're done with it.
 	///
-	var readBuffer: UnsafeMutablePointer<CChar> = UnsafeMutablePointer<CChar>.alloc(ETSocket.SOCKET_DEFAULT_READ_BUFFER_SIZE)
+	var readBuffer: UnsafeMutablePointer<CChar> = UnsafeMutablePointer<CChar>.alloc(BlueSocket.SOCKET_DEFAULT_READ_BUFFER_SIZE)
 
 	///
-	/// Internal Storage Buffer iniitially created with `ETSocket.SOCKET_DEFAULT_READ_BUFFER_SIZE`.
+	/// Internal Storage Buffer iniitially created with `BlueSocket.SOCKET_DEFAULT_READ_BUFFER_SIZE`.
 	///
-	var readStorage: NSMutableData = NSMutableData(capacity: ETSocket.SOCKET_DEFAULT_READ_BUFFER_SIZE)!
+	var readStorage: NSMutableData = NSMutableData(capacity: BlueSocket.SOCKET_DEFAULT_READ_BUFFER_SIZE)!
 
 	// MARK: -- Public
 
@@ -195,19 +206,19 @@ public class ETSocket: ETReader, ETWriter {
 	/// Internal Read buffer size for all open sockets.
 	///		**Note:** Changing this value will cause the internal read buffer to
 	///			be discarded and reallocated with the new size. The value must be
-	///			set to at least `ETSocket.SOCKET_MINIMUM_READ_BUFFER_SIZE`. If set
+	///			set to at least `BlueSocket.SOCKET_MINIMUM_READ_BUFFER_SIZE`. If set
 	///			to something smaller, it will be automatically set to the minimum
-	///			size as defined by `ETSocket.SOCKET_MINIMUM_READ_BUFFER_SIZE`.
+	///			size as defined by `BlueSocket.SOCKET_MINIMUM_READ_BUFFER_SIZE`.
 	///
-	public var readBufferSize: Int = ETSocket.SOCKET_DEFAULT_READ_BUFFER_SIZE {
+	public var readBufferSize: Int = BlueSocket.SOCKET_DEFAULT_READ_BUFFER_SIZE {
 
 		// If the buffer size changes we need to reallocate the buffer...
 		didSet {
 
 			// Ensure minimum buffer size...
-			if readBufferSize < ETSocket.SOCKET_MINIMUM_READ_BUFFER_SIZE {
+			if readBufferSize < BlueSocket.SOCKET_MINIMUM_READ_BUFFER_SIZE {
 
-				readBufferSize = ETSocket.SOCKET_MINIMUM_READ_BUFFER_SIZE
+				readBufferSize = BlueSocket.SOCKET_MINIMUM_READ_BUFFER_SIZE
 			}
 
 			print("Creating read buffer of size: \(readBufferSize)")
@@ -225,9 +236,9 @@ public class ETSocket: ETReader, ETWriter {
 
 	///
 	/// Maximum number of pending connections per listening socket.
-	///		**Note:** Default value is `ETSocket.SOCKET_DEFAULT_MAX_CONNECTIONS`
+	///		**Note:** Default value is `BlueSocket.SOCKET_DEFAULT_MAX_CONNECTIONS`
 	///
-	public var maxPendingConnections: Int = ETSocket.SOCKET_DEFAULT_MAX_CONNECTIONS
+	public var maxPendingConnections: Int = BlueSocket.SOCKET_DEFAULT_MAX_CONNECTIONS
 
 	///
 	/// True if this socket is connected.
@@ -247,7 +258,7 @@ public class ETSocket: ETReader, ETWriter {
 	///
 	/// The remote host name this socket is connected to. (Readonly)
 	///
-	public private(set) var remoteHostName: String = ETSocket.NO_HOSTNAME
+	public private(set) var remoteHostName: String = BlueSocket.NO_HOSTNAME
 
 	///
 	/// The remote port this socket is connected to. (Readonly)
@@ -263,27 +274,27 @@ public class ETSocket: ETReader, ETWriter {
 	// MARK: Class Methods
 
 	///
-	/// Creates a default pre-configured ETSocket instance.
+	/// Creates a default pre-configured BlueSocket instance.
 	///
-	/// - Returns: New ETSocket instance
+	/// - Returns: New BlueSocket instance
 	///
-	public class func defaultConfigured() throws ->ETSocket {
+	public class func defaultConfigured() throws -> BlueSocket {
 
-		return try ETSocket(family: .INET, type: .STREAM, proto: .TCP)
+		return try BlueSocket(family: .INET, type: .STREAM, proto: .TCP)
 	}
 
 	///
-	/// Create a configured ETSocket instance.
+	/// Create a configured BlueSocket instance.
 	///
 	/// - Parameter family:	The family of the socket to create.
 	///	- Parameter	type:	The type of socket to create.
 	///	- Parameter proto:	The protocool to use for the socket.
 	///
-	/// - Returns: New ETSocket instance
+	/// - Returns: New BlueSocket instance
 	///
-	public class func customConfigured(family: SocketProtocolFamily, type: SocketType, proto: SocketProtocol) throws ->ETSocket {
+	public class func customConfigured(family: BlueSocketProtocolFamily, type: BlueSocketType, proto: BlueSocketProtocol) throws -> BlueSocket {
 
-		return try ETSocket(family: family, type: type, proto: proto)
+		return try BlueSocket(family: family, type: type, proto: proto)
 	}
 
 	///
@@ -293,7 +304,7 @@ public class ETSocket: ETReader, ETWriter {
 	///
 	/// - Returns: Optional String containing the dotted IP address or nil if not available.
 	///
-	public class func dottedIP(fromAddress: in_addr) ->String? {
+	public class func dottedIP(fromAddress: in_addr) -> String? {
 
 		let cString = inet_ntoa(fromAddress)
 		return String.fromCString(cString)
@@ -304,15 +315,15 @@ public class ETSocket: ETReader, ETWriter {
 	// MARK: -- Public
 
 	///
-	/// Internal initializer to create a configured ETSocket instance.
+	/// Internal initializer to create a configured BlueSocket instance.
 	///
 	/// - Parameter family:	The family of the socket to create.
 	///	- Parameter	type:	The type of socket to create.
 	///	- Parameter proto:	The protocool to use for the socket.
 	///
-	/// - Returns: New ETSocket instance
+	/// - Returns: New BlueSocket instance
 	///
-	private init(family: SocketProtocolFamily, type: SocketType, proto: SocketProtocol) throws {
+	private init(family: BlueSocketProtocolFamily, type: BlueSocketType, proto: BlueSocketProtocol) throws {
 
 		// Initialize the read buffer...
 		self.readBuffer.initialize(0)
@@ -323,8 +334,8 @@ public class ETSocket: ETReader, ETWriter {
 		// If error, return error...
 		if self.socketfd < 0 {
 
-			self.socketfd = Int32(ETSocket.SOCKET_INVALID_DESCRIPTOR)
-			throw ETSocketError(code: ETSocket.SOCKET_ERR_UNABLE_TO_CREATE_SOCKET, reason: self.lastError())
+			self.socketfd = Int32(BlueSocket.SOCKET_INVALID_DESCRIPTOR)
+			throw BlueSocketError(code: BlueSocket.SOCKET_ERR_UNABLE_TO_CREATE_SOCKET, reason: self.lastError())
 		}
 	}
 
@@ -336,14 +347,14 @@ public class ETSocket: ETReader, ETWriter {
 	/// - Parameter fd: Open file descriptor.
 	///	- Parameter remoteAddress: The sockaddr_in associated with the open fd.
 	///
-	/// - Returns: New ETSocket instance
+	/// - Returns: New BlueSocket instance
 	///
 	private init(fd: Int32, remoteAddress: sockaddr_in) throws {
 
 		self.connected = true
 		self.listening = false
 		self.readBuffer.initialize(0)
-		if let hostname = ETSocket.dottedIP(remoteAddress.sin_addr) {
+		if let hostname = BlueSocket.dottedIP(remoteAddress.sin_addr) {
 			self.remoteHostName = hostname
 		}
 		self.remotePort = Int(remoteAddress.sin_port)
@@ -367,24 +378,24 @@ public class ETSocket: ETReader, ETWriter {
 	///
 	/// Accepts an incoming connection request on the current instance, leaving the current instance still listening.
 	///
-	/// - returns: New ETSocket instance representing the newly accepted socket.
+	/// - returns: New BlueSocket instance representing the newly accepted socket.
 	///
-	public func acceptConnectionAndKeepListening() throws ->ETSocket {
+	public func acceptConnectionAndKeepListening() throws -> BlueSocket {
 
 		// The socket must've been created, not connected and listening...
-		if self.socketfd == Int32(ETSocket.SOCKET_INVALID_DESCRIPTOR) {
+		if self.socketfd == Int32(BlueSocket.SOCKET_INVALID_DESCRIPTOR) {
 
-			throw ETSocketError(code: ETSocket.SOCKET_ERR_BAD_DESCRIPTOR, reason: nil)
+			throw BlueSocketError(code: BlueSocket.SOCKET_ERR_BAD_DESCRIPTOR, reason: nil)
 		}
 
 		if self.connected {
 
-			throw ETSocketError(code: ETSocket.SOCKET_ERR_ALREADY_CONNECTED, reason: nil)
+			throw BlueSocketError(code: BlueSocket.SOCKET_ERR_ALREADY_CONNECTED, reason: nil)
 		}
 
 		if !self.listening {
 
-			throw ETSocketError(code: ETSocket.SOCKET_ERR_NOT_LISTENING, reason: nil)
+			throw BlueSocketError(code: BlueSocket.SOCKET_ERR_NOT_LISTENING, reason: nil)
 		}
 
 		// Accept the remote connection...
@@ -395,12 +406,12 @@ public class ETSocket: ETReader, ETWriter {
 		}
 		if socketfd2 < 0 {
 
-			throw ETSocketError(code: ETSocket.SOCKET_ERR_ACCEPT_FAILED, reason: self.lastError())
+			throw BlueSocketError(code: BlueSocket.SOCKET_ERR_ACCEPT_FAILED, reason: self.lastError())
 		}
 
 		// Create and return the new socket...
 		//	Note: The current socket continues to listen.
-		return try ETSocket(fd: socketfd2, remoteAddress: acceptAddr)
+		return try BlueSocket(fd: socketfd2, remoteAddress: acceptAddr)
 	}
 
 	///
@@ -409,19 +420,19 @@ public class ETSocket: ETReader, ETWriter {
 	public func acceptConnection() throws {
 
 		// The socket must've been created, not connected and listening...
-		if self.socketfd == Int32(ETSocket.SOCKET_INVALID_DESCRIPTOR) {
+		if self.socketfd == Int32(BlueSocket.SOCKET_INVALID_DESCRIPTOR) {
 
-			throw ETSocketError(code: ETSocket.SOCKET_ERR_BAD_DESCRIPTOR, reason: nil)
+			throw BlueSocketError(code: BlueSocket.SOCKET_ERR_BAD_DESCRIPTOR, reason: nil)
 		}
 
 		if self.connected {
 
-			throw ETSocketError(code: ETSocket.SOCKET_ERR_ALREADY_CONNECTED, reason: nil)
+			throw BlueSocketError(code: BlueSocket.SOCKET_ERR_ALREADY_CONNECTED, reason: nil)
 		}
 
 		if !self.listening {
 
-			throw ETSocketError(code: ETSocket.SOCKET_ERR_NOT_LISTENING, reason: nil)
+			throw BlueSocketError(code: BlueSocket.SOCKET_ERR_NOT_LISTENING, reason: nil)
 		}
 
 		// Accept the remote connection...
@@ -433,7 +444,7 @@ public class ETSocket: ETReader, ETWriter {
 
 		if socketfd2 < 0 {
 
-			throw ETSocketError(code: ETSocket.SOCKET_ERR_ACCEPT_FAILED, reason: self.lastError())
+			throw BlueSocketError(code: BlueSocket.SOCKET_ERR_ACCEPT_FAILED, reason: self.lastError())
 		}
 
 		// Close the old socket...
@@ -442,7 +453,7 @@ public class ETSocket: ETReader, ETWriter {
 		// Replace the existing socketfd with the new one...
 		self.socketfd = socketfd2
 		self.remotePort = Int(acceptAddr.sin_port)
-		if let hostname = ETSocket.dottedIP(acceptAddr.sin_addr) {
+		if let hostname = BlueSocket.dottedIP(acceptAddr.sin_addr) {
 			self.remoteHostName = hostname
 		}
 
@@ -456,7 +467,7 @@ public class ETSocket: ETReader, ETWriter {
 	///
 	public func close() {
 		
-		if self.socketfd != Int32(ETSocket.SOCKET_INVALID_DESCRIPTOR) {
+		if self.socketfd != Int32(BlueSocket.SOCKET_INVALID_DESCRIPTOR) {
 			#if os(Linux)
 				if self.listening {
 					Glibc.shutdown(self.socketfd, Int32(SHUT_RDWR))
@@ -468,10 +479,10 @@ public class ETSocket: ETReader, ETWriter {
 				}
 				Darwin.close(self.socketfd)
 			#endif
-			self.socketfd = Int32(ETSocket.SOCKET_INVALID_DESCRIPTOR)
+			self.socketfd = Int32(BlueSocket.SOCKET_INVALID_DESCRIPTOR)
 		}
 		
-		self.remoteHostName = ETSocket.NO_HOSTNAME
+		self.remoteHostName = BlueSocket.NO_HOSTNAME
 		self.connected = false
 		self.listening = false
 	}
@@ -485,19 +496,19 @@ public class ETSocket: ETReader, ETWriter {
 	public func connectTo(host: String, port: Int32) throws {
 
 		// The socket must've been created and must not be connected...
-		if self.socketfd == Int32(ETSocket.SOCKET_INVALID_DESCRIPTOR) {
+		if self.socketfd == Int32(BlueSocket.SOCKET_INVALID_DESCRIPTOR) {
 
-			throw ETSocketError(code: ETSocket.SOCKET_ERR_BAD_DESCRIPTOR, reason: nil)
+			throw BlueSocketError(code: BlueSocket.SOCKET_ERR_BAD_DESCRIPTOR, reason: nil)
 		}
 
 		if self.connected {
 
-			throw ETSocketError(code: ETSocket.SOCKET_ERR_ALREADY_CONNECTED, reason: nil)
+			throw BlueSocketError(code: BlueSocket.SOCKET_ERR_ALREADY_CONNECTED, reason: nil)
 		}
 
 		if host.utf8.count == 0 {
 
-			throw ETSocketError(code: ETSocket.SOCKET_ERR_INVALID_HOSTNAME, reason: nil)
+			throw BlueSocketError(code: BlueSocket.SOCKET_ERR_INVALID_HOSTNAME, reason: nil)
 		}
 
 		// Look up the host...
@@ -505,7 +516,7 @@ public class ETSocket: ETReader, ETWriter {
 		let remoteHost: UnsafeMutablePointer<hostent> = gethostbyname(self.remoteHostName)
 		if remoteHost == nil {
 
-			throw ETSocketError(code: ETSocket.SOCKET_ERR_GETHOSTBYNAME_FAILED, reason: self.lastError())
+			throw BlueSocketError(code: BlueSocket.SOCKET_ERR_GETHOSTBYNAME_FAILED, reason: self.lastError())
 		}
 
 		// Copy the info into the socket address structure...
@@ -520,7 +531,7 @@ public class ETSocket: ETReader, ETWriter {
 		}
 		if rc < 0 {
 
-			throw ETSocketError(code: ETSocket.SOCKET_ERR_CONNECT_FAILED, reason: self.lastError())
+			throw BlueSocketError(code: BlueSocket.SOCKET_ERR_CONNECT_FAILED, reason: self.lastError())
 		}
 
 		self.remoteHostName = host
@@ -533,17 +544,17 @@ public class ETSocket: ETReader, ETWriter {
 	///
 	/// - Returns: Tuple containing two boolean values, one for readable and one for writable.
 	///
-	public func isReadableOrWritable() throws ->(readable: Bool, writable: Bool) {
+	public func isReadableOrWritable() throws -> (readable: Bool, writable: Bool) {
 
 		// The socket must've been created and must be connected...
-		if self.socketfd == Int32(ETSocket.SOCKET_INVALID_DESCRIPTOR) {
+		if self.socketfd == Int32(BlueSocket.SOCKET_INVALID_DESCRIPTOR) {
 
-			throw ETSocketError(code: ETSocket.SOCKET_ERR_BAD_DESCRIPTOR, reason: nil)
+			throw BlueSocketError(code: BlueSocket.SOCKET_ERR_BAD_DESCRIPTOR, reason: nil)
 		}
 
 		if !self.connected {
 
-			throw ETSocketError(code: ETSocket.SOCKET_ERR_NOT_CONNECTED, reason: nil)
+			throw BlueSocketError(code: BlueSocket.SOCKET_ERR_NOT_CONNECTED, reason: nil)
 		}
 
 		// Create a read and write file descriptor set for this socket...
@@ -564,7 +575,7 @@ public class ETSocket: ETReader, ETWriter {
 		// A count of less than zero indicates select failed...
 		if count < 0 {
 
-			throw ETSocketError(code: ETSocket.SOCKET_ERR_SELECT_FAILED, reason: self.lastError())
+			throw BlueSocketError(code: BlueSocket.SOCKET_ERR_SELECT_FAILED, reason: self.lastError())
 		}
 
 		// Return a tuple containing whether or not this socket is readable and/or writable...
@@ -594,13 +605,13 @@ public class ETSocket: ETReader, ETWriter {
 		var on: Int32 = 1
 		if setsockopt(self.socketfd, SOL_SOCKET, SO_REUSEADDR, &on, socklen_t(sizeof(Int32))) < 0 {
 			
-			throw ETSocketError(code: ETSocket.SOCKET_ERR_SETSOCKOPT_FAILED, reason: self.lastError())
+			throw BlueSocketError(code: BlueSocket.SOCKET_ERR_SETSOCKOPT_FAILED, reason: self.lastError())
 		}
 		
 		// Bind the address to the socket....
 		var localAddr = sockaddr_in()
 		localAddr.sin_family = sa_family_t(AF_INET)
-		localAddr.sin_addr.s_addr = ETSocket.INADDR_ANY
+		localAddr.sin_addr.s_addr = BlueSocket.INADDR_ANY
 		localAddr.sin_port = in_port_t(UInt16(bigEndian: UInt16(port)))
 
 		var bindAddr = sockaddr()
@@ -610,13 +621,13 @@ public class ETSocket: ETReader, ETWriter {
 
 		if bind(self.socketfd, &bindAddr, addrSize) < 0 {
 
-			throw ETSocketError(code: ETSocket.SOCKET_ERR_BIND_FAILED, reason: self.lastError())
+			throw BlueSocketError(code: BlueSocket.SOCKET_ERR_BIND_FAILED, reason: self.lastError())
 		}
 
 		// Now listen for connections...
 		if listen(self.socketfd, Int32(maxPendingConnections)) < 0 {
 
-			throw ETSocketError(code: ETSocket.SOCKET_ERR_LISTEN_FAILED, reason: self.lastError())
+			throw BlueSocketError(code: BlueSocket.SOCKET_ERR_LISTEN_FAILED, reason: self.lastError())
 		}
 
 		self.listening = true
@@ -628,28 +639,28 @@ public class ETSocket: ETReader, ETWriter {
 	/// - Parameter buffer: The buffer to return the data in.
 	/// - Parameter bufSize: The size of the buffer.
 	///
-	/// - Throws: `ETSocket.SOCKET_ERR_RECV_BUFFER_TOO_SMALL` if the buffer provided is too small.
-	///		Call again with proper buffer size (see `ETSocketError.bufferSizeNeeded`) or
+	/// - Throws: `BlueSocket.SOCKET_ERR_RECV_BUFFER_TOO_SMALL` if the buffer provided is too small.
+	///		Call again with proper buffer size (see `BlueSocketError.bufferSizeNeeded`) or
 	///		use `readData(data: NSMutableData)`.
 	///
 	/// - Returns: The number of bytes returned in the buffer.
 	///
-	public func readData(buffer: UnsafeMutablePointer<CChar>, bufSize: Int) throws ->Int {
+	public func readData(buffer: UnsafeMutablePointer<CChar>, bufSize: Int) throws -> Int {
 
 		if buffer == nil || bufSize == 0 {
 
-			throw ETSocketError(code: ETSocket.SOCKET_ERR_INVALID_BUFFER, reason: nil)
+			throw BlueSocketError(code: BlueSocket.SOCKET_ERR_INVALID_BUFFER, reason: nil)
 		}
 
 		// The socket must've been created and must be connected...
-		if self.socketfd == Int32(ETSocket.SOCKET_INVALID_DESCRIPTOR) {
+		if self.socketfd == Int32(BlueSocket.SOCKET_INVALID_DESCRIPTOR) {
 
-			throw ETSocketError(code: ETSocket.SOCKET_ERR_BAD_DESCRIPTOR, reason: nil)
+			throw BlueSocketError(code: BlueSocket.SOCKET_ERR_BAD_DESCRIPTOR, reason: nil)
 		}
 
 		if !self.connected {
 
-			throw ETSocketError(code: ETSocket.SOCKET_ERR_NOT_CONNECTED, reason: nil)
+			throw BlueSocketError(code: BlueSocket.SOCKET_ERR_NOT_CONNECTED, reason: nil)
 		}
 
 		// See if we have cached data to send back...
@@ -657,7 +668,7 @@ public class ETSocket: ETReader, ETWriter {
 
 			if bufSize < self.readStorage.length {
 
-				throw ETSocketError(bufferSize: self.readStorage.length)
+				throw BlueSocketError(bufferSize: self.readStorage.length)
 			}
 
 			let returnCount = self.readStorage.length
@@ -687,7 +698,7 @@ public class ETSocket: ETReader, ETWriter {
 			// Is the caller's buffer big enough?
 			if bufSize < self.readStorage.length {
 
-				throw ETSocketError(bufferSize: self.readStorage.length)
+				throw BlueSocketError(bufferSize: self.readStorage.length)
 			}
 
 			// - We've read data, copy to the callers buffer...
@@ -711,14 +722,14 @@ public class ETSocket: ETReader, ETWriter {
 
 		guard let data = NSMutableData(capacity: 2000) else {
 
-			throw ETSocketError(code: ETSocket.SOCKET_ERR_INTERNAL, reason: "Unable to create temporary NSData...")
+			throw BlueSocketError(code: BlueSocket.SOCKET_ERR_INTERNAL, reason: "Unable to create temporary NSData...")
 		}
 
 		try self.readData(data)
 
 		guard let str = NSString(data: data, encoding: NSUTF8StringEncoding) else {
 
-			throw ETSocketError(code: ETSocket.SOCKET_ERR_INTERNAL, reason: "Unable to convert data to NSString.")
+			throw BlueSocketError(code: BlueSocket.SOCKET_ERR_INTERNAL, reason: "Unable to convert data to NSString.")
 		}
 
 		#if os(Linux)
@@ -737,17 +748,17 @@ public class ETSocket: ETReader, ETWriter {
 	///
 	/// - Returns: The number of bytes returned in the buffer.
 	///
-	public func readData(data: NSMutableData) throws ->Int {
+	public func readData(data: NSMutableData) throws -> Int {
 
 		// The socket must've been created and must be connected...
-		if self.socketfd == Int32(ETSocket.SOCKET_INVALID_DESCRIPTOR) {
+		if self.socketfd == Int32(BlueSocket.SOCKET_INVALID_DESCRIPTOR) {
 
-			throw ETSocketError(code: ETSocket.SOCKET_ERR_BAD_DESCRIPTOR, reason: nil)
+			throw BlueSocketError(code: BlueSocket.SOCKET_ERR_BAD_DESCRIPTOR, reason: nil)
 		}
 
 		if !self.connected {
 
-			throw ETSocketError(code: ETSocket.SOCKET_ERR_NOT_CONNECTED, reason: nil)
+			throw BlueSocketError(code: BlueSocket.SOCKET_ERR_NOT_CONNECTED, reason: nil)
 		}
 
 		// Read all available bytes...
@@ -785,18 +796,18 @@ public class ETSocket: ETReader, ETWriter {
 
 		if buffer == nil || bufSize == 0 {
 
-			throw ETSocketError(code: ETSocket.SOCKET_ERR_INVALID_BUFFER, reason: nil)
+			throw BlueSocketError(code: BlueSocket.SOCKET_ERR_INVALID_BUFFER, reason: nil)
 		}
 
 		// The socket must've been created and must be connected...
-		if self.socketfd == Int32(ETSocket.SOCKET_INVALID_DESCRIPTOR) {
+		if self.socketfd == Int32(BlueSocket.SOCKET_INVALID_DESCRIPTOR) {
 
-			throw ETSocketError(code: ETSocket.SOCKET_ERR_BAD_DESCRIPTOR, reason: nil)
+			throw BlueSocketError(code: BlueSocket.SOCKET_ERR_BAD_DESCRIPTOR, reason: nil)
 		}
 
 		if !self.connected {
 
-			throw ETSocketError(code: ETSocket.SOCKET_ERR_NOT_CONNECTED, reason: nil)
+			throw BlueSocketError(code: BlueSocket.SOCKET_ERR_NOT_CONNECTED, reason: nil)
 		}
 
 		var sent = 0
@@ -805,7 +816,7 @@ public class ETSocket: ETReader, ETWriter {
 			let s = write(self.socketfd, buffer + sent, Int(bufSize - sent))
 			if s <= 0 {
 
-				throw ETSocketError(code: ETSocket.SOCKET_ERR_WRITE_FAILED, reason: self.lastError())
+				throw BlueSocketError(code: BlueSocket.SOCKET_ERR_WRITE_FAILED, reason: self.lastError())
 			}
 			sent += s
 		}
@@ -819,14 +830,14 @@ public class ETSocket: ETReader, ETWriter {
 	public func writeData(data: NSData) throws {
 
 		// The socket must've been created and must be connected...
-		if self.socketfd == Int32(ETSocket.SOCKET_INVALID_DESCRIPTOR) {
+		if self.socketfd == Int32(BlueSocket.SOCKET_INVALID_DESCRIPTOR) {
 
-			throw ETSocketError(code: ETSocket.SOCKET_ERR_BAD_DESCRIPTOR, reason: nil)
+			throw BlueSocketError(code: BlueSocket.SOCKET_ERR_BAD_DESCRIPTOR, reason: nil)
 		}
 
 		if !self.connected {
 
-			throw ETSocketError(code: ETSocket.SOCKET_ERR_NOT_CONNECTED, reason: nil)
+			throw BlueSocketError(code: BlueSocket.SOCKET_ERR_NOT_CONNECTED, reason: nil)
 		}
 
 		var sent = 0
@@ -836,7 +847,7 @@ public class ETSocket: ETReader, ETWriter {
 			let s = write(self.socketfd, buffer + sent, Int(data.length - sent))
 			if s <= 0 {
 
-				throw ETSocketError(code: ETSocket.SOCKET_ERR_WRITE_FAILED, reason: self.lastError())
+				throw BlueSocketError(code: BlueSocket.SOCKET_ERR_WRITE_FAILED, reason: self.lastError())
 			}
 			sent += s
 		}
@@ -865,7 +876,7 @@ public class ETSocket: ETReader, ETWriter {
 		let flags = fcntl(self.socketfd, F_GETFL)
 		if flags < 0 {
 
-			throw ETSocketError(code: ETSocket.SOCKET_ERR_GET_FCNTL_FAILED, reason: self.lastError())
+			throw BlueSocketError(code: BlueSocket.SOCKET_ERR_GET_FCNTL_FAILED, reason: self.lastError())
 		}
 
 		var result: Int32 = 0
@@ -880,7 +891,7 @@ public class ETSocket: ETReader, ETWriter {
 
 		if result < 0 {
 
-			throw ETSocketError(code: ETSocket.SOCKET_ERR_SET_FCNTL_FAILED, reason: self.lastError())
+			throw BlueSocketError(code: BlueSocket.SOCKET_ERR_SET_FCNTL_FAILED, reason: self.lastError())
 		}
 
 		self.isBlocking = shouldBlock
@@ -893,7 +904,7 @@ public class ETSocket: ETReader, ETWriter {
 	///
 	/// - Returns: number of bytes read.
 	///
-	private func readDataIntoStorage() throws ->Int {
+	private func readDataIntoStorage() throws -> Int {
 
 		// Clear the buffer...
 		if self.readBuffer != nil {
@@ -918,7 +929,7 @@ public class ETSocket: ETReader, ETWriter {
 				}
 
 				// - Something went wrong...
-				throw ETSocketError(code: ETSocket.SOCKET_ERR_RECV_FAILED, reason: self.lastError())
+				throw BlueSocketError(code: BlueSocket.SOCKET_ERR_RECV_FAILED, reason: self.lastError())
 			}
 
 			if count > 0 {
@@ -942,7 +953,7 @@ public class ETSocket: ETReader, ETWriter {
 	///
 	/// - Returns: String containing relevant text about the error.
 	///
-	private func lastError() ->String {
+	private func lastError() -> String {
 
 		return String.fromCString(strerror(errno)) ?? "Error: \(errno)"
 	}

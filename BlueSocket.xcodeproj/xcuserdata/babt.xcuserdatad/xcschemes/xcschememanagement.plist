@@ -4,12 +4,12 @@
 <dict>
 	<key>SchemeUserState</key>
 	<dict>
-		<key>ETSocket-iOS.xcscheme</key>
+		<key>BlueSocket-iOS.xcscheme</key>
 		<dict>
 			<key>orderHint</key>
 			<integer>1</integer>
 		</dict>
-		<key>ETSocket.xcscheme</key>
+		<key>BlueSocket.xcscheme</key>
 		<dict>
 			<key>orderHint</key>
 			<integer>0</integer>

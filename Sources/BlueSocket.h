@@ -1,7 +1,8 @@
 //
-//  BlueSocket.swift
+//  BlueSocket.h
 //  BlueSocket
 //
+//  Created by Bill Abt on 1/19/16.
 //  Copyright © 2016 IBM. All rights reserved.
 //
 // 	Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,10 +18,14 @@
 // 	limitations under the License.
 //
 
-import PackageDescription
+#import <Cocoa/Cocoa.h>
 
-let package = Package(
-	name: "BlueSocket",
-	targets: [Target(name: "BlueSocket")],
-	exclude: ["BlueSocket.xcodeproj", "BlueSocket.xcworkspace", "README.md", "Sources/Info.plist"]
-)
+//! Project version number for BlueSocket.
+FOUNDATION_EXPORT double BlueSocketVersionNumber;
+
+//! Project version string for BlueSocket.
+FOUNDATION_EXPORT const unsigned char BlueSocketVersionString[];
+
+// In this header, you should import all the public headers of your framework using statements like #import <ETSocket/PublicHeader.h>
+
+

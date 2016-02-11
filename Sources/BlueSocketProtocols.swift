@@ -1,7 +1,8 @@
 //
-//  BlueSocket.swift
+//  BlueSocketProtocols.swift
 //  BlueSocket
 //
+//  Created by Bill Abt on 1/7/16.
 //  Copyright © 2016 IBM. All rights reserved.
 //
 // 	Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,10 +18,18 @@
 // 	limitations under the License.
 //
 
-import PackageDescription
+import Foundation
 
-let package = Package(
-	name: "BlueSocket",
-	targets: [Target(name: "BlueSocket")],
-	exclude: ["BlueSocket.xcodeproj", "BlueSocket.xcworkspace", "README.md", "Sources/Info.plist"]
-)
+public protocol BlueSocketReader {
+	
+	func readString() throws -> String?
+	
+	func readData(data: NSMutableData) throws -> Int
+}
+
+public protocol BlueSocketWriter {
+	
+	func writeData(data: NSData) throws
+
+	func writeString(string: String) throws
+}

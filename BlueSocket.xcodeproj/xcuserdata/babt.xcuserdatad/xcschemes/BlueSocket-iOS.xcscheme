@@ -11,13 +11,14 @@
             buildForRunning = "YES"
             buildForProfiling = "YES"
             buildForArchiving = "YES"
-            buildForAnalyzing = "YES">
+            buildForAnalyzing = "YES"
+            hideIssues = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "8C0F4BF51C4E84CC008B2B0A"
-               BuildableName = "ETSocket.framework"
-               BlueprintName = "ETSocket"
-               ReferencedContainer = "container:ETSocket.xcodeproj">
+               BlueprintIdentifier = "8CC36DF61C4EA1BE00BAA659"
+               BuildableName = "BlueSocket.framework"
+               BlueprintName = "BlueSocket-iOS"
+               ReferencedContainer = "container:BlueSocket.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -45,10 +46,10 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "8C0F4BF51C4E84CC008B2B0A"
-            BuildableName = "ETSocket.framework"
-            BlueprintName = "ETSocket"
-            ReferencedContainer = "container:ETSocket.xcodeproj">
+            BlueprintIdentifier = "8CC36DF61C4EA1BE00BAA659"
+            BuildableName = "BlueSocket.framework"
+            BlueprintName = "BlueSocket-iOS"
+            ReferencedContainer = "container:BlueSocket.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
       <AdditionalOptions>
@@ -63,10 +64,10 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "8C0F4BF51C4E84CC008B2B0A"
-            BuildableName = "ETSocket.framework"
-            BlueprintName = "ETSocket"
-            ReferencedContainer = "container:ETSocket.xcodeproj">
+            BlueprintIdentifier = "8CC36DF61C4EA1BE00BAA659"
+            BuildableName = "BlueSocket.framework"
+            BlueprintName = "BlueSocket-iOS"
+            ReferencedContainer = "container:BlueSocket.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
    </ProfileAction>
