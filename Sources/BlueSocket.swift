@@ -136,6 +136,11 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 
 		case INET, INET6
 
+		///
+		/// Return the value for a particular case
+		///
+		/// - Returns: Int32 containing the value for specific case.
+		///
 		func valueOf() -> Int32 {
 			switch(self) {
 			case .INET:
@@ -156,6 +161,11 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 
 		case STREAM
 
+		///
+		/// Return the value for a particular case
+		///
+		/// - Returns: Int32 containing the value for specific case.
+		///
 		func valueOf() -> Int32 {
 			switch(self) {
 			case .STREAM:
@@ -176,6 +186,11 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 	public enum BlueSocketProtocol {
 		case TCP
 
+		///
+		/// Return the value for a particular case
+		///
+		/// - Returns: Int32 containing the value for specific case.
+		///
 		func valueOf() -> Int32 {
 			switch(self) {
 			case .TCP:
@@ -196,7 +211,7 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 	var readBuffer: UnsafeMutablePointer<CChar> = UnsafeMutablePointer<CChar>.alloc(BlueSocket.SOCKET_DEFAULT_READ_BUFFER_SIZE)
 
 	///
-	/// Internal Storage Buffer iniitially created with `BlueSocket.SOCKET_DEFAULT_READ_BUFFER_SIZE`.
+	/// Internal Storage Buffer initially created with `BlueSocket.SOCKET_DEFAULT_READ_BUFFER_SIZE`.
 	///
 	var readStorage: NSMutableData = NSMutableData(capacity: BlueSocket.SOCKET_DEFAULT_READ_BUFFER_SIZE)!
 
@@ -241,17 +256,17 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 	public var maxPendingConnections: Int = BlueSocket.SOCKET_DEFAULT_MAX_CONNECTIONS
 
 	///
-	/// True if this socket is connected.
+	/// True if this socket is connected. False otherwise. (Readonly)
 	///
 	public private(set) var connected: Bool = false
 
 	///
-	/// True if this socket is blocking.
+	/// True if this socket is blocking. False otherwise. (Readonly)
 	///
 	public private(set) var isBlocking: Bool = true
 
 	///
-	/// True if this socket is listening.
+	/// True if this socket is listening. False otherwise. (Readonly)
 	///
 	public private(set) var listening: Bool = false
 
@@ -275,6 +290,7 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 
 	///
 	/// Creates a default pre-configured BlueSocket instance.
+	///		Default socket created with family: .INET, type: .STREAM, proto: .TCP
 	///
 	/// - Returns: New BlueSocket instance
 	///
@@ -331,7 +347,7 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 		// Create the socket...
 		self.socketfd = socket(family.valueOf(), type.valueOf(), proto.valueOf())
 
-		// If error, return error...
+		// If error, throw an appropriate exception...
 		if self.socketfd < 0 {
 
 			self.socketfd = Int32(BlueSocket.SOCKET_INVALID_DESCRIPTOR)
@@ -354,9 +370,11 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 		self.connected = true
 		self.listening = false
 		self.readBuffer.initialize(0)
+		
 		if let hostname = BlueSocket.dottedIP(remoteAddress.sin_addr) {
 			self.remoteHostName = hostname
 		}
+		
 		self.remotePort = Int(remoteAddress.sin_port)
 		self.socketfd = fd
 	}
@@ -441,7 +459,6 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 		let socketfd2 = withUnsafeMutablePointer(&acceptAddr) {
 			accept(self.socketfd, UnsafeMutablePointer($0), &addrSize)
 		}
-
 		if socketfd2 < 0 {
 
 			throw BlueSocketError(code: BlueSocket.SOCKET_ERR_ACCEPT_FAILED, reason: self.lastError())
@@ -468,6 +485,9 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 	public func close() {
 		
 		if self.socketfd != Int32(BlueSocket.SOCKET_INVALID_DESCRIPTOR) {
+			
+			// Note: if the socket is listening, we need to shut it down prior to closing
+			//		or the socket will be left hanging until it times out.
 			#if os(Linux)
 				if self.listening {
 					Glibc.shutdown(self.socketfd, Int32(SHUT_RDWR))
@@ -479,6 +499,7 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 				}
 				Darwin.close(self.socketfd)
 			#endif
+			
 			self.socketfd = Int32(BlueSocket.SOCKET_INVALID_DESCRIPTOR)
 		}
 		
@@ -647,6 +668,7 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 	///
 	public func readData(buffer: UnsafeMutablePointer<CChar>, bufSize: Int) throws -> Int {
 
+		// Make sure the buffer is valid...
 		if buffer == nil || bufSize == 0 {
 
 			throw BlueSocketError(code: BlueSocket.SOCKET_ERR_INVALID_BUFFER, reason: nil)
@@ -673,7 +695,7 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 
 			let returnCount = self.readStorage.length
 
-			// - We've got data we've already read, copy to the callers buffer...
+			// - We've got data we've already read, copy to the caller's buffer...
 			memcpy(buffer, self.readStorage.bytes, self.readStorage.length)
 
 			// - Reset the storage buffer...
@@ -698,6 +720,7 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 			// Is the caller's buffer big enough?
 			if bufSize < self.readStorage.length {
 
+				// Nope, throw an exception telling the caller how big the buffer must be...
 				throw BlueSocketError(bufferSize: self.readStorage.length)
 			}
 
@@ -794,6 +817,7 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 	///
 	public func writeData(buffer: UnsafePointer<Void>, bufSize: Int) throws {
 
+		// Make sure the buffer is valid...
 		if buffer == nil || bufSize == 0 {
 
 			throw BlueSocketError(code: BlueSocket.SOCKET_ERR_INVALID_BUFFER, reason: nil)
@@ -839,6 +863,11 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 
 			throw BlueSocketError(code: BlueSocket.SOCKET_ERR_NOT_CONNECTED, reason: nil)
 		}
+		
+		// If there's no data in the NSData object, why bother? Fail silently...
+		if data.length == 0 {
+			return
+		}
 
 		var sent = 0
 		let buffer = data.bytes
@@ -861,7 +890,8 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 	public func writeString(string: String) throws {
 
 		try string.nulTerminatedUTF8.withUnsafeBufferPointer() {
-      // The count returned by nullTerminatedUTF8 includes the null terminator
+			
+			// The count returned by nullTerminatedUTF8 includes the null terminator...
 			try self.writeData($0.baseAddress, bufSize: $0.count-1)
 		}
 	}
@@ -914,6 +944,7 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 			memset(self.readBuffer, 0x0, self.readBufferSize)
 		}
 
+		// Read all the available data...
 		var count: Int = 0
 		repeat {
 
@@ -922,8 +953,9 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 			// Check for error...
 			if count < 0 {
 
-				// - Could be an error, but if errno is EAGAIN or EWOULDBLOCK, it means there was NO data to read...
-				if errno == EAGAIN {
+				// - Could be an error, but if errno is EAGAIN or EWOULDBLOCK (if a non-blocking socket),
+				//		it means there was NO data to read...
+				if errno == EAGAIN || errno == EWOULDBLOCK {
 
 					return 0
 				}
