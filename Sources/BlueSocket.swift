@@ -325,6 +325,32 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 		let cString = inet_ntoa(fromAddress)
 		return String.fromCString(cString)
 	}
+	
+	///
+	/// Check whether one or more sockets are available for reading and/or writing
+	///
+	/// - Parameter sockets: Array of BlueSockets to be tested.
+	///
+	/// - Returns: Tuple containing two arrays of BlueSockets, one each representing readable and writable sockets.
+	///
+	public class func checkStatus(sockets: [BlueSocket]) throws -> (readables: [BlueSocket], writables: [BlueSocket]) {
+		
+		var readables: [BlueSocket] = []
+		var writables: [BlueSocket] = []
+		
+		for socket in sockets {
+			
+			let result = try socket.isReadableOrWritable()
+			if result.readable {
+				readables.append(socket)
+			}
+			if result.writable {
+				writables.append(socket)
+			}
+		}
+		
+		return (readables, writables)
+	}
 
 	// MARK: Lifecycle Methods
 
