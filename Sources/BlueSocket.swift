@@ -125,24 +125,51 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 	public static let SOCKET_ERR_GET_FCNTL_FAILED			= -9981
 	public static let SOCKET_ERR_SET_FCNTL_FAILED			= -9980
 	public static let SOCKET_ERR_NOT_IMPLEMENTED			= -9979
-	public static let SOCKET_ERR_INTERNAL					= -9978
+	public static let SOCKET_ERR_NOT_SUPPORTED_YET			= -9978
+	public static let SOCKET_ERR_INTERNAL					= -9977
 
 	// MARK: Enums
 
 	///
 	/// Socket Protocol Family Values
 	///
+	/// **Note:** Only the following are supported at this time:
+	///			INET = AF_INET (IPV4)
+	///			INET6 = AF_INET6 (IPV6)
+	///
 	public enum BlueSocketProtocolFamily {
 
 		case INET, INET6
 
+		///
+		/// Return enum equivalent of a raw value
+		///
+		/// - Parameter value: Value for which enum value is desired
+		///
+		/// - Returns: Optional contain enum value or nil
+		///
+		static func getFamily(value: Int32) -> BlueSocketProtocolFamily? {
+			
+			switch (value) {
+				
+			case Int32(AF_INET):
+				return .INET
+			case Int32(AF_INET6):
+				return .INET6
+			default:
+				return nil
+			}
+		}
+		
 		///
 		/// Return the value for a particular case
 		///
 		/// - Returns: Int32 containing the value for specific case.
 		///
 		func valueOf() -> Int32 {
-			switch(self) {
+		
+			switch (self) {
+			
 			case .INET:
 				return Int32(AF_INET)
 
@@ -150,41 +177,130 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 				return Int32(AF_INET6)
 			}
 		}
+		
+		///
+		/// Return whether passed value is equivalent to case value.
+		///
+		/// - Parameter value: Value used in comparison
+		///
+		/// - Returns: True if equivalent, false otherwise
+		///
+		func isEquivalentTo(value: Int32) -> Bool {
+
+			return self.valueOf() == value
+		}
 	}
 
 	///
 	/// Socket Type Values
 	///
-	/// **Note:** Only `STREAM`, i.e. `SOCK_STREAM`, supported at this time.
+	/// **Note:** Only the following are supported at this time:
+	///			STREAM = SOCK_STREAM (Provides sequenced, reliable, two-way, connection-based byte streams.)
+	///			DGRAM = SOCK_DGRAM (Supports datagrams (connectionless, unreliable messages of a fixed maximum length).)
 	///
 	public enum BlueSocketType {
 
-		case STREAM
+		case STREAM, DGRAM
 
+		///
+		/// Return enum equivalent of a raw value
+		///
+		/// - Parameter value: Value for which enum value is desired
+		///
+		/// - Returns: Optional contain enum value or nil
+		///
+		static func getType(value: Int32) -> BlueSocketType? {
+
+			#if os(Linux)
+			switch (value) {
+				
+			case Int32(SOCK_STREAM.rawValue):
+				return .STREAM
+			case Int32(SOCK_DGRAM.rawValue):
+				return .DGRAM
+			default:
+				return nil
+			}
+			#else
+			switch (value) {
+				
+			case SOCK_STREAM:
+				return .STREAM
+			case SOCK_DGRAM:
+				return .DGRAM
+			default:
+				return nil
+			}
+			#endif
+		}
+		
 		///
 		/// Return the value for a particular case
 		///
 		/// - Returns: Int32 containing the value for specific case.
 		///
 		func valueOf() -> Int32 {
-			switch(self) {
+			
+			switch (self) {
+			
 			case .STREAM:
 				#if os(Linux)
 					return Int32(SOCK_STREAM.rawValue)
 				#else
 					return SOCK_STREAM
 				#endif
+			case .DGRAM:
+				#if os(Linux)
+					return Int32(SOCK_DGRAM.rawValue)
+				#else
+					return SOCK_DGRAM
+				#endif
 			}
+		}
+
+		///
+		/// Return whether passed value is equivalent to case value.
+		///
+		/// - Parameter value: Value used in comparison
+		///
+		/// - Returns: True if equivalent, false otherwise
+		///
+		func isEquivalentTo(value: Int32) -> Bool {
+			
+			return self.valueOf() == value
 		}
 	}
 
 	///
 	/// Socket Protocol Values
 	///
-	/// **Note:** Only `TCP`, i.e. `IPROTO_TCP`, supported at this time.
+	/// **Note:** Only the following are supported at this time:
+	///			TCP = IPPROTO_TCP
+	///			UDP = IPPROTO_UDP
 	///
-	public enum BlueSocketProtocol {
-		case TCP
+	public enum BlueSocketProtocol: Int32 {
+		
+		case TCP, UDP
+		
+		///
+		/// Return enum equivalent of a raw value
+		///
+		/// - Parameter value: Value for which enum value is desired
+		///
+		/// - Returns: Optional contain enum value or nil
+		///
+		static func getProtocol(value: Int32) -> BlueSocketProtocol? {
+			
+			switch (value) {
+				
+			case Int32(IPPROTO_TCP):
+				return .TCP
+			case Int32(IPPROTO_UDP):
+				return .UDP
+			default:
+				return nil
+			}
+		}
 
 		///
 		/// Return the value for a particular case
@@ -192,12 +308,84 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 		/// - Returns: Int32 containing the value for specific case.
 		///
 		func valueOf() -> Int32 {
-			switch(self) {
+			
+			switch (self) {
+			
 			case .TCP:
 				return Int32(IPPROTO_TCP)
+			case .UDP:
+				return Int32(IPPROTO_UDP)
 			}
 		}
+
+		///
+		/// Return whether passed value is equivalent to case value.
+		///
+		/// - Parameter value: Value used in comparison
+		///
+		/// - Returns: True if equivalent, false otherwise
+		///
+		func isEquivalentTo(value: Int32) -> Bool {
+			
+			return self.valueOf() == value
+		}
 	}
+	
+	// MARK: Structs
+	
+	public struct BlueSocketSignature: CustomStringConvertible {
+		
+		public private(set) var protocolFamily: BlueSocketProtocolFamily
+		public private(set) var socketType: BlueSocketType
+		public private(set) var proto: BlueSocketProtocol
+		public private(set) var address: sockaddr? {
+			
+			didSet(value) {
+				
+				if let newAddr = value {
+					
+					address = sockaddr()
+					var addrSize = Int(0)
+					switch (self.protocolFamily) {
+						
+					case .INET:
+						addrSize = Int(sizeof(sockaddr_in))
+						
+					case .INET6:
+						addrSize = Int(sizeof(sockaddr_in6))
+					}
+					
+					var addr = newAddr
+					memcpy(&address, &addr, addrSize)
+				}
+			}
+		}
+		
+		public init?(protocolFamily: Int32, socketType: Int32, proto: Int32, address: sockaddr?) {
+		
+			guard let family = BlueSocketProtocolFamily.getFamily(protocolFamily),
+				let type = BlueSocketType.getType(socketType),
+				let pro = BlueSocketProtocol.getProtocol(proto) else {
+					
+					return nil
+			}
+			
+			self.protocolFamily = family
+			self.socketType = type
+			self.proto = pro
+			
+			self.address = address
+		}
+
+		///
+		/// Returns a string description of the error.
+		///
+		public var description: String {
+			
+			return "Signature: family: \(self.protocolFamily), type: \(self.socketType), protocol: \(self.proto)"
+		}
+	}
+	
 
 	// MARK: Properties
 
@@ -284,6 +472,9 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 	/// The file descriptor representing this socket. (Readonly)
 	///
 	public private(set) var socketfd: Int32 = Int32(SOCKET_INVALID_DESCRIPTOR)
+	
+	///
+	public private(set) var signature: BlueSocketSignature? = nil
 
 
 	// MARK: Class Methods
@@ -310,6 +501,11 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 	///
 	public class func customConfigured(family: BlueSocketProtocolFamily, type: BlueSocketType, proto: BlueSocketProtocol) throws -> BlueSocket {
 
+		if type == .DGRAM || proto == .UDP {
+			
+			throw BlueSocketError(code: BlueSocket.SOCKET_ERR_NOT_SUPPORTED_YET, reason: "Full support for Datagrams and UDP not available yet.")
+
+		}
 		return try BlueSocket(family: family, type: type, proto: proto)
 	}
 
@@ -379,6 +575,9 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 			self.socketfd = Int32(BlueSocket.SOCKET_INVALID_DESCRIPTOR)
 			throw BlueSocketError(code: BlueSocket.SOCKET_ERR_UNABLE_TO_CREATE_SOCKET, reason: self.lastError())
 		}
+		
+		// Create the signature...
+		self.signature = BlueSocketSignature(protocolFamily: family.valueOf(), socketType: type.valueOf(), proto: proto.valueOf(), address: nil)
 	}
 
 	// MARK: -- Private
@@ -403,6 +602,19 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 		
 		self.remotePort = Int(remoteAddress.sin_port)
 		self.socketfd = fd
+		
+		// Create the signature...
+		#if os(Linux)
+			let type = Int32(SOCK_STREAM.rawValue)
+		#else
+			let type = SOCK_STREAM
+		#endif
+		var address = sockaddr()
+		let addrSize = Int(sizeof(sockaddr_in))
+		var addr = remoteAddress
+		memcpy(&address, &addr, addrSize)
+		self.signature = BlueSocketSignature(protocolFamily: Int32(remoteAddress.sin_family), socketType: type, proto: Int32(IPPROTO_TCP), address: address)
+		
 	}
 
 	deinit {
