@@ -5,7 +5,7 @@ Socket framework for Swift using the Swift Package Manager. Works on OS X and Li
 
 ## Contents
 
-* ETSocket: Low level socket framework. Pure Swift. 
+* BlueSocket: Low level socket framework. Pure Swift. 
 
 ## Prerequisites
 
