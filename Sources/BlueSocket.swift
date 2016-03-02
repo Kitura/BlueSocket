@@ -335,9 +335,24 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 	
 	public struct BlueSocketSignature: CustomStringConvertible {
 		
+		///
+		/// Protocol Family
+		///
 		public private(set) var protocolFamily: BlueSocketProtocolFamily
+		
+		///
+		/// Socket Type
+		///
 		public private(set) var socketType: BlueSocketType
+		
+		///
+		/// Socket Protocol
+		///
 		public private(set) var proto: BlueSocketProtocol
+		
+		///
+		/// Address info for socket.
+		///
 		public private(set) var address: sockaddr? {
 			
 			didSet(value) {
@@ -361,6 +376,16 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 			}
 		}
 		
+		///
+		/// Create a socket signature
+		///
+		/// - Parameter protocolFamily:	The family of the socket to create.
+		///	- Parameter	socketType:		The type of socket to create.
+		///	- Parameter proto:			The protocool to use for the socket.
+		/// - Parameter address:		Address info for the socket.
+		///
+		/// - Returns: New BlueSocketSignature instance
+		///
 		public init?(protocolFamily: Int32, socketType: Int32, proto: Int32, address: sockaddr?) {
 		
 			guard let family = BlueSocketProtocolFamily.getFamily(protocolFamily),
@@ -473,6 +498,9 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 	///
 	public private(set) var socketfd: Int32 = Int32(SOCKET_INVALID_DESCRIPTOR)
 	
+	///
+	/// The signature for the socket.
+	/// 	**Note:** See BlueSocketSignature above.
 	///
 	public private(set) var signature: BlueSocketSignature? = nil
 
