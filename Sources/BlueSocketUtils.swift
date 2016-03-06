@@ -52,7 +52,7 @@ public extension String {
 		buf.dealloc(buflen)
 		return s
 	}
-
+	
 	///
 	/// This function converts a String to a C string
 	///
@@ -62,7 +62,159 @@ public extension String {
 		
 		return strdup(self)
 	}
+	
+}
 
+public extension sockaddr_storage {
+	
+	///
+	/// Convert to sockaddr
+	///
+	/// - Returns: sockaddr
+	///
+	public func toAddr() -> sockaddr {
+		
+		var addr = sockaddr()
+		let addrSize = sizeof(sockaddr)
+		var temp = self
+		memcpy(&addr, &temp, addrSize)
+		return addr
+	}
+	
+	///
+	/// Convert to sockaddr_in
+	///
+	/// - Returns: sockaddr_in
+	///
+	public func toIPV4() -> sockaddr_in {
+		
+		var addr = sockaddr_in()
+		let addrSize = sizeof(sockaddr_in)
+		var temp = self
+		memcpy(&addr, &temp, addrSize)
+		return addr
+	}
+	
+	///
+	/// Convert to sockaddr_in6
+	///
+	/// - Returns: sockaddr_in6
+	///
+	public func toIPV6() -> sockaddr_in6 {
+		
+		var addr = sockaddr_in6()
+		let addrSize = sizeof(sockaddr_in6)
+		var temp = self
+		memcpy(&addr, &temp, addrSize)
+		return addr
+	}
+}
+
+public extension sockaddr {
+	
+	///
+	/// Convert to sockaddr_storage
+	///
+	/// - Returns: sockaddr_storage
+	///
+	public func toStorage() -> sockaddr_storage {
+		
+		var addr = sockaddr_storage()
+		let addrSize = sizeof(sockaddr_storage)
+		var temp = self
+		memcpy(&addr, &temp, addrSize)
+		return addr
+	}
+	
+	///
+	/// Convert to sockaddr_in
+	///
+	/// - Returns: sockaddr_in
+	///
+	public func toIPV4() -> sockaddr_in {
+		
+		var addr = sockaddr_in()
+		let addrSize = sizeof(sockaddr_in)
+		var temp = self
+		memcpy(&addr, &temp, addrSize)
+		return addr
+	}
+	
+	///
+	/// Convert to sockaddr_in6
+	///
+	/// - Returns: sockaddr_in6
+	///
+	public func toIPV6() -> sockaddr_in6 {
+		
+		var addr = sockaddr_in6()
+		let addrSize = sizeof(sockaddr_in6)
+		var temp = self
+		memcpy(&addr, &temp, addrSize)
+		return addr
+	}
+}
+
+public extension sockaddr_in {
+	
+	///
+	/// Convert to sockaddr_storage
+	///
+	/// - Returns: sockaddr_storage
+	///
+	public func toStorage() -> sockaddr_storage {
+		
+		var addr = sockaddr_storage()
+		let addrSize = sizeof(sockaddr_storage)
+		var temp = self
+		memcpy(&addr, &temp, addrSize)
+		return addr
+	}
+	
+	///
+	/// Convert to sockaddr
+	///
+	/// - Returns: sockaddr
+	///
+	public func toAddr() -> sockaddr {
+		
+		var addr = sockaddr()
+		let addrSize = sizeof(sockaddr)
+		var temp = self
+		memcpy(&addr, &temp, addrSize)
+		return addr
+	}
+}
+
+public extension sockaddr_in6 {
+	
+	///
+	/// Convert to sockaddr_storage
+	///
+	/// - Returns: sockaddr_storage
+	///
+	public func toStorage() -> sockaddr_storage {
+		
+		var addr = sockaddr_storage()
+		let addrSize = sizeof(sockaddr_storage)
+		var temp = self
+		memcpy(&addr, &temp, addrSize)
+		return addr
+	}
+	
+	///
+	/// Convert to sockaddr
+	///
+	/// - Returns: sockaddr
+	///
+	public func toAddr() -> sockaddr {
+		
+		var addr = sockaddr()
+		let addrSize = sizeof(sockaddr)
+		var temp = self
+		memcpy(&addr, &temp, addrSize)
+		return addr
+	}
 }
 
 #if os(Linux)
