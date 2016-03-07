@@ -336,6 +336,21 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 	
 	public struct BlueSocketSignature: CustomStringConvertible {
 		
+		// MARK: - Private
+
+		///
+		/// Address info for ipv4 socket.
+		///
+		private var _ipv4Address: sockaddr_in = sockaddr_in()
+		
+		///
+		/// Address info for ipv6 socket.
+		///
+		private var _ipv6Address: sockaddr_in6 = sockaddr_in6()
+		
+		
+		// MARK: - Public
+		
 		///
 		/// Protocol Family
 		///
@@ -360,10 +375,19 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 				
 				if let newAddr = value {
 					
-					address = sockaddr()
-					
 					var addr = newAddr
-					memcpy(&address, &addr, self.addrSize)
+					switch (self.protocolFamily) {
+						
+					case .INET:
+						_ipv4Address = sockaddr_in()
+						memcpy(&_ipv4Address, &addr, self.addrSize)
+						address = _ipv4Address.toAddr()
+						
+					case .INET6:
+						_ipv6Address = sockaddr_in6()
+						memcpy(&_ipv6Address, &addr, self.addrSize)
+						address = _ipv4Address.toAddr()
+					}
 				}
 			}
 		}
