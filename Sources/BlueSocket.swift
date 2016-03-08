@@ -127,7 +127,8 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 	public static let SOCKET_ERR_SET_FCNTL_FAILED			= -9979
 	public static let SOCKET_ERR_NOT_IMPLEMENTED			= -9978
 	public static let SOCKET_ERR_NOT_SUPPORTED_YET			= -9977
-	public static let SOCKET_ERR_INTERNAL					= -9976
+	public static let SOCKET_ERR_BAD_SIGNATURE_PARAMETERS	= -9976
+	public static let SOCKET_ERR_INTERNAL					= -9975
 	
 	// MARK: Enums
 	
@@ -339,16 +340,11 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 		// MARK: - Private
 		
 		///
-		/// Address info for ipv4 socket.
+		/// Generic Address info for socket.
 		///
-		private var _ipv4Address: sockaddr_in = sockaddr_in()
+		private var _address: sockaddr_storage = sockaddr_storage()
 		
-		///
-		/// Address info for ipv6 socket.
-		///
-		private var _ipv6Address: sockaddr_in6 = sockaddr_in6()
-		
-		
+
 		// MARK: - Public
 		
 		///
@@ -367,21 +363,23 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 		public private(set) var proto: BlueSocketProtocol
 		
 		///
+		/// Host name for connection
+		///
+		public private(set) var hostname: String? = nil
+		
+		///
+		/// Port for connection
+		///
+		public private(set) var port: Int32? = nil
+		
+		///
 		/// Address info for socket.
 		///
-		public private(set) var address: sockaddr? {
+		public private(set) var address: sockaddr_storage? {
 			
 			get {
 				
-				switch (protocolFamily) {
-					
-				case .INET:
-					return _ipv4Address.toAddr()
-					
-				case .INET6:
-					return _ipv6Address.toAddr()
-				}
-				
+				return _address
 			}
 			
 			set(value) {
@@ -389,16 +387,7 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 				if let newAddr = value {
 					
 					var addr = newAddr
-					switch (protocolFamily) {
-						
-					case .INET:
-						_ipv4Address = sockaddr_in()
-						memcpy(&_ipv4Address, &addr, addrSize)
-						
-					case .INET6:
-						_ipv6Address = sockaddr_in6()
-						memcpy(&_ipv6Address, &addr, addrSize)
-					}
+					memcpy(&_address, &addr, addrSize)
 				}
 			}
 		}
@@ -428,13 +417,13 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 		///
 		/// - Returns: New BlueSocketSignature instance
 		///
-		public init?(protocolFamily: Int32, socketType: Int32, proto: Int32, address: sockaddr?) {
+		public init?(protocolFamily: Int32, socketType: Int32, proto: Int32, address: sockaddr_storage?) throws {
 			
 			guard let family = BlueSocketProtocolFamily.getFamily(protocolFamily),
 				let type = BlueSocketType.getType(socketType),
 				let pro = BlueSocketProtocol.getProtocol(proto) else {
 					
-					return nil
+					throw BlueSocketError(code: BlueSocket.SOCKET_ERR_BAD_SIGNATURE_PARAMETERS, reason: "Bad family, type or protocol passed.")
 			}
 			
 			self.protocolFamily = family
@@ -442,6 +431,36 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 			self.proto = pro
 			
 			self.address = address
+			
+		}
+		
+		///
+		/// Create a socket signature
+		///
+		///	- Parameter	socketType:		The type of socket to create.
+		///	- Parameter proto:			The protocool to use for the socket.
+		/// - Parameter hostname:		Hostname for this signature.
+		/// - Parameter port:			Port for this signature.
+		///
+		/// - Returns: New BlueSocketSignature instance
+		///
+		public init?(socketType: BlueSocketType, proto: BlueSocketProtocol, hostname: String?, port: Int32?) throws {
+			
+			// Make sure we have what we need...
+			guard let _ = hostname,
+				let _ = port else {
+					
+					throw BlueSocketError(code: BlueSocket.SOCKET_ERR_BAD_SIGNATURE_PARAMETERS, reason: "Missing hostname, port or both.")
+			}
+			
+			// Default to IPV4 socket protocol family...
+			self.protocolFamily = .INET
+			
+			self.socketType = socketType
+			self.proto = proto
+			
+			self.hostname = hostname
+			self.port = port
 		}
 		
 		///
@@ -449,7 +468,15 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 		///
 		public var description: String {
 			
-			return "Signature: family: \(self.protocolFamily), type: \(self.socketType), protocol: \(self.proto)"
+			switch (self.protocolFamily) {
+				
+			case .INET:
+				return "Signature: family: \(self.protocolFamily), type: \(self.socketType), protocol: \(self.proto), address (v4): \(address?.toIPV4())"
+				
+			case .INET6:
+				return "Signature: family: \(self.protocolFamily), type: \(self.socketType), protocol: \(self.proto), address (v6): \(address?.toIPV6())"
+				
+			}
 		}
 	}
 	
@@ -602,25 +629,26 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 	///
 	/// - Returns: Optional Tuple containing the hostname and port.
 	///
-	public class func ipAddressStringAndPort(fromAddress: sockaddr) -> (hostname: String, port: Int32)? {
+	public class func ipAddressStringAndPort(fromAddress: sockaddr_storage) -> (hostname: String, port: Int32)? {
 		
+		let addr = fromAddress.toAddr()
 		var bufLen: Int = Int(INET_ADDRSTRLEN)
-		if fromAddress.sa_family == sa_family_t(AF_INET6) {
+		if addr.sa_family == sa_family_t(AF_INET6) {
 			bufLen = Int(INET6_ADDRSTRLEN)
 		}
 		var buf = [CChar](count:bufLen, repeatedValue: 0)
 		
 		var port: Int32 = 0
-		if fromAddress.sa_family == sa_family_t(AF_INET) {
+		if addr.sa_family == sa_family_t(AF_INET) {
 			
 			var addr_in = fromAddress.toIPV4()
-			inet_ntop(Int32(fromAddress.sa_family), &addr_in.sin_addr, &buf, socklen_t(bufLen))
+			inet_ntop(Int32(addr.sa_family), &addr_in.sin_addr, &buf, socklen_t(bufLen))
 			port = Int32(addr_in.sin_port)
 			
 		} else {	// AF_INET6
 			
 			var addr_in = fromAddress.toIPV6()
-			inet_ntop(Int32(fromAddress.sa_family), &addr_in.sin6_addr, &buf, socklen_t(bufLen))
+			inet_ntop(Int32(addr.sa_family), &addr_in.sin6_addr, &buf, socklen_t(bufLen))
 			port = Int32(addr_in.sin6_port)
 		}
 		
@@ -687,7 +715,7 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 		}
 		
 		// Create the signature...
-		self.signature = BlueSocketSignature(
+		try self.signature = BlueSocketSignature(
 			protocolFamily: family.valueOf(),
 			socketType: type.valueOf(),
 			proto: proto.valueOf(),
@@ -704,7 +732,7 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 	///
 	/// - Returns: New BlueSocket instance
 	///
-	private init(fd: Int32, remoteAddress: sockaddr) throws {
+	private init(fd: Int32, remoteAddress: sockaddr_storage) throws {
 		
 		self.connected = true
 		self.listening = false
@@ -724,8 +752,8 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 			let type = SOCK_STREAM
 		#endif
 		
-		self.signature = BlueSocketSignature(
-			protocolFamily: Int32(remoteAddress.sa_family),
+		try self.signature = BlueSocketSignature(
+			protocolFamily: Int32(remoteAddress.toAddr().sa_family),
 			socketType: type,
 			proto: Int32(IPPROTO_TCP),
 			address: remoteAddress)
@@ -770,8 +798,8 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 		}
 		
 		// Accept the remote connection...
-		var acceptAddr = sockaddr()
-		var addrSize: socklen_t = socklen_t(sizeof(sockaddr))
+		var acceptAddr = sockaddr_storage()
+		var addrSize: socklen_t = socklen_t(sizeof(sockaddr_storage))
 		let socketfd2 = withUnsafeMutablePointer(&acceptAddr) {
 			accept(self.socketfd, UnsafeMutablePointer($0), &addrSize)
 		}
@@ -807,8 +835,8 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 		}
 		
 		// Accept the remote connection...
-		var acceptAddr = sockaddr()
-		var addrSize: socklen_t = socklen_t(sizeof(sockaddr))
+		var acceptAddr = sockaddr_storage()
+		var addrSize: socklen_t = socklen_t(sizeof(sockaddr_storage))
 		let socketfd2 = withUnsafeMutablePointer(&acceptAddr) {
 			accept(self.socketfd, UnsafeMutablePointer($0), &addrSize)
 		}
@@ -974,18 +1002,24 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 			throw BlueSocketError(code: BlueSocket.SOCKET_ERR_GETADDRINFO_FAILED, reason: self.lastError())
 		}
 		
+		// Close the existing socket (if open) before replacing it...
+		if self.socketfd != Int32(BlueSocket.SOCKET_INVALID_DESCRIPTOR) {
+			
+			self.close()
+		}
+		
 		self.socketfd = socketDescriptor!
 		self.remoteHostName = host
 		self.remotePort = Int(port)
 		self.connected = true
-		var addr = sockaddr()
+		var addr = sockaddr_storage()
 		var addrSize = Int(sizeof(sockaddr_in))
 		if targetInfo.memory.ai_family == Int32(AF_INET6) {
 			
 			addrSize = Int(sizeof(sockaddr_in6))
 		}
 		memcpy(&addr, targetInfo.memory.ai_addr, addrSize)
-		self.signature = BlueSocketSignature(
+		try self.signature = BlueSocketSignature(
 			protocolFamily: Int32(targetInfo.memory.ai_family),
 			socketType: targetInfo.memory.ai_socktype,
 			proto: targetInfo.memory.ai_protocol,
@@ -994,20 +1028,36 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 	}
 	
 	///
-	/// Connect to the address pointed to by the signature passed.
+	/// Connect to the address or hostname/port pointed to by the signature passed.
 	///
-	/// - Parameter signature:	Signature containing the address to connect to.
+	/// - Parameter signature:	Signature containing the address hostname/port to connect to.
 	///
 	public func connectUsing(Signature signature: BlueSocketSignature) throws {
 		
 		// Ensure we've got a proper address...
-		guard let addr = signature.address else {
+		if signature.hostname == nil || signature.port == nil {
 			
-			throw BlueSocketError(code: BlueSocket.SOCKET_ERR_MISSING_CONNECTION_DATA, reason: "Unable to access connection data.")
+			guard let _ = signature.address else {
+				
+				throw BlueSocketError(code: BlueSocket.SOCKET_ERR_MISSING_CONNECTION_DATA, reason: "Unable to access connection data.")
+			}
+			
+		} else {
+			
+			// Otherwise, make sure we've got a hostname and port...
+			guard let hostname = signature.hostname,
+				let port = signature.port else {
+					
+					throw BlueSocketError(code: BlueSocket.SOCKET_ERR_MISSING_CONNECTION_DATA, reason: "Unable to access hostname and port.")
+			}
+			
+			// Connect using hostname and port....
+			try self.connectTo(hostname, port: port)
+			return
 		}
 		
-		// Now, do the connection...
-		var remoteAddr = addr
+		// Now, do the connection using the supplied address...
+		var remoteAddr = signature.address!
 		let rc = withUnsafeMutablePointer(&remoteAddr) {
 			connect(self.socketfd, UnsafeMutablePointer($0), socklen_t(signature.addrSize))
 		}
@@ -1016,7 +1066,7 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 			throw BlueSocketError(code: BlueSocket.SOCKET_ERR_CONNECT_FAILED, reason: self.lastError())
 		}
 		
-		if let (hostname, port) = BlueSocket.ipAddressStringAndPort(addr) {
+		if let (hostname, port) = BlueSocket.ipAddressStringAndPort(remoteAddr) {
 			
 			self.remoteHostName = hostname
 			self.remotePort = Int(port)
@@ -1168,7 +1218,7 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 		}
 		
 		// Save the address info...
-		var addr = sockaddr()
+		var addr = sockaddr_storage()
 		var addrSize = Int(sizeof(sockaddr_in))
 		if targetInfo.memory.ai_family == Int32(AF_INET6) {
 			

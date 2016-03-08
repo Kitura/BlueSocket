@@ -125,34 +125,6 @@ public extension sockaddr {
 		memcpy(&addr, &temp, addrSize)
 		return addr
 	}
-	
-	///
-	/// Convert to sockaddr_in
-	///
-	/// - Returns: sockaddr_in
-	///
-	public func toIPV4() -> sockaddr_in {
-		
-		var addr = sockaddr_in()
-		let addrSize = sizeof(sockaddr_in)
-		var temp = self
-		memcpy(&addr, &temp, addrSize)
-		return addr
-	}
-	
-	///
-	/// Convert to sockaddr_in6
-	///
-	/// - Returns: sockaddr_in6
-	///
-	public func toIPV6() -> sockaddr_in6 {
-		
-		var addr = sockaddr_in6()
-		let addrSize = sizeof(sockaddr_in6)
-		var temp = self
-		memcpy(&addr, &temp, addrSize)
-		return addr
-	}
 }
 
 public extension sockaddr_in {
@@ -170,20 +142,6 @@ public extension sockaddr_in {
 		memcpy(&addr, &temp, addrSize)
 		return addr
 	}
-	
-	///
-	/// Convert to sockaddr
-	///
-	/// - Returns: sockaddr
-	///
-	public func toAddr() -> sockaddr {
-		
-		var addr = sockaddr()
-		let addrSize = sizeof(sockaddr)
-		var temp = self
-		memcpy(&addr, &temp, addrSize)
-		return addr
-	}
 }
 
 public extension sockaddr_in6 {
@@ -197,20 +155,6 @@ public extension sockaddr_in6 {
 		
 		var addr = sockaddr_storage()
 		let addrSize = sizeof(sockaddr_storage)
-		var temp = self
-		memcpy(&addr, &temp, addrSize)
-		return addr
-	}
-	
-	///
-	/// Convert to sockaddr
-	///
-	/// - Returns: sockaddr
-	///
-	public func toAddr() -> sockaddr {
-		
-		var addr = sockaddr()
-		let addrSize = sizeof(sockaddr)
 		var temp = self
 		memcpy(&addr, &temp, addrSize)
 		return addr
