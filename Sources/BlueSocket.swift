@@ -344,7 +344,7 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 		///
 		private var _address: sockaddr_storage = sockaddr_storage()
 		
-
+		
 		// MARK: - Public
 		
 		///
@@ -623,9 +623,27 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 	}
 	
 	///
-	/// Extract the dotted IP address and port.
+	/// Create an instance for existing open socket fd.
 	///
-	/// - Parameter fromAddress: The sockaddr struct.
+	/// - Parameter fd: Open file descriptor.
+	///	- Parameter remoteAddress: The sockaddr_storage associated with the open fd.
+	///
+	/// - Returns: New BlueSocket instance
+	///
+	public class func createUsing(NativeHandle socketfd: Int32, address: sockaddr_storage?) throws -> BlueSocket {
+		
+		guard let addr = address else {
+			
+			throw BlueSocketError(code: BlueSocket.SOCKET_ERR_MISSING_CONNECTION_DATA, reason: "Unable to access socket connection data.")
+		}
+		
+		return try BlueSocket(fd: socketfd, remoteAddress: addr)
+	}
+	
+	///
+	/// Extract the string form of IP address and the port.
+	///
+	/// - Parameter fromAddress: The sockaddr_storage struct.
 	///
 	/// - Returns: Optional Tuple containing the hostname and port.
 	///
