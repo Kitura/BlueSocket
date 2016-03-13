@@ -38,17 +38,17 @@ public extension String {
 	///
 	///	- Returns: An Optional String based on the passed C string
 	///
-	static func fromCString(cs: UnsafePointer<CChar>, length: Int!) -> String?	{
+	static func fromCString(cs: UnsafePointer<CChar>, length: Int?) -> String?	{
 		
-		guard length != .None else {
-			return String.fromCString(cs)
+		guard length != nil else {
+			return String(validatingUTF8: cs)
 		}
 		
-		let buflen = length + 1
+		let buflen = length! + 1
 		let buf = UnsafeMutablePointer<CChar>(allocatingCapacity: buflen)
-		memcpy(buf, cs, length)
-		buf[length] = 0
-		let s = String.fromCString(buf)
+		memcpy(buf, cs, length!)
+		buf[length!] = 0
+		let s = String(validatingUTF8: buf)
 		buf.deallocateCapacity(buflen)
 		return s
 	}

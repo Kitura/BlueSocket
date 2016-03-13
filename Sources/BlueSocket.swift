@@ -670,7 +670,7 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 			port = Int32(addr_in.sin6_port)
 		}
 
-		if let s = String.fromCString(buf) {
+		if let s = String(validatingUTF8: buf) {
 			return (s, port)
 
 		}
@@ -964,9 +964,9 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 
 			var errorString: String
 			if status == EAI_SYSTEM {
-				errorString = String(UTF8String: strerror(errno)) ?? "Unknown error code."
+				errorString = String(validatingUTF8: strerror(errno)) ?? "Unknown error code."
 			} else {
-				errorString = String(UTF8String: gai_strerror(errno)) ?? "Unknown error code."
+				errorString = String(validatingUTF8: gai_strerror(errno)) ?? "Unknown error code."
 			}
 			throw BlueSocketError(code: BlueSocket.SOCKET_ERR_GETADDRINFO_FAILED, reason: errorString)
 		}
@@ -1198,9 +1198,9 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 
 			var errorString: String
 			if status == EAI_SYSTEM {
-				errorString = String(UTF8String: strerror(errno)) ?? "Unknown error code."
+				errorString = String(validatingUTF8: strerror(errno)) ?? "Unknown error code."
 			} else {
-				errorString = String(UTF8String: gai_strerror(errno)) ?? "Unknown error code."
+				errorString = String(validatingUTF8: gai_strerror(errno)) ?? "Unknown error code."
 			}
 			throw BlueSocketError(code: BlueSocket.SOCKET_ERR_GETADDRINFO_FAILED, reason: errorString)
 		}
@@ -1593,7 +1593,7 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 	///
 	private func lastError() -> String {
 
-		return String.fromCString(strerror(errno)) ?? "Error: \(errno)"
+		return String(validatingUTF8: strerror(errno)) ?? "Error: \(errno)"
 	}
 
 }
