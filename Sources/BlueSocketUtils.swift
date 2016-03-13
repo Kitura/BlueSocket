@@ -45,11 +45,11 @@ public extension String {
 		}
 		
 		let buflen = length + 1
-		let buf = UnsafeMutablePointer<CChar>.alloc(buflen)
+		let buf = UnsafeMutablePointer<CChar>(allocatingCapacity: buflen)
 		memcpy(buf, cs, length)
 		buf[length] = 0
 		let s = String.fromCString(buf)
-		buf.dealloc(buflen)
+		buf.deallocateCapacity(buflen)
 		return s
 	}
 	

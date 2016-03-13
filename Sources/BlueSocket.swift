@@ -490,7 +490,7 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 	/// 	**Note:** The readBuffer is actually allocating unmanaged memory that'll
 	///			be deallocated when we're done with it.
 	///
-	var readBuffer: UnsafeMutablePointer<CChar> = UnsafeMutablePointer<CChar>.alloc(BlueSocket.SOCKET_DEFAULT_READ_BUFFER_SIZE)
+	var readBuffer: UnsafeMutablePointer<CChar> = UnsafeMutablePointer<CChar>(allocatingCapacity: BlueSocket.SOCKET_DEFAULT_READ_BUFFER_SIZE)
 
 	///
 	/// Internal Storage Buffer initially created with `BlueSocket.SOCKET_DEFAULT_READ_BUFFER_SIZE`.
@@ -522,11 +522,11 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 			if readBufferSize != oldValue {
 
 				if readBuffer != nil {
-					readBuffer.destroy()
-					readBuffer.dealloc(oldValue)
+					readBuffer.deinitialize()
+					readBuffer.deallocateCapacity(oldValue)
 				}
-				readBuffer = UnsafeMutablePointer<CChar>.alloc(readBufferSize)
-				readBuffer.initialize(0)
+				readBuffer = UnsafeMutablePointer<CChar>(allocatingCapacity: readBufferSize)
+				readBuffer.initialize(with: 0)
 			}
 		}
 	}
@@ -720,7 +720,7 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 	private init(family: BlueSocketProtocolFamily, type: BlueSocketType, proto: BlueSocketProtocol) throws {
 
 		// Initialize the read buffer...
-		self.readBuffer.initialize(0)
+		self.readBuffer.initialize(with: 0)
 
 		// Create the socket...
 		self.socketfd = socket(family.valueOf(), type.valueOf(), proto.valueOf())
@@ -754,7 +754,7 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 
 		self.connected = true
 		self.listening = false
-		self.readBuffer.initialize(0)
+		self.readBuffer.initialize(with: 0)
 
 		if let (hostname, port) = BlueSocket.ipAddressStringAndPort(remoteAddress) {
 			self.remoteHostName = hostname
@@ -786,8 +786,8 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 		}
 
 		// Destroy and free the readBuffer...
-		self.readBuffer.destroy(0)
-		self.readBuffer.dealloc(self.readBufferSize)
+		self.readBuffer.deinitialize()
+		self.readBuffer.deallocateCapacity(self.readBufferSize)
 	}
 
 	// MARK: Public Methods
@@ -956,7 +956,7 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 				ai_next: nil)
 		#endif
 
-		var targetInfo = UnsafeMutablePointer<addrinfo>()
+		var targetInfo = UnsafeMutablePointer<addrinfo>(allocatingCapacity: 1)
 
 		// Retrieve the info on our target...
 		var status: Int32 = getaddrinfo(host, String(port), &hints, &targetInfo)
@@ -1190,7 +1190,7 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 				ai_next: nil)
 		#endif
 
-		var targetInfo = UnsafeMutablePointer<addrinfo>()
+		var targetInfo = UnsafeMutablePointer<addrinfo>(allocatingCapacity: 1)
 
 		// Retrieve the info on our target...
 		let status: Int32 = getaddrinfo(nil, String(port), &hints, &targetInfo)
@@ -1545,8 +1545,8 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 		// Clear the buffer...
 		if self.readBuffer != nil {
 
-			self.readBuffer.destroy()
-			self.readBuffer.initialize(0x0)
+			self.readBuffer.deinitialize()
+			self.readBuffer.initialize(with: 0x0)
 			memset(self.readBuffer, 0x0, self.readBufferSize)
 		}
 
