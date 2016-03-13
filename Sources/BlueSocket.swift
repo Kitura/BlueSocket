@@ -984,13 +984,13 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 		var info = targetInfo
 		while (info != nil) {
 
-			socketDescriptor = socket(info.memory.ai_family, info.memory.ai_socktype, info.memory.ai_protocol)
+			socketDescriptor = socket(info.pointee.ai_family, info.pointee.ai_socktype, info.pointee.ai_protocol)
 			if socketDescriptor == -1 {
 				continue
 			}
 
 			// Connect to the server...
-			status = connect(socketDescriptor!, info.memory.ai_addr, info.memory.ai_addrlen)
+			status = connect(socketDescriptor!, info.pointee.ai_addr, info.pointee.ai_addrlen)
 
 			// Break if successful...
 			if status == 0 {
@@ -1004,7 +1004,7 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 				Darwin.close(socketDescriptor!)
 			#endif
 			socketDescriptor = nil
-			info = info.memory.ai_next
+			info = info.pointee.ai_next
 		}
 
 		// Throw if there is a status error...
@@ -1032,15 +1032,15 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 		self.connected = true
 		var addr = sockaddr_storage()
 		var addrSize = Int(sizeof(sockaddr_in))
-		if targetInfo.memory.ai_family == Int32(AF_INET6) {
+		if targetInfo.pointee.ai_family == Int32(AF_INET6) {
 
 			addrSize = Int(sizeof(sockaddr_in6))
 		}
-		memcpy(&addr, targetInfo.memory.ai_addr, addrSize)
+		memcpy(&addr, targetInfo.pointee.ai_addr, addrSize)
 		try self.signature = BlueSocketSignature(
-			protocolFamily: Int32(targetInfo.memory.ai_family),
-			socketType: targetInfo.memory.ai_socktype,
-			proto: targetInfo.memory.ai_protocol,
+			protocolFamily: Int32(targetInfo.pointee.ai_family),
+			socketType: targetInfo.pointee.ai_socktype,
+			proto: targetInfo.pointee.ai_protocol,
 			address: addr)
 
 	}
@@ -1218,7 +1218,7 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 		while (info != nil) {
 
 			// Try to bind the socket to the address...
-			if bind(self.socketfd, info.memory.ai_addr, info.memory.ai_addrlen) == 0 {
+			if bind(self.socketfd, info.pointee.ai_addr, info.pointee.ai_addrlen) == 0 {
 
 				// Success... We've found our address...
 				bound = true
@@ -1226,7 +1226,7 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 			}
 
 			// Try the next one...
-			info = info.memory.ai_next
+			info = info.pointee.ai_next
 		}
 
 		// Throw an error if we weren't able to bind to an address...
@@ -1238,11 +1238,11 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 		// Save the address info...
 		var addr = sockaddr_storage()
 		var addrSize = Int(sizeof(sockaddr_in))
-		if targetInfo.memory.ai_family == Int32(AF_INET6) {
+		if targetInfo.pointee.ai_family == Int32(AF_INET6) {
 
 			addrSize = Int(sizeof(sockaddr_in6))
 		}
-		memcpy(&addr, targetInfo.memory.ai_addr, addrSize)
+		memcpy(&addr, targetInfo.pointee.ai_addr, addrSize)
 		self.signature?.address = addr
 
 		// Update our hostname and port...
