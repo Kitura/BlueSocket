@@ -654,7 +654,7 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 		if addr.sa_family == sa_family_t(AF_INET6) {
 			bufLen = Int(INET6_ADDRSTRLEN)
 		}
-		var buf = [CChar](count:bufLen, repeatedValue: 0)
+		var buf = [CChar](repeating: 0, count: bufLen)
 
 		var port: Int32 = 0
 		if addr.sa_family == sa_family_t(AF_INET) {
