@@ -18,7 +18,7 @@
 // 	limitations under the License.
 //
 
-#import <Cocoa/Cocoa.h>
+#import <Foundation/Foundation.h>
 
 //! Project version number for BlueSocket.
 FOUNDATION_EXPORT double BlueSocketVersionNumber;
