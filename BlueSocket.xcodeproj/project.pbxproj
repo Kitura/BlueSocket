@@ -11,10 +11,22 @@
 		8C0F4C051C4E8630008B2B0A /* BlueSocketProtocols.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C0F4C021C4E8630008B2B0A /* BlueSocketProtocols.swift */; };
 		8C0F4C061C4E8630008B2B0A /* BlueSocket.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C0F4C031C4E8630008B2B0A /* BlueSocket.swift */; };
 		8C0F4C071C4E8630008B2B0A /* BlueSocketUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C0F4C041C4E8630008B2B0A /* BlueSocketUtils.swift */; };
+		8CA9B1661C98A00400E607FB /* BlueSocketTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CA9B1651C98A00400E607FB /* BlueSocketTests.swift */; };
+		8CA9B1681C98A00400E607FB /* BlueSocket.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8C0F4BF61C4E84CC008B2B0A /* BlueSocket.framework */; };
 		8CC36DF81C4EA1BE00BAA659 /* BlueSocketProtocols.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C0F4C021C4E8630008B2B0A /* BlueSocketProtocols.swift */; };
 		8CC36DF91C4EA1BE00BAA659 /* BlueSocket.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C0F4C031C4E8630008B2B0A /* BlueSocket.swift */; };
 		8CC36DFA1C4EA1BE00BAA659 /* BlueSocketUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C0F4C041C4E8630008B2B0A /* BlueSocketUtils.swift */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		8CA9B1691C98A00400E607FB /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 8C0F4BED1C4E84CC008B2B0A /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 8C0F4BF51C4E84CC008B2B0A;
+			remoteInfo = BlueSocket;
+		};
+/* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
 		8C0F4BF61C4E84CC008B2B0A /* BlueSocket.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = BlueSocket.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -24,6 +36,9 @@
 		8C0F4C031C4E8630008B2B0A /* BlueSocket.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BlueSocket.swift; sourceTree = "<group>"; };
 		8C0F4C041C4E8630008B2B0A /* BlueSocketUtils.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BlueSocketUtils.swift; sourceTree = "<group>"; };
 		8C0F4C081C4E866E008B2B0A /* Package.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Package.swift; sourceTree = "<group>"; };
+		8CA9B1631C98A00400E607FB /* BlueSocketTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BlueSocketTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		8CA9B1651C98A00400E607FB /* BlueSocketTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = BlueSocketTests.swift; path = Tests/BlueSocketTests.swift; sourceTree = "<group>"; };
+		8CA9B1671C98A00400E607FB /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = Info.plist; path = Tests/Info.plist; sourceTree = "<group>"; };
 		8CC36E021C4EA1BE00BAA659 /* BlueSocket.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = BlueSocket.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		8CC36E041C4EA34700BAA659 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -33,6 +48,14 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		8CA9B1601C98A00400E607FB /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				8CA9B1681C98A00400E607FB /* BlueSocket.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -52,6 +75,7 @@
 				8CC36E041C4EA34700BAA659 /* README.md */,
 				8C0F4C081C4E866E008B2B0A /* Package.swift */,
 				8C0F4BF81C4E84CC008B2B0A /* Sources */,
+				8CF2D7371C989EE0000A7D2B /* Tests */,
 				8C0F4BF71C4E84CC008B2B0A /* Products */,
 			);
 			sourceTree = "<group>";
@@ -61,6 +85,7 @@
 			children = (
 				8C0F4BF61C4E84CC008B2B0A /* BlueSocket.framework */,
 				8CC36E021C4EA1BE00BAA659 /* BlueSocket.framework */,
+				8CA9B1631C98A00400E607FB /* BlueSocketTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -83,6 +108,15 @@
 				8C0F4BFB1C4E84CC008B2B0A /* Info.plist */,
 			);
 			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		8CF2D7371C989EE0000A7D2B /* Tests */ = {
+			isa = PBXGroup;
+			children = (
+				8CA9B1651C98A00400E607FB /* BlueSocketTests.swift */,
+				8CA9B1671C98A00400E607FB /* Info.plist */,
+			);
+			name = Tests;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -124,6 +158,24 @@
 			productReference = 8C0F4BF61C4E84CC008B2B0A /* BlueSocket.framework */;
 			productType = "com.apple.product-type.framework";
 		};
+		8CA9B1621C98A00400E607FB /* BlueSocketTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 8CA9B16D1C98A00400E607FB /* Build configuration list for PBXNativeTarget "BlueSocketTests" */;
+			buildPhases = (
+				8CA9B15F1C98A00400E607FB /* Sources */,
+				8CA9B1601C98A00400E607FB /* Frameworks */,
+				8CA9B1611C98A00400E607FB /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				8CA9B16A1C98A00400E607FB /* PBXTargetDependency */,
+			);
+			name = BlueSocketTests;
+			productName = BlueSocketTests;
+			productReference = 8CA9B1631C98A00400E607FB /* BlueSocketTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 		8CC36DF61C4EA1BE00BAA659 /* BlueSocket-iOS */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 8CC36DFF1C4EA1BE00BAA659 /* Build configuration list for PBXNativeTarget "BlueSocket-iOS" */;
@@ -148,11 +200,15 @@
 		8C0F4BED1C4E84CC008B2B0A /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
+				LastSwiftUpdateCheck = 0730;
 				LastUpgradeCheck = 0720;
 				ORGANIZATIONNAME = IBM;
 				TargetAttributes = {
 					8C0F4BF51C4E84CC008B2B0A = {
 						CreatedOnToolsVersion = 7.2;
+					};
+					8CA9B1621C98A00400E607FB = {
+						CreatedOnToolsVersion = 7.3;
 					};
 					8CC36DF61C4EA1BE00BAA659 = {
 						DevelopmentTeam = 2ZB889ETZ7;
@@ -173,12 +229,20 @@
 			targets = (
 				8C0F4BF51C4E84CC008B2B0A /* BlueSocket */,
 				8CC36DF61C4EA1BE00BAA659 /* BlueSocket-iOS */,
+				8CA9B1621C98A00400E607FB /* BlueSocketTests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
 		8C0F4BF41C4E84CC008B2B0A /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		8CA9B1611C98A00400E607FB /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -205,6 +269,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		8CA9B15F1C98A00400E607FB /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				8CA9B1661C98A00400E607FB /* BlueSocketTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		8CC36DF71C4EA1BE00BAA659 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -216,6 +288,14 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		8CA9B16A1C98A00400E607FB /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 8C0F4BF51C4E84CC008B2B0A /* BlueSocket */;
+			targetProxy = 8CA9B1691C98A00400E607FB /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		8C0F4BFC1C4E84CC008B2B0A /* Debug */ = {
@@ -343,6 +423,30 @@
 			};
 			name = Release;
 		};
+		8CA9B16B1C98A00400E607FB /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ANALYZER_NONNULL = YES;
+				COMBINE_HIDPI_IMAGES = YES;
+				INFOPLIST_FILE = Tests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.ibm.et.BlueSocketTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		8CA9B16C1C98A00400E607FB /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ANALYZER_NONNULL = YES;
+				COMBINE_HIDPI_IMAGES = YES;
+				INFOPLIST_FILE = Tests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.ibm.et.BlueSocketTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
 		8CC36E001C4EA1BE00BAA659 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -405,6 +509,15 @@
 			buildConfigurations = (
 				8C0F4BFF1C4E84CC008B2B0A /* Debug */,
 				8C0F4C001C4E84CC008B2B0A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		8CA9B16D1C98A00400E607FB /* Build configuration list for PBXNativeTarget "BlueSocketTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				8CA9B16B1C98A00400E607FB /* Debug */,
+				8CA9B16C1C98A00400E607FB /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
