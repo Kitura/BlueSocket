@@ -32,7 +32,7 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 
 	// MARK: Constants
 
-	public static let BlueSocket_DOMAIN						= "BlueSocket.ErrorDomain"
+	// MARK: -- Generic
 
 	public static let SOCKET_MINIMUM_READ_BUFFER_SIZE		= 1024
 	public static let SOCKET_DEFAULT_READ_BUFFER_SIZE		= 4096
@@ -45,7 +45,9 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 
 	public static let NO_HOSTNAME							= "No hostname"
 
-	// MARK: - Error Codes
+	// MARK: -- Errors: Domain and Codes
+
+	public static let SOCKET_ERR_DOMAIN						= "com.ibm.oss.BlueSocket.ErrorDomain"
 
 	public static let SOCKET_ERR_UNABLE_TO_CREATE_SOCKET    = -9999
 	public static let SOCKET_ERR_BAD_DESCRIPTOR				= -9998
@@ -74,6 +76,8 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 	public static let SOCKET_ERR_INTERNAL					= -9975
 
 	// MARK: Enums
+
+	// MARK: -- ProtocolFamily
 
 	///
 	/// Socket Protocol Family Values
@@ -135,6 +139,8 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 			return self.valueOf() == value
 		}
 	}
+
+	// MARK: -- SocketType
 
 	///
 	/// Socket Type Values
@@ -216,6 +222,8 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 		}
 	}
 
+	// MARK: -- SocketProtocol
+
 	///
 	/// Socket Protocol Values
 	///
@@ -277,6 +285,8 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 	}
 
 	// MARK: Structs
+
+	// MARK: -- Signature
 
 	public struct Signature: CustomStringConvertible {
 
@@ -423,11 +433,17 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 		}
 	}
 
+	// MARK: -- Error
 
 	public class Error: ErrorProtocol, CustomStringConvertible {
 
 		///
-		/// The error code: **see BlueSocket for possible errors**
+		/// The error domain.
+		///
+		public let domain: String = SOCKET_ERR_DOMAIN
+
+		///
+		/// The error code: **see constants above for possible errors**
 		///
 		public var errorCode: Int32
 
@@ -496,6 +512,7 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 	/// Internal Storage Buffer initially created with `BlueSocket.SOCKET_DEFAULT_READ_BUFFER_SIZE`.
 	///
 	var readStorage: NSMutableData = NSMutableData(capacity: BlueSocket.SOCKET_DEFAULT_READ_BUFFER_SIZE)!
+
 
 	// MARK: -- Public
 
