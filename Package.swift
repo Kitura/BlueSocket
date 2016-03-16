@@ -22,5 +22,5 @@ import PackageDescription
 let package = Package(
 	name: "BlueSocket",
 	targets: [Target(name: "BlueSocket")],
-	exclude: ["BlueSocket.xcodeproj", "BlueSocket.xcworkspace", "README.md", "Sources/Info.plist"]
+	exclude: ["BlueSocket.xcodeproj", "BlueSocket.xcworkspace", "README.md", "Sources/Info.plist", "Tests"]
 )
