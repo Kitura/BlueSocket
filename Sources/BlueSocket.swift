@@ -148,6 +148,11 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 		case IPV4(sockaddr_in)
 		case IPV6(sockaddr_in6)
 		
+		///
+		/// Cast to a sockaddr struct.
+		///
+		/// - Returns: sockaddr structure.
+		///
 		public func toAddr() -> sockaddr {
 			
 			switch self {
@@ -351,10 +356,10 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 			switch (self.protocolFamily) {
 				
 			case .INET:
-				return Int(sizeof(sockaddr_in))
+				return Int(sizeof(sockaddr_in.self))
 				
 			case .INET6:
-				return Int(sizeof(sockaddr_in6))
+				return Int(sizeof(sockaddr_in6.self))
 			}
 		}
 		
@@ -923,6 +928,9 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 		// Close the old socket...
 		self.close()
 		
+		// Save the address...
+		self.signature!.address = address
+		
 		// Replace the existing socketfd with the new one...
 		self.socketfd = socketfd2
 		
@@ -1220,7 +1228,7 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 		// Set a flag so that this address can be re-used immediately after the connection
 		// closes.  (TCP normally imposes a delay before an address can be re-used.)
 		var on: Int32 = 1
-		if setsockopt(self.socketfd, SOL_SOCKET, SO_REUSEADDR, &on, socklen_t(sizeof(Int32))) < 0 {
+		if setsockopt(self.socketfd, SOL_SOCKET, SO_REUSEADDR, &on, socklen_t(sizeof(Int32.self))) < 0 {
 			
 			throw Error(code: BlueSocket.SOCKET_ERR_SETSOCKOPT_FAILED, reason: self.lastError())
 		}
@@ -1229,7 +1237,7 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 		//	Note: Linux does not support the SO_NOSIGPIPE option. Instead, we use the
 		//		  MSG_NOSIGNAL flags passed to send.  See the writeData() functions below.
 		#if !os(Linux)
-			if setsockopt(self.socketfd, SOL_SOCKET, SO_NOSIGPIPE, &on, socklen_t(sizeof(Int32))) < 0 {
+			if setsockopt(self.socketfd, SOL_SOCKET, SO_NOSIGPIPE, &on, socklen_t(sizeof(Int32.self))) < 0 {
 				
 				throw Error(code: BlueSocket.SOCKET_ERR_SETSOCKOPT_FAILED, reason: self.lastError())
 			}
