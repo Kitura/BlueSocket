@@ -74,10 +74,10 @@ public extension sockaddr_storage {
 	///
 	public func toAddr() -> sockaddr {
 		
-		var addr = sockaddr()
-		let addrSize = sizeof(sockaddr)
 		var temp = self
-		memcpy(&addr, &temp, addrSize)
+		let addr = withUnsafePointer(&temp) {
+			return UnsafePointer<sockaddr>($0).memory
+		}
 		return addr
 	}
 	
@@ -88,10 +88,10 @@ public extension sockaddr_storage {
 	///
 	public func toIPV4() -> sockaddr_in {
 		
-		var addr = sockaddr_in()
-		let addrSize = sizeof(sockaddr_in)
 		var temp = self
-		memcpy(&addr, &temp, addrSize)
+		let addr = withUnsafePointer(&temp) {
+			return UnsafePointer<sockaddr_in>($0).memory
+		}
 		return addr
 	}
 	
@@ -102,27 +102,10 @@ public extension sockaddr_storage {
 	///
 	public func toIPV6() -> sockaddr_in6 {
 		
-		var addr = sockaddr_in6()
-		let addrSize = sizeof(sockaddr_in6)
 		var temp = self
-		memcpy(&addr, &temp, addrSize)
-		return addr
-	}
-}
-
-public extension sockaddr {
-	
-	///
-	/// Convert to sockaddr_storage
-	///
-	/// - Returns: sockaddr_storage
-	///
-	public func toStorage() -> sockaddr_storage {
-		
-		var addr = sockaddr_storage()
-		let addrSize = sizeof(sockaddr_storage)
-		var temp = self
-		memcpy(&addr, &temp, addrSize)
+		let addr = withUnsafePointer(&temp) {
+			return UnsafePointer<sockaddr_in6>($0).memory
+		}
 		return addr
 	}
 }
@@ -130,16 +113,16 @@ public extension sockaddr {
 public extension sockaddr_in {
 	
 	///
-	/// Convert to sockaddr_storage
+	/// Convert to sockaddr
 	///
-	/// - Returns: sockaddr_storage
+	/// - Returns: sockaddr
 	///
-	public func toStorage() -> sockaddr_storage {
+	public func toAddr() -> sockaddr {
 		
-		var addr = sockaddr_storage()
-		let addrSize = sizeof(sockaddr_storage)
 		var temp = self
-		memcpy(&addr, &temp, addrSize)
+		let addr = withUnsafePointer(&temp) {
+			return UnsafePointer<sockaddr>($0).memory
+		}
 		return addr
 	}
 }
@@ -147,16 +130,16 @@ public extension sockaddr_in {
 public extension sockaddr_in6 {
 	
 	///
-	/// Convert to sockaddr_storage
+	/// Convert to sockaddr
 	///
-	/// - Returns: sockaddr_storage
+	/// - Returns: sockaddr
 	///
-	public func toStorage() -> sockaddr_storage {
+	public func toAddr() -> sockaddr {
 		
-		var addr = sockaddr_storage()
-		let addrSize = sizeof(sockaddr_storage)
 		var temp = self
-		memcpy(&addr, &temp, addrSize)
+		let addr = withUnsafePointer(&temp) {
+			return UnsafePointer<sockaddr>($0).memory
+		}
 		return addr
 	}
 }
