@@ -29,7 +29,7 @@ public protocol BlueSocketReader {
 	///
 	/// - Returns: Optional String
 	///
-	func readString() throws -> String?
+	func read() throws -> String?
 	
 	///
 	/// Reads all available data
@@ -38,24 +38,24 @@ public protocol BlueSocketReader {
 	///
 	/// - Returns: Integer representing the number of bytes read.
 	///
-	func readData(data: NSMutableData) throws -> Int
+	func read(into data: NSMutableData) throws -> Int
 }
 
 // MARK: BlueSocketWriter
 
 public protocol BlueSocketWriter {
-
+	
 	///
 	/// Writes data
 	///
 	/// - Parameter data: NSData object containing the data to be written.
 	///
-	func writeData(data: NSData) throws
-
+	func write(from data: NSData) throws
+	
 	///
 	/// Writes a string
 	///
 	/// - Parameter string: String data to be written.
 	///
-	func writeString(string: String) throws
+	func write(from string: String) throws
 }

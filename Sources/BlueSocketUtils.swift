@@ -26,44 +26,8 @@
 	import Glibc
 #endif
 
-// MARK: String Extensions
 
-public extension String {
-	
-	///
-	/// This function returns an Optional String based on passed C string.
-	///
-	/// - Parameter cs: 	Pointer C string
-	/// - Parameter length:	Length of cs
-	///
-	///	- Returns: An Optional String based on the passed C string
-	///
-	static func fromCString(cs: UnsafePointer<CChar>, length: Int!) -> String?	{
-		
-		guard length != .None else {
-			return String.fromCString(cs)
-		}
-		
-		let buflen = length + 1
-		let buf = UnsafeMutablePointer<CChar>.alloc(buflen)
-		memcpy(buf, cs, length)
-		buf[length] = 0
-		let s = String.fromCString(buf)
-		buf.dealloc(buflen)
-		return s
-	}
-	
-	///
-	/// This function converts a String to a C string
-	///
-	/// - Returns: Pointer to a C string **Note: This pointer must be dealloc'd when no longer in use.**
-	///
-	public func toCString() -> UnsafeMutablePointer<Int8> {
-		
-		return strdup(self)
-	}
-	
-}
+// MARK: sockaddr_storage Extension
 
 public extension sockaddr_storage {
 	
@@ -76,7 +40,7 @@ public extension sockaddr_storage {
 		
 		var temp = self
 		let addr = withUnsafePointer(&temp) {
-			return UnsafePointer<sockaddr>($0).memory
+			return UnsafePointer<sockaddr>($0).pointee
 		}
 		return addr
 	}
@@ -90,7 +54,7 @@ public extension sockaddr_storage {
 		
 		var temp = self
 		let addr = withUnsafePointer(&temp) {
-			return UnsafePointer<sockaddr_in>($0).memory
+			return UnsafePointer<sockaddr_in>($0).pointee
 		}
 		return addr
 	}
@@ -104,11 +68,13 @@ public extension sockaddr_storage {
 		
 		var temp = self
 		let addr = withUnsafePointer(&temp) {
-			return UnsafePointer<sockaddr_in6>($0).memory
+			return UnsafePointer<sockaddr_in6>($0).pointee
 		}
 		return addr
 	}
 }
+
+// MARK: sockaddr_in Extension
 
 public extension sockaddr_in {
 	
@@ -121,11 +87,13 @@ public extension sockaddr_in {
 		
 		var temp = self
 		let addr = withUnsafePointer(&temp) {
-			return UnsafePointer<sockaddr>($0).memory
+			return UnsafePointer<sockaddr>($0).pointee
 		}
 		return addr
 	}
 }
+
+// MARK: sockaddr_in6 Extension
 
 public extension sockaddr_in6 {
 	
@@ -138,7 +106,7 @@ public extension sockaddr_in6 {
 		
 		var temp = self
 		let addr = withUnsafePointer(&temp) {
-			return UnsafePointer<sockaddr>($0).memory
+			return UnsafePointer<sockaddr>($0).pointee
 		}
 		return addr
 	}

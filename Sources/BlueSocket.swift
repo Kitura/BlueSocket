@@ -38,8 +38,8 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 	public static let SOCKET_DEFAULT_READ_BUFFER_SIZE		= 4096
 	public static let SOCKET_DEFAULT_MAX_CONNECTIONS		= 5
 	
-	public static let SOCKET_INVALID_PORT					= 0
-	public static let SOCKET_INVALID_DESCRIPTOR 			= -1
+	public static let SOCKET_INVALID_PORT					= Int32(0)
+	public static let SOCKET_INVALID_DESCRIPTOR 			= Int32(-1)
 	
 	public static let INADDR_ANY							= in_addr_t(0)
 	
@@ -99,7 +99,7 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 		///
 		static func getFamily(value: Int32) -> ProtocolFamily? {
 			
-			switch (value) {
+			switch value {
 				
 			case Int32(AF_INET):
 				return .INET
@@ -117,7 +117,7 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 		///
 		func valueOf() -> Int32 {
 			
-			switch (self) {
+			switch self {
 				
 			case .INET:
 				return Int32(AF_INET)
@@ -140,6 +140,8 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 		}
 	}
 	
+	// MARK: Socket Address
+	
 	///
 	/// Socket Address
 	///
@@ -149,11 +151,23 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 		case IPV6(sockaddr_in6)
 		
 		///
-		/// Cast to a sockaddr struct.
+		/// Size of address
 		///
-		/// - Returns: sockaddr structure.
+		public var size: Int {
+			
+			switch self {
+				
+			case .IPV4(let addr):
+				return sizeofValue(addr)
+			case .IPV6(let addr):
+				return sizeofValue(addr)
+			}
+		}
+		
 		///
-		public func toAddr() -> sockaddr {
+		/// As a sockaddr struct.
+		///
+		public var addr: sockaddr {
 			
 			switch self {
 				
@@ -189,7 +203,7 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 		static func getType(value: Int32) -> SocketType? {
 			
 			#if os(Linux)
-				switch (value) {
+				switch value {
 					
 				case Int32(SOCK_STREAM.rawValue):
 					return .STREAM
@@ -199,7 +213,7 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 					return nil
 				}
 			#else
-				switch (value) {
+				switch value {
 					
 				case SOCK_STREAM:
 					return .STREAM
@@ -218,7 +232,7 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 		///
 		func valueOf() -> Int32 {
 			
-			switch (self) {
+			switch self {
 				
 			case .STREAM:
 				#if os(Linux)
@@ -270,7 +284,7 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 		///
 		static func getProtocol(value: Int32) -> SocketProtocol? {
 			
-			switch (value) {
+			switch value {
 				
 			case Int32(IPPROTO_TCP):
 				return .TCP
@@ -288,7 +302,7 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 		///
 		func valueOf() -> Int32 {
 			
-			switch (self) {
+			switch self {
 				
 			case .TCP:
 				return Int32(IPPROTO_TCP)
@@ -336,32 +350,17 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 		///
 		/// Host name for connection
 		///
-		public private(set) var hostname: String? = nil
+		public private(set) var hostname: String? = BlueSocket.NO_HOSTNAME
 		
 		///
 		/// Port for connection
 		///
-		public private(set) var port: Int32? = nil
+		public private(set) var port: Int32 = BlueSocket.SOCKET_INVALID_PORT
 		
 		///
 		/// Address info for socket.
 		///
 		public private(set) var address: Address? = nil
-		
-		///
-		/// Size of address info
-		///
-		public var addrSize: Int {
-			
-			switch (self.protocolFamily) {
-				
-			case .INET:
-				return Int(sizeof(sockaddr_in.self))
-				
-			case .INET6:
-				return Int(sizeof(sockaddr_in6.self))
-			}
-		}
 		
 		///
 		/// Create a socket signature
@@ -404,7 +403,7 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 			
 			// Make sure we have what we need...
 			guard let _ = hostname,
-				let _ = port else {
+				let port = port else {
 					
 					throw Error(code: BlueSocket.SOCKET_ERR_BAD_SIGNATURE_PARAMETERS, reason: "Missing hostname, port or both.")
 			}
@@ -420,17 +419,51 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 		}
 		
 		///
+		/// Create a socket signature
+		///
+		/// - Parameter protocolFamily:	The family of the socket to create.
+		///	- Parameter	socketType:		The type of socket to create.
+		///	- Parameter proto:			The protocool to use for the socket.
+		/// - Parameter address:		Address info for the socket.
+		/// - Parameter hostname:		Hostname for this signature.
+		/// - Parameter port:			Port for this signature.
+		///
+		/// - Returns: New Signature instance
+		///
+		private init?(protocolFamily: Int32, socketType: Int32, proto: Int32, address: Address?, hostname: String?, port: Int32?) throws {
+			
+			// This constructor requires all items be present...
+			guard let family = ProtocolFamily.getFamily(protocolFamily),
+				let type = SocketType.getType(socketType),
+				let pro = SocketProtocol.getProtocol(proto),
+				let _ = hostname,
+				let port = port else {
+					
+					throw Error(code: BlueSocket.SOCKET_ERR_BAD_SIGNATURE_PARAMETERS, reason: "Incomplete parameters.")
+			}
+			
+			self.protocolFamily = family
+			self.socketType = type
+			self.proto = pro
+			
+			self.address = address
+			
+			self.hostname = hostname
+			self.port = port
+		}
+		
+		///
 		/// Returns a string description of the error.
 		///
 		public var description: String {
 			
-			return "Signature: family: \(self.protocolFamily), type: \(self.socketType), protocol: \(self.proto), address: \(address)"
+			return "Signature: family: \(protocolFamily), type: \(socketType), protocol: \(proto), address: \(address), hostname: \(hostname), port: \(port)"
 		}
 	}
 	
 	// MARK: -- Error
 	
-	public class Error: ErrorType, CustomStringConvertible {
+	public class Error: ErrorProtocol, CustomStringConvertible {
 		
 		///
 		/// The error domain.
@@ -501,7 +534,7 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 	/// 	**Note:** The readBuffer is actually allocating unmanaged memory that'll
 	///			be deallocated when we're done with it.
 	///
-	var readBuffer: UnsafeMutablePointer<CChar> = UnsafeMutablePointer<CChar>.alloc(BlueSocket.SOCKET_DEFAULT_READ_BUFFER_SIZE)
+	var readBuffer: UnsafeMutablePointer<CChar> = UnsafeMutablePointer<CChar>(allocatingCapacity: BlueSocket.SOCKET_DEFAULT_READ_BUFFER_SIZE)
 	
 	///
 	/// Internal Storage Buffer initially created with `BlueSocket.SOCKET_DEFAULT_READ_BUFFER_SIZE`.
@@ -534,11 +567,11 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 			if readBufferSize != oldValue {
 				
 				if readBuffer != nil {
-					readBuffer.destroy()
-					readBuffer.dealloc(oldValue)
+					readBuffer.deinitialize()
+					readBuffer.deallocateCapacity(oldValue)
 				}
-				readBuffer = UnsafeMutablePointer<CChar>.alloc(readBufferSize)
-				readBuffer.initialize(0)
+				readBuffer = UnsafeMutablePointer<CChar>(allocatingCapacity: readBufferSize)
+				readBuffer.initialize(with:0)
 			}
 		}
 	}
@@ -567,17 +600,32 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 	///
 	/// The remote host name this socket is connected to. (Readonly)
 	///
-	public private(set) var remoteHostName: String = BlueSocket.NO_HOSTNAME
+	public var remoteHostName: String {
+		
+		guard let sig = signature,
+			let host = sig.hostname else {
+				return BlueSocket.NO_HOSTNAME
+		}
+		
+		return host
+	}
 	
 	///
 	/// The remote port this socket is connected to. (Readonly)
 	///
-	public private(set) var	remotePort: Int = SOCKET_INVALID_PORT
+	public var	remotePort: Int32 {
+		
+		guard let sig = signature where sig.port != BlueSocket.SOCKET_INVALID_PORT else {
+			return BlueSocket.SOCKET_INVALID_PORT
+		}
+		
+		return sig.port
+	}
 	
 	///
 	/// The file descriptor representing this socket. (Readonly)
 	///
-	public private(set) var socketfd: Int32 = Int32(SOCKET_INVALID_DESCRIPTOR)
+	public private(set) var socketfd: Int32 = SOCKET_INVALID_DESCRIPTOR
 	
 	///
 	/// The signature for the socket.
@@ -625,11 +673,11 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 	///
 	/// - Returns: New BlueSocket instance. **Note:** Connection status should be checked via the *connected* property on the returned socket.
 	///
-	public class func createConnected(Signature signature: Signature) throws -> BlueSocket {
+	public class func createConnected(using signature: Signature) throws -> BlueSocket {
 		
 		let socket = try BlueSocket(family: signature.protocolFamily, type: signature.socketType, proto: signature.proto)
 		
-		try socket.connectUsing(Signature: signature)
+		try socket.connect(using: signature)
 		
 		return socket
 	}
@@ -642,14 +690,14 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 	///
 	/// - Returns: New BlueSocket instance
 	///
-	public class func createUsing(NativeHandle socketfd: Int32, address: Address?) throws -> BlueSocket {
+	public class func create(using nativeHandle: Int32, address: Address?) throws -> BlueSocket {
 		
 		guard let addr = address else {
 			
 			throw Error(code: BlueSocket.SOCKET_ERR_MISSING_CONNECTION_DATA, reason: "Unable to access socket connection data.")
 		}
 		
-		return try BlueSocket(fd: socketfd, remoteAddress: addr)
+		return try BlueSocket(fd: nativeHandle, remoteAddress: addr)
 	}
 	
 	///
@@ -672,7 +720,7 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 			var addr_in = address
 			let addr = addr_in.toAddr()
 			bufLen = Int(INET_ADDRSTRLEN)
-			buf = [CChar](count: bufLen, repeatedValue: 0)
+			buf = [CChar](repeating: 0, count: bufLen)
 			inet_ntop(Int32(addr.sa_family), &addr_in.sin_addr, &buf, socklen_t(bufLen))
 			port = Int32(UInt16(addr_in.sin_port).byteSwapped)
 			
@@ -680,13 +728,13 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 			var addr_in = address
 			let addr = addr_in.toAddr()
 			bufLen = Int(INET6_ADDRSTRLEN)
-			buf = [CChar](count: bufLen, repeatedValue: 0)
+			buf = [CChar](repeating: 0, count: bufLen)
 			inet_ntop(Int32(addr.sa_family), &addr_in.sin6_addr, &buf, socklen_t(bufLen))
 			port = Int32(UInt16(addr_in.sin6_port).byteSwapped)
 			
 		}
 		
-		if let s = String.fromCString(buf) {
+		if let s = String(validatingUTF8: buf) {
 			return (s, port)
 			
 		}
@@ -736,7 +784,7 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 	private init(family: ProtocolFamily, type: SocketType, proto: SocketProtocol) throws {
 		
 		// Initialize the read buffer...
-		self.readBuffer.initialize(0)
+		self.readBuffer.initialize(with: 0)
 		
 		// Create the socket...
 		self.socketfd = socket(family.valueOf(), type.valueOf(), proto.valueOf())
@@ -744,7 +792,7 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 		// If error, throw an appropriate exception...
 		if self.socketfd < 0 {
 			
-			self.socketfd = Int32(BlueSocket.SOCKET_INVALID_DESCRIPTOR)
+			self.socketfd = BlueSocket.SOCKET_INVALID_DESCRIPTOR
 			throw Error(code: BlueSocket.SOCKET_ERR_UNABLE_TO_CREATE_SOCKET, reason: self.lastError())
 		}
 		
@@ -770,12 +818,7 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 		
 		self.connected = true
 		self.listening = false
-		self.readBuffer.initialize(0)
-		
-		if let (hostname, port) = BlueSocket.ipAddressStringAndPort(remoteAddress) {
-			self.remoteHostName = hostname
-			self.remotePort = Int(port)
-		}
+		self.readBuffer.initialize(with: 0)
 		
 		self.socketfd = fd
 		
@@ -786,12 +829,21 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 			let type = SOCK_STREAM
 		#endif
 		
-		try self.signature = Signature(
-			protocolFamily: Int32(remoteAddress.toAddr().sa_family),
-			socketType: type,
-			proto: Int32(IPPROTO_TCP),
-			address: remoteAddress)
-		
+		if let (hostname, port) = BlueSocket.ipAddressStringAndPort(remoteAddress) {
+			try self.signature = Signature(
+				protocolFamily: Int32(remoteAddress.addr.sa_family),
+				socketType: type,
+				proto: Int32(IPPROTO_TCP),
+				address: remoteAddress,
+				hostname: hostname,
+				port: port)
+		} else {
+			try self.signature = Signature(
+				protocolFamily: Int32(remoteAddress.addr.sa_family),
+				socketType: type,
+				proto: Int32(IPPROTO_TCP),
+				address: remoteAddress)
+		}
 	}
 	
 	deinit {
@@ -802,8 +854,8 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 		}
 		
 		// Destroy and free the readBuffer...
-		self.readBuffer.destroy(0)
-		self.readBuffer.dealloc(self.readBufferSize)
+		self.readBuffer.deinitialize()
+		self.readBuffer.deallocateCapacity(self.readBufferSize)
 	}
 	
 	// MARK: Public Methods
@@ -816,7 +868,7 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 	public func acceptConnectionAndKeepListening() throws -> BlueSocket {
 		
 		// The socket must've been created, not connected and listening...
-		if self.socketfd == Int32(BlueSocket.SOCKET_INVALID_DESCRIPTOR) {
+		if self.socketfd == BlueSocket.SOCKET_INVALID_DESCRIPTOR {
 			
 			throw Error(code: BlueSocket.SOCKET_ERR_BAD_DESCRIPTOR, reason: nil)
 		}
@@ -876,7 +928,7 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 	public func acceptConnection() throws {
 		
 		// The socket must've been created, not connected and listening...
-		if self.socketfd == Int32(BlueSocket.SOCKET_INVALID_DESCRIPTOR) {
+		if self.socketfd == BlueSocket.SOCKET_INVALID_DESCRIPTOR {
 			
 			throw Error(code: BlueSocket.SOCKET_ERR_BAD_DESCRIPTOR, reason: nil)
 		}
@@ -935,8 +987,8 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 		self.socketfd = socketfd2
 		
 		if let (hostname, port) = BlueSocket.ipAddressStringAndPort(address) {
-			self.remoteHostName = hostname
-			self.remotePort = Int(port)
+			self.signature!.hostname = hostname
+			self.signature!.port = port
 		}
 		
 		// We're connected...
@@ -949,7 +1001,7 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 	///
 	public func close() {
 		
-		if self.socketfd != Int32(BlueSocket.SOCKET_INVALID_DESCRIPTOR) {
+		if self.socketfd != BlueSocket.SOCKET_INVALID_DESCRIPTOR {
 			
 			// Note: if the socket is listening, we need to shut it down prior to closing
 			//		or the socket will be left hanging until it times out.
@@ -965,10 +1017,13 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 				Darwin.close(self.socketfd)
 			#endif
 			
-			self.socketfd = Int32(BlueSocket.SOCKET_INVALID_DESCRIPTOR)
+			self.socketfd = BlueSocket.SOCKET_INVALID_DESCRIPTOR
 		}
 		
-		self.remoteHostName = BlueSocket.NO_HOSTNAME
+		if let _ = self.signature {
+			self.signature!.hostname = BlueSocket.NO_HOSTNAME
+			self.signature!.port = BlueSocket.SOCKET_INVALID_PORT
+		}
 		self.connected = false
 		self.listening = false
 	}
@@ -979,10 +1034,10 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 	/// - Parameter host:	The host name to connect to.
 	///	- Parameter port:	The port to be used.
 	///
-	public func connectTo(host: String, port: Int32) throws {
+	public func connect(to host: String, port: Int32) throws {
 		
 		// The socket must've been created and must not be connected...
-		if self.socketfd == Int32(BlueSocket.SOCKET_INVALID_DESCRIPTOR) {
+		if self.socketfd == BlueSocket.SOCKET_INVALID_DESCRIPTOR {
 			
 			throw Error(code: BlueSocket.SOCKET_ERR_BAD_DESCRIPTOR, reason: nil)
 		}
@@ -1021,7 +1076,7 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 				ai_next: nil)
 		#endif
 		
-		var targetInfo = UnsafeMutablePointer<addrinfo>()
+		var targetInfo = UnsafeMutablePointer<addrinfo>(allocatingCapacity: 1)
 		
 		// Retrieve the info on our target...
 		var status: Int32 = getaddrinfo(host, String(port), &hints, &targetInfo)
@@ -1029,9 +1084,9 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 			
 			var errorString: String
 			if status == EAI_SYSTEM {
-				errorString = String(UTF8String: strerror(errno)) ?? "Unknown error code."
+				errorString = String(validatingUTF8: strerror(errno)) ?? "Unknown error code."
 			} else {
-				errorString = String(UTF8String: gai_strerror(errno)) ?? "Unknown error code."
+				errorString = String(validatingUTF8: gai_strerror(errno)) ?? "Unknown error code."
 			}
 			throw Error(code: BlueSocket.SOCKET_ERR_GETADDRINFO_FAILED, reason: errorString)
 		}
@@ -1049,13 +1104,17 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 		var info = targetInfo
 		while (info != nil) {
 			
-			socketDescriptor = socket(info.memory.ai_family, info.memory.ai_socktype, info.memory.ai_protocol)
+			socketDescriptor = socket(info.pointee.ai_family, info.pointee.ai_socktype, info.pointee.ai_protocol)
 			if socketDescriptor == -1 {
 				continue
 			}
 			
 			// Connect to the server...
-			status = connect(socketDescriptor!, info.memory.ai_addr, info.memory.ai_addrlen)
+			#if os(Linux)
+				status = Glibc.connect(socketDescriptor!, info.pointee.ai_addr, info.pointee.ai_addrlen)
+			#else
+				status = Darwin.connect(socketDescriptor!, info.pointee.ai_addr, info.pointee.ai_addrlen)
+			#endif
 			
 			// Break if successful...
 			if status == 0 {
@@ -1069,7 +1128,7 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 				Darwin.close(socketDescriptor!)
 			#endif
 			socketDescriptor = nil
-			info = info.memory.ai_next
+			info = info.pointee.ai_next
 		}
 		
 		// Throw if there is a status error...
@@ -1086,34 +1145,34 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 		}
 		
 		// Close the existing socket (if open) before replacing it...
-		if self.socketfd != Int32(BlueSocket.SOCKET_INVALID_DESCRIPTOR) {
+		if self.socketfd != BlueSocket.SOCKET_INVALID_DESCRIPTOR {
 			
 			self.close()
 		}
 		
 		self.socketfd = socketDescriptor!
-		self.remoteHostName = host
-		self.remotePort = Int(port)
 		self.connected = true
 		var address: Address
-		if info.memory.ai_family == Int32(AF_INET6) {
+		if info.pointee.ai_family == Int32(AF_INET6) {
 			
 			var addr = sockaddr_in6()
-			memcpy(&addr, info.memory.ai_addr, Int(sizeofValue(addr)))
+			memcpy(&addr, info.pointee.ai_addr, Int(sizeofValue(addr)))
 			address = .IPV6(addr)
 			
 		} else {
 			
 			var addr = sockaddr_in()
-			memcpy(&addr, info.memory.ai_addr, Int(sizeofValue(addr)))
+			memcpy(&addr, info.pointee.ai_addr, Int(sizeofValue(addr)))
 			address = .IPV4(addr)
 			
 		}
 		try self.signature = Signature(
-			protocolFamily: Int32(info.memory.ai_family),
-			socketType: info.memory.ai_socktype,
-			proto: info.memory.ai_protocol,
-			address: address)
+			protocolFamily: Int32(info.pointee.ai_family),
+			socketType: info.pointee.ai_socktype,
+			proto: info.pointee.ai_protocol,
+			address: address,
+			hostname: host,
+			port: port)
 		
 	}
 	
@@ -1122,10 +1181,10 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 	///
 	/// - Parameter signature:	Signature containing the address hostname/port to connect to.
 	///
-	public func connectUsing(Signature signature: Signature) throws {
+	public func connect(using signature: Signature) throws {
 		
 		// Ensure we've got a proper address...
-		if signature.hostname == nil || signature.port == nil {
+		if signature.hostname == nil || signature.port == BlueSocket.SOCKET_INVALID_PORT {
 			
 			guard let _ = signature.address else {
 				
@@ -1135,31 +1194,40 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 		} else {
 			
 			// Otherwise, make sure we've got a hostname and port...
-			guard let hostname = signature.hostname,
-				let port = signature.port else {
+			guard let hostname = signature.hostname
+				where signature.port != BlueSocket.SOCKET_INVALID_PORT else {
 					
 					throw Error(code: BlueSocket.SOCKET_ERR_MISSING_CONNECTION_DATA, reason: "Unable to access hostname and port.")
 			}
 			
 			// Connect using hostname and port....
-			try self.connectTo(hostname, port: port)
+			try self.connect(to: hostname, port: signature.port)
 			return
 		}
 		
 		// Now, do the connection using the supplied address...
-		var remoteAddr = signature.address!
-		let rc = withUnsafeMutablePointer(&remoteAddr) {
-			connect(self.socketfd, UnsafeMutablePointer($0), socklen_t(signature.addrSize))
-		}
+		var remoteAddr = signature.address!.addr
+		
+		#if os(Linux)
+			let rc = withUnsafeMutablePointer(&remoteAddr) {
+				Glibc.connect(self.socketfd, UnsafeMutablePointer($0), socklen_t(signature.address!.size))
+			}
+		#else
+			let rc = withUnsafeMutablePointer(&remoteAddr) {
+				Darwin.connect(self.socketfd, UnsafeMutablePointer($0), socklen_t(signature.address!.size))
+			}
+		#endif
 		if rc < 0 {
 			
 			throw Error(code: BlueSocket.SOCKET_ERR_CONNECT_FAILED, reason: self.lastError())
 		}
 		
-		if let (hostname, port) = BlueSocket.ipAddressStringAndPort(remoteAddr) {
+		if let (hostname, port) = BlueSocket.ipAddressStringAndPort(signature.address!) {
 			
-			self.remoteHostName = hostname
-			self.remotePort = Int(port)
+			var sig = signature
+			sig.hostname = hostname
+			sig.port = Int32(port)
+			self.signature = sig
 			self.connected = true
 		}
 	}
@@ -1172,7 +1240,7 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 	public func isReadableOrWritable() throws -> (readable: Bool, writable: Bool) {
 		
 		// The socket must've been created and must be connected...
-		if self.socketfd == Int32(BlueSocket.SOCKET_INVALID_DESCRIPTOR) {
+		if self.socketfd == BlueSocket.SOCKET_INVALID_DESCRIPTOR {
 			
 			throw Error(code: BlueSocket.SOCKET_ERR_BAD_DESCRIPTOR, reason: nil)
 		}
@@ -1212,9 +1280,9 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 	///
 	/// - Parameter port: The port to listen on.
 	///
-	public func listenOn(port: Int) throws {
+	public func listen(on port: Int) throws {
 		
-		return try self.listenOn(port, maxPendingConnections: self.maxPendingConnections)
+		return try self.listen(on: port, maxPendingConnections: self.maxPendingConnections)
 	}
 	
 	///
@@ -1223,7 +1291,7 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 	/// - Parameter port: The port to listen on.
 	/// - Parameter maxPendingConnections: The maximum number of pending connections to allow.
 	///
-	public func listenOn(port: Int, maxPendingConnections: Int) throws {
+	public func listen(on port: Int, maxPendingConnections: Int) throws {
 		
 		// Set a flag so that this address can be re-used immediately after the connection
 		// closes.  (TCP normally imposes a delay before an address can be re-used.)
@@ -1272,7 +1340,7 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 				ai_next: nil)
 		#endif
 		
-		var targetInfo = UnsafeMutablePointer<addrinfo>()
+		var targetInfo = UnsafeMutablePointer<addrinfo>(allocatingCapacity: 1)
 		
 		// Retrieve the info on our target...
 		let status: Int32 = getaddrinfo(nil, String(port), &hints, &targetInfo)
@@ -1280,9 +1348,9 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 			
 			var errorString: String
 			if status == EAI_SYSTEM {
-				errorString = String(UTF8String: strerror(errno)) ?? "Unknown error code."
+				errorString = String(validatingUTF8: strerror(errno)) ?? "Unknown error code."
 			} else {
-				errorString = String(UTF8String: gai_strerror(errno)) ?? "Unknown error code."
+				errorString = String(validatingUTF8: gai_strerror(errno)) ?? "Unknown error code."
 			}
 			throw Error(code: BlueSocket.SOCKET_ERR_GETADDRINFO_FAILED, reason: errorString)
 		}
@@ -1300,7 +1368,7 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 		while (info != nil) {
 			
 			// Try to bind the socket to the address...
-			if bind(self.socketfd, info.memory.ai_addr, info.memory.ai_addrlen) == 0 {
+			if bind(self.socketfd, info.pointee.ai_addr, info.pointee.ai_addrlen) == 0 {
 				
 				// Success... We've found our address...
 				bound = true
@@ -1308,7 +1376,7 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 			}
 			
 			// Try the next one...
-			info = info.memory.ai_next
+			info = info.pointee.ai_next
 		}
 		
 		// Throw an error if we weren't able to bind to an address...
@@ -1319,16 +1387,16 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 		
 		// Save the address info...
 		var address: Address
-		if info.memory.ai_family == Int32(AF_INET6) {
+		if info.pointee.ai_family == Int32(AF_INET6) {
 			
 			var addr = sockaddr_in6()
-			memcpy(&addr, info.memory.ai_addr, Int(sizeofValue(addr)))
+			memcpy(&addr, info.pointee.ai_addr, Int(sizeofValue(addr)))
 			address = .IPV6(addr)
 			
 		} else {
 			
 			var addr = sockaddr_in()
-			memcpy(&addr, info.memory.ai_addr, Int(sizeofValue(addr)))
+			memcpy(&addr, info.pointee.ai_addr, Int(sizeofValue(addr)))
 			address = .IPV4(addr)
 			
 		}
@@ -1337,15 +1405,22 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 		
 		// Update our hostname and port...
 		if let (hostname, port) = BlueSocket.ipAddressStringAndPort(address) {
-			self.remoteHostName = hostname
-			self.remotePort = Int(port)
+			self.signature?.hostname = hostname
+			self.signature?.port = Int32(port)
 		}
 		
 		// Now listen for connections...
-		if listen(self.socketfd, Int32(maxPendingConnections)) < 0 {
-			
-			throw Error(code: BlueSocket.SOCKET_ERR_LISTEN_FAILED, reason: self.lastError())
-		}
+		#if os(Linux)
+			if Glibc.listen(self.socketfd, Int32(maxPendingConnections)) < 0 {
+				
+				throw Error(code: BlueSocket.SOCKET_ERR_LISTEN_FAILED, reason: self.lastError())
+			}
+		#else
+			if Darwin.listen(self.socketfd, Int32(maxPendingConnections)) < 0 {
+				
+				throw Error(code: BlueSocket.SOCKET_ERR_LISTEN_FAILED, reason: self.lastError())
+			}
+		#endif
 		
 		self.listening = true
 	}
@@ -1362,7 +1437,7 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 	///
 	/// - Returns: The number of bytes returned in the buffer.
 	///
-	public func readData(buffer: UnsafeMutablePointer<CChar>, bufSize: Int) throws -> Int {
+	public func read(into buffer: UnsafeMutablePointer<CChar>, bufSize: Int) throws -> Int {
 		
 		// Make sure the buffer is valid...
 		if buffer == nil || bufSize == 0 {
@@ -1371,7 +1446,7 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 		}
 		
 		// The socket must've been created and must be connected...
-		if self.socketfd == Int32(BlueSocket.SOCKET_INVALID_DESCRIPTOR) {
+		if self.socketfd == BlueSocket.SOCKET_INVALID_DESCRIPTOR {
 			
 			throw Error(code: BlueSocket.SOCKET_ERR_BAD_DESCRIPTOR, reason: nil)
 		}
@@ -1437,14 +1512,14 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 	///
 	/// - Returns: String containing the data read from the socket.
 	///
-	public func readString() throws -> String? {
+	public func read() throws -> String? {
 		
 		guard let data = NSMutableData(capacity: 2000) else {
 			
 			throw Error(code: BlueSocket.SOCKET_ERR_INTERNAL, reason: "Unable to create temporary NSData...")
 		}
 		
-		try self.readData(data)
+		try self.read(into: data)
 		
 		guard let str = NSString(data: data, encoding: NSUTF8StringEncoding) else {
 			
@@ -1467,10 +1542,10 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 	///
 	/// - Returns: The number of bytes returned in the buffer.
 	///
-	public func readData(data: NSMutableData) throws -> Int {
+	public func read(into data: NSMutableData) throws -> Int {
 		
 		// The socket must've been created and must be connected...
-		if self.socketfd == Int32(BlueSocket.SOCKET_INVALID_DESCRIPTOR) {
+		if self.socketfd == BlueSocket.SOCKET_INVALID_DESCRIPTOR {
 			
 			throw Error(code: BlueSocket.SOCKET_ERR_BAD_DESCRIPTOR, reason: nil)
 		}
@@ -1494,7 +1569,12 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 		if count > 0 {
 			
 			// - Yes, move to caller's buffer...
-			data.appendData(self.readStorage)
+			//		@TODO: Fix this when Linux Foundation catches up...
+			#if os(Linux)
+				data.appendData(self.readStorage)
+			#else
+				data.append(self.readStorage)
+			#endif
 			
 			returnCount = self.readStorage.length
 			
@@ -1511,7 +1591,7 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 	/// - Parameter buffer: The buffer containing the data to write.
 	/// - Parameter bufSize: The size of the buffer.
 	///
-	public func writeData(buffer: UnsafePointer<Void>, bufSize: Int) throws {
+	public func write(from buffer: UnsafePointer<Void>, bufSize: Int) throws {
 		
 		// Make sure the buffer is valid...
 		if buffer == nil || bufSize == 0 {
@@ -1520,7 +1600,7 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 		}
 		
 		// The socket must've been created and must be connected...
-		if self.socketfd == Int32(BlueSocket.SOCKET_INVALID_DESCRIPTOR) {
+		if self.socketfd == BlueSocket.SOCKET_INVALID_DESCRIPTOR {
 			
 			throw Error(code: BlueSocket.SOCKET_ERR_BAD_DESCRIPTOR, reason: nil)
 		}
@@ -1553,10 +1633,10 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 	///
 	/// - Parameter data: The NSData object containing the data to write.
 	///
-	public func writeData(data: NSData) throws {
+	public func write(from data: NSData) throws {
 		
 		// The socket must've been created and must be connected...
-		if self.socketfd == Int32(BlueSocket.SOCKET_INVALID_DESCRIPTOR) {
+		if self.socketfd == BlueSocket.SOCKET_INVALID_DESCRIPTOR {
 			
 			throw Error(code: BlueSocket.SOCKET_ERR_BAD_DESCRIPTOR, reason: nil)
 		}
@@ -1595,12 +1675,12 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 	///
 	/// - Parameter string: The string to write.
 	///
-	public func writeString(string: String) throws {
+	public func write(from string: String) throws {
 		
 		try string.nulTerminatedUTF8.withUnsafeBufferPointer() {
 			
 			// The count returned by nullTerminatedUTF8 includes the null terminator...
-			try self.writeData($0.baseAddress, bufSize: $0.count-1)
+			try self.write(from:$0.baseAddress, bufSize: $0.count-1)
 		}
 	}
 	
@@ -1647,8 +1727,8 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 		// Clear the buffer...
 		if self.readBuffer != nil {
 			
-			self.readBuffer.destroy()
-			self.readBuffer.initialize(0x0)
+			self.readBuffer.deinitialize()
+			self.readBuffer.initialize(with: 0x0)
 			memset(self.readBuffer, 0x0, self.readBufferSize)
 		}
 		
@@ -1695,7 +1775,7 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 	///
 	private func lastError() -> String {
 		
-		return String.fromCString(strerror(errno)) ?? "Error: \(errno)"
+		return String(validatingUTF8: strerror(errno)) ?? "Error: \(errno)"
 	}
 	
 }
