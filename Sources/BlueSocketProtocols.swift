@@ -29,7 +29,7 @@ public protocol BlueSocketReader {
 	///
 	/// - Returns: Optional String
 	///
-	func read() throws -> String?
+	func readString() throws -> String?
 	
 	///
 	/// Reads all available data

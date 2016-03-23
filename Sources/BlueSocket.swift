@@ -1512,7 +1512,7 @@ public class BlueSocket: BlueSocketReader, BlueSocketWriter {
 	///
 	/// - Returns: String containing the data read from the socket.
 	///
-	public func read() throws -> String? {
+	public func readString() throws -> String? {
 		
 		guard let data = NSMutableData(capacity: 2000) else {
 			
