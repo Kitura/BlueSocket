@@ -1,5 +1,5 @@
 //
-//  BlueSocketProtocols.swift
+//  SocketProtocols.swift
 //  BlueSocket
 //
 //  Created by Bill Abt on 1/7/16.
@@ -20,9 +20,9 @@
 
 import Foundation
 
-// MARK: BlueSocketReader
+// MARK: Reader
 
-public protocol BlueSocketReader {
+public protocol SocketReader {
 	
 	///
 	/// Reads a string.
@@ -41,9 +41,9 @@ public protocol BlueSocketReader {
 	func read(into data: NSMutableData) throws -> Int
 }
 
-// MARK: BlueSocketWriter
+// MARK: Writer
 
-public protocol BlueSocketWriter {
+public protocol SocketWriter {
 	
 	///
 	/// Writes data

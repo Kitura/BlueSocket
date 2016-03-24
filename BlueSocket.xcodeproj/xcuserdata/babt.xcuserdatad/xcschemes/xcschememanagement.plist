@@ -14,10 +14,20 @@
 			<key>orderHint</key>
 			<integer>0</integer>
 		</dict>
+		<key>BlueSocketTests.xcscheme</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>2</integer>
+		</dict>
 	</dict>
 	<key>SuppressBuildableAutocreation</key>
 	<dict>
 		<key>8C0F4BF51C4E84CC008B2B0A</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>8CA9B1621C98A00400E607FB</key>
 		<dict>
 			<key>primary</key>
 			<true/>

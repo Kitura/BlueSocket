@@ -1,5 +1,5 @@
 //
-//  BlueSocketUtils.swift
+//  SocketUtils.swift
 //  BlueSocket
 //
 //  Created by Bill Abt on 11/19/15.

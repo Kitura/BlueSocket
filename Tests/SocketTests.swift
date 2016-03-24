@@ -1,6 +1,6 @@
 //
-//  BlueSocketTests.swift
-//  BlueSocketTests
+//  SocketTests.swift
+//  BlueSocket
 //
 //  Created by Bill Abt on 3/15/16.
 //  Copyright © 2016 IBM. All rights reserved.
@@ -10,7 +10,7 @@ import XCTest
 
 @testable import BlueSocket
 
-class BlueSocketTests: XCTestCase {
+class SocketTests: XCTestCase {
     
     override func setUp() {
         super.setUp()
@@ -29,9 +29,11 @@ class BlueSocketTests: XCTestCase {
     
     func testPerformanceExample() {
         // This is an example of a performance test case.
+		/*
         self.measureBlock {
             // Put the code you want to measure the time of here.
         }
+		*/
     }
     
 }
