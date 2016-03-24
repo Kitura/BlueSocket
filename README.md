@@ -5,19 +5,17 @@ Socket framework for Swift using the Swift Package Manager. Works on OS X and Li
 
 ## Contents
 
-* BlueSocket: Low level socket framework. Pure Swift. 
+* Socket: Generic low level socket framework. Pure Swift. 
 
 ## Prerequisites
 
 ### Swift
-* Swift Open Source `swift-DEVELOPMENT-SNAPSHOT-2016-03-01-a` toolchain or higher (**REQUIRED**)
+* Swift Open Source `swift-DEVELOPMENT-SNAPSHOT-2016-03-16-a` toolchain or higher (**REQUIRED for latest release**)
 
 ### OS X
 
 * OS X 10.11.0 (*El Capitan*) or higher
-* Xcode Version 7.2 (*7C68*) or higher using the above toolchain
-   *or*
-* Xcode Version 7.3 beta (*7D152p*) or higher using the above toolchain (*Recommended*)
+* Xcode Version 7.3 (7D175) or higher using the above toolchain (*Recommended*)
 
 ### Linux
 
@@ -26,7 +24,7 @@ Socket framework for Swift using the Swift Package Manager. Works on OS X and Li
 
 ## Build
 
-To build ETSocket from the command line:
+To build Socket from the command line:
 
 ```
 % cd <path-to-clone>
