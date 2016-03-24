@@ -7,11 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		8C0F4BFA1C4E84CC008B2B0A /* BlueSocket.h in Headers */ = {isa = PBXBuildFile; fileRef = 8C0F4BF91C4E84CC008B2B0A /* BlueSocket.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		8C0F4BFA1C4E84CC008B2B0A /* Socket.h in Headers */ = {isa = PBXBuildFile; fileRef = 8C0F4BF91C4E84CC008B2B0A /* Socket.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		8C0F4C051C4E8630008B2B0A /* SocketProtocols.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C0F4C021C4E8630008B2B0A /* SocketProtocols.swift */; };
 		8C0F4C061C4E8630008B2B0A /* Socket.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C0F4C031C4E8630008B2B0A /* Socket.swift */; };
 		8C0F4C071C4E8630008B2B0A /* SocketUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C0F4C041C4E8630008B2B0A /* SocketUtils.swift */; };
-		8C3003E91CA46DF500E9AEC4 /* BlueSocket.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8C0F4BF61C4E84CC008B2B0A /* BlueSocket.framework */; };
+		8C3003E91CA46DF500E9AEC4 /* Socket.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8C0F4BF61C4E84CC008B2B0A /* Socket.framework */; };
 		8CA9B1661C98A00400E607FB /* SocketTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CA9B1651C98A00400E607FB /* SocketTests.swift */; };
 		8CC36DF81C4EA1BE00BAA659 /* SocketProtocols.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C0F4C021C4E8630008B2B0A /* SocketProtocols.swift */; };
 		8CC36DF91C4EA1BE00BAA659 /* Socket.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C0F4C031C4E8630008B2B0A /* Socket.swift */; };
@@ -29,14 +29,14 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		8C0F4BF61C4E84CC008B2B0A /* BlueSocket.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = BlueSocket.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		8C0F4BF91C4E84CC008B2B0A /* BlueSocket.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = BlueSocket.h; sourceTree = "<group>"; };
+		8C0F4BF61C4E84CC008B2B0A /* Socket.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Socket.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		8C0F4BF91C4E84CC008B2B0A /* Socket.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Socket.h; sourceTree = "<group>"; };
 		8C0F4BFB1C4E84CC008B2B0A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		8C0F4C021C4E8630008B2B0A /* SocketProtocols.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SocketProtocols.swift; sourceTree = "<group>"; };
 		8C0F4C031C4E8630008B2B0A /* Socket.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Socket.swift; sourceTree = "<group>"; };
 		8C0F4C041C4E8630008B2B0A /* SocketUtils.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SocketUtils.swift; sourceTree = "<group>"; };
 		8C0F4C081C4E866E008B2B0A /* Package.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Package.swift; sourceTree = "<group>"; };
-		8CA9B1631C98A00400E607FB /* BlueSocketTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BlueSocketTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		8CA9B1631C98A00400E607FB /* SocketTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SocketTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		8CA9B1651C98A00400E607FB /* SocketTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SocketTests.swift; path = Tests/SocketTests.swift; sourceTree = "<group>"; };
 		8CA9B1671C98A00400E607FB /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = Info.plist; path = Tests/Info.plist; sourceTree = "<group>"; };
 		8CC36E021C4EA1BE00BAA659 /* BlueSocket.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = BlueSocket.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -55,7 +55,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				8C3003E91CA46DF500E9AEC4 /* BlueSocket.framework in Frameworks */,
+				8C3003E91CA46DF500E9AEC4 /* Socket.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -83,9 +83,9 @@
 		8C0F4BF71C4E84CC008B2B0A /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				8C0F4BF61C4E84CC008B2B0A /* BlueSocket.framework */,
+				8C0F4BF61C4E84CC008B2B0A /* Socket.framework */,
 				8CC36E021C4EA1BE00BAA659 /* BlueSocket.framework */,
-				8CA9B1631C98A00400E607FB /* BlueSocketTests.xctest */,
+				8CA9B1631C98A00400E607FB /* SocketTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -104,7 +104,7 @@
 		8C0F4C011C4E85F7008B2B0A /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
-				8C0F4BF91C4E84CC008B2B0A /* BlueSocket.h */,
+				8C0F4BF91C4E84CC008B2B0A /* Socket.h */,
 				8C0F4BFB1C4E84CC008B2B0A /* Info.plist */,
 			);
 			name = "Supporting Files";
@@ -126,7 +126,7 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				8C0F4BFA1C4E84CC008B2B0A /* BlueSocket.h in Headers */,
+				8C0F4BFA1C4E84CC008B2B0A /* Socket.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -140,9 +140,9 @@
 /* End PBXHeadersBuildPhase section */
 
 /* Begin PBXNativeTarget section */
-		8C0F4BF51C4E84CC008B2B0A /* BlueSocket */ = {
+		8C0F4BF51C4E84CC008B2B0A /* Socket */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 8C0F4BFE1C4E84CC008B2B0A /* Build configuration list for PBXNativeTarget "BlueSocket" */;
+			buildConfigurationList = 8C0F4BFE1C4E84CC008B2B0A /* Build configuration list for PBXNativeTarget "Socket" */;
 			buildPhases = (
 				8C0F4BF11C4E84CC008B2B0A /* Sources */,
 				8C0F4BF21C4E84CC008B2B0A /* Frameworks */,
@@ -153,14 +153,14 @@
 			);
 			dependencies = (
 			);
-			name = BlueSocket;
+			name = Socket;
 			productName = ETSocket;
-			productReference = 8C0F4BF61C4E84CC008B2B0A /* BlueSocket.framework */;
+			productReference = 8C0F4BF61C4E84CC008B2B0A /* Socket.framework */;
 			productType = "com.apple.product-type.framework";
 		};
-		8CA9B1621C98A00400E607FB /* BlueSocketTests */ = {
+		8CA9B1621C98A00400E607FB /* SocketTests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 8CA9B16D1C98A00400E607FB /* Build configuration list for PBXNativeTarget "BlueSocketTests" */;
+			buildConfigurationList = 8CA9B16D1C98A00400E607FB /* Build configuration list for PBXNativeTarget "SocketTests" */;
 			buildPhases = (
 				8CA9B15F1C98A00400E607FB /* Sources */,
 				8CA9B1601C98A00400E607FB /* Frameworks */,
@@ -171,14 +171,14 @@
 			dependencies = (
 				8CA9B16A1C98A00400E607FB /* PBXTargetDependency */,
 			);
-			name = BlueSocketTests;
+			name = SocketTests;
 			productName = BlueSocketTests;
-			productReference = 8CA9B1631C98A00400E607FB /* BlueSocketTests.xctest */;
+			productReference = 8CA9B1631C98A00400E607FB /* SocketTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
-		8CC36DF61C4EA1BE00BAA659 /* BlueSocket-iOS */ = {
+		8CC36DF61C4EA1BE00BAA659 /* Socket-iOS */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 8CC36DFF1C4EA1BE00BAA659 /* Build configuration list for PBXNativeTarget "BlueSocket-iOS" */;
+			buildConfigurationList = 8CC36DFF1C4EA1BE00BAA659 /* Build configuration list for PBXNativeTarget "Socket-iOS" */;
 			buildPhases = (
 				8CC36DF71C4EA1BE00BAA659 /* Sources */,
 				8CC36DFB1C4EA1BE00BAA659 /* Frameworks */,
@@ -189,7 +189,7 @@
 			);
 			dependencies = (
 			);
-			name = "BlueSocket-iOS";
+			name = "Socket-iOS";
 			productName = ETSocket;
 			productReference = 8CC36E021C4EA1BE00BAA659 /* BlueSocket.framework */;
 			productType = "com.apple.product-type.framework";
@@ -227,9 +227,9 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				8C0F4BF51C4E84CC008B2B0A /* BlueSocket */,
-				8CC36DF61C4EA1BE00BAA659 /* BlueSocket-iOS */,
-				8CA9B1621C98A00400E607FB /* BlueSocketTests */,
+				8C0F4BF51C4E84CC008B2B0A /* Socket */,
+				8CC36DF61C4EA1BE00BAA659 /* Socket-iOS */,
+				8CA9B1621C98A00400E607FB /* SocketTests */,
 			);
 		};
 /* End PBXProject section */
@@ -292,7 +292,7 @@
 /* Begin PBXTargetDependency section */
 		8CA9B16A1C98A00400E607FB /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 8C0F4BF51C4E84CC008B2B0A /* BlueSocket */;
+			target = 8C0F4BF51C4E84CC008B2B0A /* Socket */;
 			targetProxy = 8CA9B1691C98A00400E607FB /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
@@ -398,7 +398,7 @@
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.ibm.oss.Socket;
-				PRODUCT_NAME = BlueSocket;
+				PRODUCT_NAME = Socket;
 				SKIP_INSTALL = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
@@ -418,7 +418,7 @@
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.ibm.oss.Socket;
-				PRODUCT_NAME = BlueSocket;
+				PRODUCT_NAME = Socket;
 				SKIP_INSTALL = YES;
 			};
 			name = Release;
@@ -430,7 +430,7 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				INFOPLIST_FILE = Tests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = com.ibm.et.BlueSocketTests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.ibm.oss.SocketTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -442,7 +442,7 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				INFOPLIST_FILE = Tests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = com.ibm.et.BlueSocketTests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.ibm.oss.SocketTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;
@@ -504,7 +504,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		8C0F4BFE1C4E84CC008B2B0A /* Build configuration list for PBXNativeTarget "BlueSocket" */ = {
+		8C0F4BFE1C4E84CC008B2B0A /* Build configuration list for PBXNativeTarget "Socket" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				8C0F4BFF1C4E84CC008B2B0A /* Debug */,
@@ -513,7 +513,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		8CA9B16D1C98A00400E607FB /* Build configuration list for PBXNativeTarget "BlueSocketTests" */ = {
+		8CA9B16D1C98A00400E607FB /* Build configuration list for PBXNativeTarget "SocketTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				8CA9B16B1C98A00400E607FB /* Debug */,
@@ -522,7 +522,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		8CC36DFF1C4EA1BE00BAA659 /* Build configuration list for PBXNativeTarget "BlueSocket-iOS" */ = {
+		8CC36DFF1C4EA1BE00BAA659 /* Build configuration list for PBXNativeTarget "Socket-iOS" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				8CC36E001C4EA1BE00BAA659 /* Debug */,

@@ -17,8 +17,8 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "8CA9B1621C98A00400E607FB"
-               BuildableName = "BlueSocketTests.xctest"
-               BlueprintName = "BlueSocketTests"
+               BuildableName = "SocketTests.xctest"
+               BlueprintName = "SocketTests"
                ReferencedContainer = "container:BlueSocket.xcodeproj">
             </BuildableReference>
          </TestableReference>

@@ -1,5 +1,5 @@
 //
-//  BlueSocket.h
+//  Socket.h
 //  BlueSocket
 //
 //  Created by Bill Abt on 1/19/16.

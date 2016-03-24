@@ -11,13 +11,12 @@
             buildForRunning = "YES"
             buildForProfiling = "YES"
             buildForArchiving = "YES"
-            buildForAnalyzing = "YES"
-            hideIssues = "NO">
+            buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "8C0F4BF51C4E84CC008B2B0A"
                BuildableName = "BlueSocket.framework"
-               BlueprintName = "BlueSocket"
+               BlueprintName = "Socket"
                ReferencedContainer = "container:BlueSocket.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -48,7 +47,7 @@
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "8C0F4BF51C4E84CC008B2B0A"
             BuildableName = "BlueSocket.framework"
-            BlueprintName = "BlueSocket"
+            BlueprintName = "Socket"
             ReferencedContainer = "container:BlueSocket.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
@@ -66,7 +65,7 @@
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "8C0F4BF51C4E84CC008B2B0A"
             BuildableName = "BlueSocket.framework"
-            BlueprintName = "BlueSocket"
+            BlueprintName = "Socket"
             ReferencedContainer = "container:BlueSocket.xcodeproj">
          </BuildableReference>
       </MacroExpansion>

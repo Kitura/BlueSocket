@@ -8,7 +8,7 @@
 
 import XCTest
 
-@testable import BlueSocket
+@testable import Socket
 
 class SocketTests: XCTestCase {
     
