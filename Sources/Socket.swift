@@ -547,13 +547,13 @@ public class Socket: SocketReader, SocketWriter {
 	}
 	
 	///
-	/// Maximum number of pending connections per isListening socket.
+	/// Maximum number of pending connections per listening socket.
 	///		**Note:** Default value is `Socket.SOCKET_DEFAULT_MAX_CONNECTIONS`
 	///
 	public var maxPendingConnections: Int = Socket.SOCKET_DEFAULT_MAX_CONNECTIONS
 	
 	///
-	/// True if this socket is isConnected. False otherwise. (Readonly)
+	/// True if this socket is connected. False otherwise. (Readonly)
 	///
 	public private(set) var isConnected: Bool = false
 	
@@ -563,7 +563,7 @@ public class Socket: SocketReader, SocketWriter {
 	public private(set) var isBlocking: Bool = true
 	
 	///
-	/// True if this socket is isListening. False otherwise. (Readonly)
+	/// True if this socket is listening. False otherwise. (Readonly)
 	///
 	public private(set) var isListening: Bool = false
 	
@@ -581,7 +581,7 @@ public class Socket: SocketReader, SocketWriter {
 	}
 	
 	///
-	/// The remote port this socket is isConnected to. (Readonly)
+	/// The remote port this socket is connected to. (Readonly)
 	///
 	public var remotePort: Int32 {
 		
@@ -645,7 +645,7 @@ public class Socket: SocketReader, SocketWriter {
 	}
 	
 	///
-	/// Create a configured and isConnected Socket instance.
+	/// Create a configured and connected Socket instance.
 	///
 	/// - Parameter signature:	The socket signature containing the connection information.
 	///
@@ -852,7 +852,7 @@ public class Socket: SocketReader, SocketWriter {
 	///
 	public func acceptClientConnection() throws -> Socket {
 		
-		// The socket must've been created, not isConnected and isListening...
+		// The socket must've been created, not connected and listening...
 		if self.socketfd == Socket.SOCKET_INVALID_DESCRIPTOR {
 			
 			throw Error(code: Socket.SOCKET_ERR_BAD_DESCRIPTOR, reason: nil)
@@ -924,7 +924,7 @@ public class Socket: SocketReader, SocketWriter {
 	///
 	public func acceptConnection() throws {
 		
-		// The socket must've been created, not isConnected and isListening...
+		// The socket must've been created, not connected and listening...
 		if self.socketfd == Socket.SOCKET_INVALID_DESCRIPTOR {
 			
 			throw Error(code: Socket.SOCKET_ERR_BAD_DESCRIPTOR, reason: nil)
@@ -1012,7 +1012,7 @@ public class Socket: SocketReader, SocketWriter {
 		
 		if self.socketfd != Socket.SOCKET_INVALID_DESCRIPTOR {
 			
-			// Note: if the socket is isListening, we need to shut it down prior to closing
+			// Note: if the socket is listening, we need to shut it down prior to closing
 			//		or the socket will be left hanging until it times out.
 			#if os(Linux)
 				if self.isListening {
@@ -1045,7 +1045,7 @@ public class Socket: SocketReader, SocketWriter {
 	///
 	public func connect(to host: String, port: Int32) throws {
 		
-		// The socket must've been created and must not be isConnected...
+		// The socket must've been created and must not be connected...
 		if self.socketfd == Socket.SOCKET_INVALID_DESCRIPTOR {
 			
 			throw Error(code: Socket.SOCKET_ERR_BAD_DESCRIPTOR, reason: nil)
@@ -1248,7 +1248,7 @@ public class Socket: SocketReader, SocketWriter {
 	///
 	public func isReadableOrWritable() throws -> (readable: Bool, writable: Bool) {
 		
-		// The socket must've been created and must be isConnected...
+		// The socket must've been created and must be connected...
 		if self.socketfd == Socket.SOCKET_INVALID_DESCRIPTOR {
 			
 			throw Error(code: Socket.SOCKET_ERR_BAD_DESCRIPTOR, reason: nil)
@@ -1454,7 +1454,7 @@ public class Socket: SocketReader, SocketWriter {
 			throw Error(code: Socket.SOCKET_ERR_INVALID_BUFFER, reason: nil)
 		}
 		
-		// The socket must've been created and must be isConnected...
+		// The socket must've been created and must be connected...
 		if self.socketfd == Socket.SOCKET_INVALID_DESCRIPTOR {
 			
 			throw Error(code: Socket.SOCKET_ERR_BAD_DESCRIPTOR, reason: nil)
@@ -1553,7 +1553,7 @@ public class Socket: SocketReader, SocketWriter {
 	///
 	public func read(into data: NSMutableData) throws -> Int {
 		
-		// The socket must've been created and must be isConnected...
+		// The socket must've been created and must be connected...
 		if self.socketfd == Socket.SOCKET_INVALID_DESCRIPTOR {
 			
 			throw Error(code: Socket.SOCKET_ERR_BAD_DESCRIPTOR, reason: nil)
@@ -1608,7 +1608,7 @@ public class Socket: SocketReader, SocketWriter {
 			throw Error(code: Socket.SOCKET_ERR_INVALID_BUFFER, reason: nil)
 		}
 		
-		// The socket must've been created and must be isConnected...
+		// The socket must've been created and must be connected...
 		if self.socketfd == Socket.SOCKET_INVALID_DESCRIPTOR {
 			
 			throw Error(code: Socket.SOCKET_ERR_BAD_DESCRIPTOR, reason: nil)
@@ -1648,7 +1648,7 @@ public class Socket: SocketReader, SocketWriter {
 	///
 	public func write(from data: NSData) throws {
 		
-		// The socket must've been created and must be isConnected...
+		// The socket must've been created and must be connected...
 		if self.socketfd == Socket.SOCKET_INVALID_DESCRIPTOR {
 			
 			throw Error(code: Socket.SOCKET_ERR_BAD_DESCRIPTOR, reason: nil)
