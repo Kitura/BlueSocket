@@ -1113,7 +1113,11 @@ public class Socket: SocketReader, SocketWriter {
 		var info = targetInfo
 		while (info != nil) {
 			
-			socketDescriptor = socket(info.pointee.ai_family, info.pointee.ai_socktype, info.pointee.ai_protocol)
+			#if os(Linux)
+				socketDescriptor = Glibc.socket(info.pointee.ai_family, info.pointee.ai_socktype, info.pointee.ai_protocol)
+			#else
+				socketDescriptor = Darwin.socket(info.pointee.ai_family, info.pointee.ai_socktype, info.pointee.ai_protocol)
+			#endif
 			if socketDescriptor == -1 {
 				continue
 			}
@@ -1377,12 +1381,21 @@ public class Socket: SocketReader, SocketWriter {
 		while (info != nil) {
 			
 			// Try to bind the socket to the address...
-			if bind(self.socketfd, info.pointee.ai_addr, info.pointee.ai_addrlen) == 0 {
-				
-				// Success... We've found our address...
-				bound = true
-				break
-			}
+			#if os(Linux)
+				if Glibc.bind(self.socketfd, info.pointee.ai_addr, info.pointee.ai_addrlen) == 0 {
+					
+					// Success... We've found our address...
+					bound = true
+					break
+				}
+			#else
+				if Darwin.bind(self.socketfd, info.pointee.ai_addr, info.pointee.ai_addrlen) == 0 {
+					
+					// Success... We've found our address...
+					bound = true
+					break
+				}
+			#endif
 			
 			// Try the next one...
 			info = info.pointee.ai_next
