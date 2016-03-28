@@ -96,7 +96,7 @@ In addition to reading from a socket, BlueSocket also supplies three methods for
 - `write(from string: String)` - This function writes the data contained in the `String` provided to the socket.
 - `write(from buffer: UnsafePointer<Void>, bufSize: Int)` - This function writes the data contained within the buffer of the specified size by providing an *unsafe* pointer to that buffer and an integer the denotes the size of that buffer.
 
-### Miscelleanous Utility Functions
+### Miscellaneous Utility Functions
 
 - `hostnameAndPort(from address: Address)` - This class function provides a means to extract the hostname and port from a given `Socket.Address`. On successful completion, a tuple containing the hostname and port are returned.
 - `checkStatus(for sockets: [Socket])` - This class function allows you check status of an array of Socket instances. Upon completion, a tuple containing two Socket arrays is returned. The first array contains the Socket instances are that have data available to be read and the second array contains Socket instances that can be written to.
