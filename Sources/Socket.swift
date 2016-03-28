@@ -339,10 +339,11 @@ public class Socket: SocketReader, SocketWriter {
 		///
 		/// Create a socket signature
 		///
-		/// - Parameter protocolFamily:	The family of the socket to create.
-		///	- Parameter	socketType:		The type of socket to create.
-		///	- Parameter proto:			The protocool to use for the socket.
-		/// - Parameter address:		Address info for the socket.
+		/// - Parameters:
+		///		- protocolFamily:	The family of the socket to create.
+		///		- socketType:		The type of socket to create.
+		///		- proto:			The protocool to use for the socket.
+		/// 	- address:		Address info for the socket.
 		///
 		/// - Returns: New Signature instance
 		///
@@ -366,10 +367,11 @@ public class Socket: SocketReader, SocketWriter {
 		///
 		/// Create a socket signature
 		///
-		///	- Parameter	socketType:		The type of socket to create.
-		///	- Parameter proto:			The protocool to use for the socket.
-		/// - Parameter hostname:		Hostname for this signature.
-		/// - Parameter port:			Port for this signature.
+		///	- Parameters:
+		///		- socketType:		The type of socket to create.
+		///		- proto:			The protocool to use for the socket.
+		/// 	- hostname:		Hostname for this signature.
+		/// 	- port:			Port for this signature.
 		///
 		/// - Returns: New Signature instance
 		///
@@ -395,12 +397,13 @@ public class Socket: SocketReader, SocketWriter {
 		///
 		/// Create a socket signature
 		///
-		/// - Parameter protocolFamily:	The family of the socket to create.
-		///	- Parameter	socketType:		The type of socket to create.
-		///	- Parameter proto:			The protocool to use for the socket.
-		/// - Parameter address:		Address info for the socket.
-		/// - Parameter hostname:		Hostname for this signature.
-		/// - Parameter port:			Port for this signature.
+		/// - Parameters:
+		///		- protocolFamily:	The family of the socket to create.
+		///		- socketType:		The type of socket to create.
+		///		- proto:			The protocool to use for the socket.
+		/// 	- address:			Address info for the socket.
+		/// 	- hostname:			Hostname for this signature.
+		/// 	- port:				Port for this signature.
 		///
 		/// - Returns: New Signature instance
 		///
@@ -469,8 +472,9 @@ public class Socket: SocketReader, SocketWriter {
 		///
 		/// Initializes an Error Instance
 		///
-		/// - Parameter code:	Error code
-		/// - Parameter reason:	Optional Error Reason
+		/// - Parameters:
+		///		- code:		Error code
+		/// 	- reason:	Optional Error Reason
 		///
 		/// - Returns: Error instance
 		///
@@ -570,7 +574,7 @@ public class Socket: SocketReader, SocketWriter {
 	///
 	/// The remote host name this socket is connected to. (Readonly)
 	///
-	public var remoteHostName: String {
+	public var remoteHostname: String {
 		
 		guard let sig = signature,
 			let host = sig.hostname else {
@@ -628,9 +632,10 @@ public class Socket: SocketReader, SocketWriter {
 	///
 	/// Create a configured Socket instance.
 	///
-	/// - Parameter family:	The family of the socket to create.
-	///	- Parameter	type:	The type of socket to create.
-	///	- Parameter proto:	The protocool to use for the socket.
+	/// - Parameters:
+	///		- family:	The family of the socket to create.
+	///		- type:		The type of socket to create.
+	///		- proto:	The protocool to use for the socket.
 	///
 	/// - Returns: New Socket instance
 	///
@@ -663,8 +668,9 @@ public class Socket: SocketReader, SocketWriter {
 	///
 	/// Create an instance for existing open socket fd.
 	///
-	/// - Parameter fd: 			Open file descriptor.
-	///	- Parameter remoteAddress: 	The sockaddr_storage associated with the open fd.
+	/// - Parameters:
+	///		- fd: 				Open file descriptor.
+	///		- remoteAddress: 	The sockaddr_storage associated with the open fd.
 	///
 	/// - Returns: New Socket instance
 	///
@@ -753,9 +759,10 @@ public class Socket: SocketReader, SocketWriter {
 	///
 	/// Internal initializer to create a configured Socket instance.
 	///
-	/// - Parameter family:	The family of the socket to create.
-	///	- Parameter	type:	The type of socket to create.
-	///	- Parameter proto:	The protocool to use for the socket.
+	/// - Parameters:
+	///		- family:	The family of the socket to create.
+	///		- type:		The type of socket to create.
+	///		- proto:	The protocool to use for the socket.
 	///
 	/// - Returns: New Socket instance
 	///
@@ -806,8 +813,9 @@ public class Socket: SocketReader, SocketWriter {
 	///
 	/// Private constructor to create an instance for existing open socket fd.
 	///
-	/// - Parameter fd: Open file descriptor.
-	///	- Parameter remoteAddress: The sockaddr_storage associated with the open fd.
+	/// - Parameters:
+	///		- fd: 				Open file descriptor.
+	///		- remoteAddress: 	The sockaddr_storage associated with the open fd.
 	///
 	/// - Returns: New Socket instance
 	///
@@ -1040,8 +1048,9 @@ public class Socket: SocketReader, SocketWriter {
 	///
 	/// Connects to the named host on the specified port.
 	///
-	/// - Parameter host:	The host name to connect to.
-	///	- Parameter port:	The port to be used.
+	/// - Parameters:
+	///		- host:	The host name to connect to.
+	///		- port:	The port to be used.
 	///
 	public func connect(to host: String, port: Int32) throws {
 		
@@ -1301,8 +1310,9 @@ public class Socket: SocketReader, SocketWriter {
 	///
 	/// Listen on a port, limiting the maximum number of pending connections.
 	///
-	/// - Parameter port: The port to listen on.
-	/// - Parameter maxPendingConnections: The maximum number of pending connections to allow.
+	/// - Parameters:
+	///		- port: 					The port to listen on.
+	/// 	- maxPendingConnections: 	The maximum number of pending connections to allow.
 	///
 	public func listen(on port: Int, maxPendingConnections: Int) throws {
 		
@@ -1450,8 +1460,9 @@ public class Socket: SocketReader, SocketWriter {
 	///
 	/// Read data from the socket.
 	///
-	/// - Parameter buffer: The buffer to return the data in.
-	/// - Parameter bufSize: The size of the buffer.
+	/// - Parameters:
+	///		- buffer: The buffer to return the data in.
+	/// 	- bufSize: The size of the buffer.
 	///
 	/// - Throws: `Socket.SOCKET_ERR_RECV_BUFFER_TOO_SMALL` if the buffer provided is too small.
 	///		Call again with proper buffer size (see `Error.bufferSizeNeeded`) or
@@ -1610,8 +1621,9 @@ public class Socket: SocketReader, SocketWriter {
 	///
 	/// Write data to the socket.
 	///
-	/// - Parameter buffer: The buffer containing the data to write.
-	/// - Parameter bufSize: The size of the buffer.
+	/// - Parameters:
+	///		- buffer: 	The buffer containing the data to write.
+	/// 	- bufSize: 	The size of the buffer.
 	///
 	public func write(from buffer: UnsafePointer<Void>, bufSize: Int) throws {
 		
