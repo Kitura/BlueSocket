@@ -1657,9 +1657,9 @@ public class Socket: SocketReader, SocketWriter {
 		while sent < bufSize {
 			
 			#if os(Linux)
-				let s = Glibc.send(self.socketfd, buffer + sent, Int(bufSize - sent), sendFlags)
+				let s = Glibc.send(self.socketfd, buffer.advanced(by: sent), Int(bufSize - sent), sendFlags)
 			#else
-				let s = Darwin.send(self.socketfd, buffer + sent, Int(bufSize - sent), sendFlags)
+				let s = Darwin.send(self.socketfd, buffer.advanced(by: sent), Int(bufSize - sent), sendFlags)
 			#endif
 			if s <= 0 {
 				
@@ -1703,9 +1703,9 @@ public class Socket: SocketReader, SocketWriter {
 		while sent < data.length {
 			
 			#if os(Linux)
-				let s = Glibc.send(self.socketfd, buffer + sent, Int(data.length - sent), sendFlags)
+				let s = Glibc.send(self.socketfd, buffer.advanced(by: sent), Int(data.length - sent), sendFlags)
 			#else
-				let s = Darwin.send(self.socketfd, buffer + sent, Int(data.length - sent), sendFlags)
+				let s = Darwin.send(self.socketfd, buffer.advanced(by: sent), Int(data.length - sent), sendFlags)
 			#endif
 			if s <= 0 {
 				
