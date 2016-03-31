@@ -274,10 +274,10 @@ public class Socket: SocketReader, SocketWriter {
 			switch self {
 				
 			case .IPV4(let addr):
-				return addr.toAddr()
+				return addr.asAddr()
 				
 			case .IPV6(let addr):
-				return addr.toAddr()
+				return addr.asAddr()
 			}
 		}
 	}
@@ -705,7 +705,7 @@ public class Socket: SocketReader, SocketWriter {
 			
 		case .IPV4(let address_in):
 			var addr_in = address_in
-			let addr = addr_in.toAddr()
+			let addr = addr_in.asAddr()
 			bufLen = Int(INET_ADDRSTRLEN)
 			buf = [CChar](repeating: 0, count: bufLen)
 			inet_ntop(Int32(addr.sa_family), &addr_in.sin_addr, &buf, socklen_t(bufLen))
@@ -713,7 +713,7 @@ public class Socket: SocketReader, SocketWriter {
 			
 		case .IPV6(let address_in):
 			var addr_in = address_in
-			let addr = addr_in.toAddr()
+			let addr = addr_in.asAddr()
 			bufLen = Int(INET6_ADDRSTRLEN)
 			buf = [CChar](repeating: 0, count: bufLen)
 			inet_ntop(Int32(addr.sa_family), &addr_in.sin6_addr, &buf, socklen_t(bufLen))

@@ -32,11 +32,11 @@
 public extension sockaddr_storage {
 	
 	///
-	/// Convert to sockaddr
+	/// Cast to sockaddr
 	///
 	/// - Returns: sockaddr
 	///
-	public func toAddr() -> sockaddr {
+	public func asAddr() -> sockaddr {
 		
 		var temp = self
 		let addr = withUnsafePointer(&temp) {
@@ -46,11 +46,11 @@ public extension sockaddr_storage {
 	}
 	
 	///
-	/// Convert to sockaddr_in
+	/// Cast to sockaddr_in
 	///
 	/// - Returns: sockaddr_in
 	///
-	public func toIPV4() -> sockaddr_in {
+	public func asIPV4() -> sockaddr_in {
 		
 		var temp = self
 		let addr = withUnsafePointer(&temp) {
@@ -60,11 +60,11 @@ public extension sockaddr_storage {
 	}
 	
 	///
-	/// Convert to sockaddr_in6
+	/// Cast to sockaddr_in6
 	///
 	/// - Returns: sockaddr_in6
 	///
-	public func toIPV6() -> sockaddr_in6 {
+	public func asIPV6() -> sockaddr_in6 {
 		
 		var temp = self
 		let addr = withUnsafePointer(&temp) {
@@ -79,11 +79,11 @@ public extension sockaddr_storage {
 public extension sockaddr_in {
 	
 	///
-	/// Convert to sockaddr
+	/// Cast to sockaddr
 	///
 	/// - Returns: sockaddr
 	///
-	public func toAddr() -> sockaddr {
+	public func asAddr() -> sockaddr {
 		
 		var temp = self
 		let addr = withUnsafePointer(&temp) {
@@ -98,11 +98,11 @@ public extension sockaddr_in {
 public extension sockaddr_in6 {
 	
 	///
-	/// Convert to sockaddr
+	/// Cast to sockaddr
 	///
 	/// - Returns: sockaddr
 	///
-	public func toAddr() -> sockaddr {
+	public func asAddr() -> sockaddr {
 		
 		var temp = self
 		let addr = withUnsafePointer(&temp) {
