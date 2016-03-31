@@ -91,6 +91,20 @@ public class Socket: SocketReader, SocketWriter {
 		case INET, INET6
 		
 		///
+		/// Return the value for a particular case
+		///
+		var value: Int32 {
+			
+			switch self {
+				
+			case .INET:
+				return Int32(AF_INET)
+				
+			case .INET6:
+				return Int32(AF_INET6)
+			}
+		}
+		///
 		/// Return enum equivalent of a raw value
 		///
 		/// - Parameter value: Value for which enum value is desired
@@ -110,22 +124,6 @@ public class Socket: SocketReader, SocketWriter {
 			}
 		}
 		
-		///
-		/// Return the value for a particular case
-		///
-		/// - Returns: Int32 containing the value for specific case.
-		///
-		func valueOf() -> Int32 {
-			
-			switch self {
-				
-			case .INET:
-				return Int32(AF_INET)
-				
-			case .INET6:
-				return Int32(AF_INET6)
-			}
-		}
 	}
 	
 	// MARK: -- SocketType
@@ -140,6 +138,28 @@ public class Socket: SocketReader, SocketWriter {
 	public enum SocketType {
 		
 		case STREAM, DGRAM
+		
+		///
+		/// Return the value for a particular case
+		///
+		var value: Int32 {
+			
+			switch self {
+				
+			case .STREAM:
+				#if os(Linux)
+					return Int32(SOCK_STREAM.rawValue)
+				#else
+					return SOCK_STREAM
+				#endif
+			case .DGRAM:
+				#if os(Linux)
+					return Int32(SOCK_DGRAM.rawValue)
+				#else
+					return SOCK_DGRAM
+				#endif
+			}
+		}
 		
 		///
 		/// Return enum equivalent of a raw value
@@ -172,30 +192,6 @@ public class Socket: SocketReader, SocketWriter {
 				}
 			#endif
 		}
-		
-		///
-		/// Return the value for a particular case
-		///
-		/// - Returns: Int32 containing the value for specific case.
-		///
-		func valueOf() -> Int32 {
-			
-			switch self {
-				
-			case .STREAM:
-				#if os(Linux)
-					return Int32(SOCK_STREAM.rawValue)
-				#else
-					return SOCK_STREAM
-				#endif
-			case .DGRAM:
-				#if os(Linux)
-					return Int32(SOCK_DGRAM.rawValue)
-				#else
-					return SOCK_DGRAM
-				#endif
-			}
-		}
 	}
 	
 	// MARK: -- SocketProtocol
@@ -210,6 +206,20 @@ public class Socket: SocketReader, SocketWriter {
 	public enum SocketProtocol: Int32 {
 		
 		case TCP, UDP
+		
+		///
+		/// Return the value for a particular case
+		///
+		var value: Int32 {
+			
+			switch self {
+				
+			case .TCP:
+				return Int32(IPPROTO_TCP)
+			case .UDP:
+				return Int32(IPPROTO_UDP)
+			}
+		}
 		
 		///
 		/// Return enum equivalent of a raw value
@@ -228,22 +238,6 @@ public class Socket: SocketReader, SocketWriter {
 				return .UDP
 			default:
 				return nil
-			}
-		}
-		
-		///
-		/// Return the value for a particular case
-		///
-		/// - Returns: Int32 containing the value for specific case.
-		///
-		func valueOf() -> Int32 {
-			
-			switch self {
-				
-			case .TCP:
-				return Int32(IPPROTO_TCP)
-			case .UDP:
-				return Int32(IPPROTO_UDP)
 			}
 		}
 	}
@@ -456,10 +450,8 @@ public class Socket: SocketReader, SocketWriter {
 		///
 		public var description: String {
 			
-			if let reason = self.errorReason {
-				return "Error code: \(self.errorCode), Reason: \(reason)"
-			}
-			return "Error code: \(self.errorCode), Reason: Unavailable"
+			let reason = self.errorReason ?? "Reason: Unavailable"
+			return "Error code: \(self.errorCode), \(reason)"
 		}
 		
 		///
@@ -570,6 +562,17 @@ public class Socket: SocketReader, SocketWriter {
 	/// True if this socket is listening. False otherwise. (Readonly)
 	///
 	public private(set) var isListening: Bool = false
+	
+	///
+	/// Listening port (-1 if not listening)
+	///
+	public var listeningPort: Int32 {
+		
+		guard let sig = signature where isListening else {
+			return Int32(-1)
+		}
+		return sig.port
+	}
 	
 	///
 	/// The remote host name this socket is connected to. (Readonly)
@@ -773,9 +776,9 @@ public class Socket: SocketReader, SocketWriter {
 		
 		// Create the socket...
 		#if os(Linux)
-			self.socketfd = Glibc.socket(family.valueOf(), type.valueOf(), proto.valueOf())
+			self.socketfd = Glibc.socket(family.value, type.value, proto.value)
 		#else
-			self.socketfd = Darwin.socket(family.valueOf(), type.valueOf(), proto.valueOf())
+			self.socketfd = Darwin.socket(family.value, type.value, proto.value)
 		#endif
 		
 		// If error, throw an appropriate exception...
@@ -787,9 +790,9 @@ public class Socket: SocketReader, SocketWriter {
 		
 		// Create the signature...
 		try self.signature = Signature(
-			protocolFamily: family.valueOf(),
-			socketType: type.valueOf(),
-			proto: proto.valueOf(),
+			protocolFamily: family.value,
+			socketType: type.value,
+			proto: proto.value,
 			address: nil)
 	}
 	
@@ -1076,7 +1079,7 @@ public class Socket: SocketReader, SocketWriter {
 			var hints = addrinfo(
 				ai_flags: AI_PASSIVE,
 				ai_family: AF_UNSPEC,
-				ai_socktype: socketType.valueOf(),
+				ai_socktype: socketType.value,
 				ai_protocol: 0,
 				ai_addrlen: 0,
 				ai_addr: nil,
@@ -1086,7 +1089,7 @@ public class Socket: SocketReader, SocketWriter {
 			var hints = addrinfo(
 				ai_flags: AI_PASSIVE,
 				ai_family: AF_UNSPEC,
-				ai_socktype: socketType.valueOf(),
+				ai_socktype: socketType.value,
 				ai_protocol: 0,
 				ai_addrlen: 0,
 				ai_canonname: nil,
@@ -1344,8 +1347,8 @@ public class Socket: SocketReader, SocketWriter {
 		#if os(Linux)
 			var hints = addrinfo(
 				ai_flags: AI_PASSIVE,
-				ai_family: sig.protocolFamily.valueOf(),
-				ai_socktype: sig.socketType.valueOf(),
+				ai_family: sig.protocolFamily.value,
+				ai_socktype: sig.socketType.value,
 				ai_protocol: 0,
 				ai_addrlen: 0,
 				ai_addr: nil,
@@ -1354,8 +1357,8 @@ public class Socket: SocketReader, SocketWriter {
 		#else
 			var hints = addrinfo(
 				ai_flags: AI_PASSIVE,
-				ai_family: sig.protocolFamily.valueOf(),
-				ai_socktype: sig.socketType.valueOf(),
+				ai_family: sig.protocolFamily.value,
+				ai_socktype: sig.socketType.value,
 				ai_protocol: 0,
 				ai_addrlen: 0,
 				ai_canonname: nil,
@@ -1722,7 +1725,7 @@ public class Socket: SocketReader, SocketWriter {
 		try string.nulTerminatedUTF8.withUnsafeBufferPointer() {
 			
 			// The count returned by nullTerminatedUTF8 includes the null terminator...
-			try self.write(from:$0.baseAddress, bufSize: $0.count-1)
+			try self.write(from: $0.baseAddress, bufSize: $0.count-1)
 		}
 	}
 	
@@ -1731,7 +1734,7 @@ public class Socket: SocketReader, SocketWriter {
 	///
 	/// - Parameter shouldBlock: True to block, false to not.
 	///
-	public func setBlocking(shouldBlock: Bool) throws {
+	public func setBlocking(mode shouldBlock: Bool) throws {
 		
 		let flags = fcntl(self.socketfd, F_GETFL)
 		if flags < 0 {
