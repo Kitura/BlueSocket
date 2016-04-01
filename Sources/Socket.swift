@@ -74,6 +74,7 @@ public class Socket: SocketReader, SocketWriter {
 	public static let SOCKET_ERR_NOT_SUPPORTED_YET			= -9977
 	public static let SOCKET_ERR_BAD_SIGNATURE_PARAMETERS	= -9976
 	public static let SOCKET_ERR_INTERNAL					= -9975
+	public static let SOCKET_ERR_WRONG_PROTOCOL				= -9974
 	
 	// MARK: Enums
 	
@@ -856,6 +857,8 @@ public class Socket: SocketReader, SocketWriter {
 	
 	// MARK: Public Methods
 	
+	// MARK: -- Accept
+	
 	///
 	/// Accepts an incoming client connection request on the current instance, leaving the current instance still listening.
 	///
@@ -1016,6 +1019,8 @@ public class Socket: SocketReader, SocketWriter {
 		self.isListening = false
 	}
 	
+	// MARK: -- Close
+	
 	///
 	/// Closes the current socket.
 	///
@@ -1047,6 +1052,8 @@ public class Socket: SocketReader, SocketWriter {
 		self.isConnected = false
 		self.isListening = false
 	}
+	
+	// MARK: -- Connect
 	
 	///
 	/// Connects to the named host on the specified port.
@@ -1257,48 +1264,7 @@ public class Socket: SocketReader, SocketWriter {
 		}
 	}
 	
-	///
-	/// Determines if this socket can be read from or written to.
-	///
-	/// - Returns: Tuple containing two boolean values, one for readable and one for writable.
-	///
-	public func isReadableOrWritable() throws -> (readable: Bool, writable: Bool) {
-		
-		// The socket must've been created and must be connected...
-		if self.socketfd == Socket.SOCKET_INVALID_DESCRIPTOR {
-			
-			throw Error(code: Socket.SOCKET_ERR_BAD_DESCRIPTOR, reason: nil)
-		}
-		
-		if !self.isConnected {
-			
-			throw Error(code: Socket.SOCKET_ERR_NOT_CONNECTED, reason: nil)
-		}
-		
-		// Create a read and write file descriptor set for this socket...
-		var readfds = fd_set()
-		fdZero(&readfds)
-		fdSet(self.socketfd, set: &readfds)
-		
-		var writefds = fd_set()
-		fdZero(&writefds)
-		fdSet(self.socketfd, set: &writefds)
-		
-		// Create a timeout of zero (i.e. don't wait)...
-		var timeout = timeval()
-		
-		// See if there's data on the socket...
-		let count = select(self.socketfd + 1, &readfds, &writefds, nil, &timeout)
-		
-		// A count of less than zero indicates select failed...
-		if count < 0 {
-			
-			throw Error(code: Socket.SOCKET_ERR_SELECT_FAILED, reason: self.lastError())
-		}
-		
-		// Return a tuple containing whether or not this socket is readable and/or writable...
-		return (fdIsSet(self.socketfd, set: &readfds), fdIsSet(self.socketfd, set: &writefds))
-	}
+	// MARK: -- Listen
 	
 	///
 	/// Listen on a port using the default for max pending connections.
@@ -1459,6 +1425,8 @@ public class Socket: SocketReader, SocketWriter {
 		
 		self.isListening = true
 	}
+	
+	// MARK: -- Read
 	
 	///
 	/// Read data from the socket.
@@ -1622,6 +1590,71 @@ public class Socket: SocketReader, SocketWriter {
 	}
 	
 	///
+	/// Read data from a UDP socket.
+	///
+	/// - Parameters:
+	///		- data: 	The buffer to return the data in.
+	///		- address: 	Address to write data to.
+	///
+	/// - Returns: The number of bytes returned in the buffer.
+	///
+	public func read(into data: NSMutableData, from address: Address) throws -> Int {
+		
+		// The socket must've been created...
+		if self.socketfd == Socket.SOCKET_INVALID_DESCRIPTOR {
+			
+			throw Error(code: Socket.SOCKET_ERR_BAD_DESCRIPTOR, reason: nil)
+		}
+		
+		// The socket must've been created for UDP...
+		guard let sig = self.signature where sig.proto == .UDP else {
+			
+			throw Error(code: Socket.SOCKET_ERR_WRONG_PROTOCOL, reason: "This is not a UDP socket.")
+		}
+		
+		return 0
+	}
+	
+	///
+	/// Read data from a UDP socket.
+	///
+	/// - Parameters:
+	///		- buffer: 	The buffer to return the data in.
+	/// 	- bufSize: 	The size of the buffer.
+	///		- address: 	Address to write data to.
+	///
+	/// - Throws: `Socket.SOCKET_ERR_RECV_BUFFER_TOO_SMALL` if the buffer provided is too small.
+	///		Call again with proper buffer size (see `Error.bufferSizeNeeded`) or
+	///		use `readData(data: NSMutableData)`.
+	///
+	/// - Returns: The number of bytes returned in the buffer.
+	///
+	public func read(into buffer: UnsafeMutablePointer<CChar>, bufSize: Int, from address: Address) throws -> Int {
+		
+		// Make sure the buffer is valid...
+		if buffer == nil || bufSize == 0 {
+			
+			throw Error(code: Socket.SOCKET_ERR_INVALID_BUFFER, reason: nil)
+		}
+		
+		// The socket must've been created...
+		if self.socketfd == Socket.SOCKET_INVALID_DESCRIPTOR {
+			
+			throw Error(code: Socket.SOCKET_ERR_BAD_DESCRIPTOR, reason: nil)
+		}
+		
+		// The socket must've been created for UDP...
+		guard let sig = self.signature where sig.proto == .UDP else {
+			
+			throw Error(code: Socket.SOCKET_ERR_WRONG_PROTOCOL, reason: "This is not a UDP socket.")
+		}
+		
+		return 0
+	}
+	
+	// MARK: -- Write
+	
+	///
 	/// Write data to the socket.
 	///
 	/// - Parameters:
@@ -1727,6 +1760,108 @@ public class Socket: SocketReader, SocketWriter {
 			// The count returned by nullTerminatedUTF8 includes the null terminator...
 			try self.write(from: $0.baseAddress, bufSize: $0.count-1)
 		}
+	}
+	
+	///
+	/// Write data to the socket.
+	///
+	/// - Parameters:
+	///		- buffer: 	The buffer containing the data to write.
+	/// 	- bufSize: 	The size of the buffer.
+	///		- address: 	Address to write data to.
+	///
+	public func write(from buffer: UnsafePointer<Void>, bufSize: Int, to addresss: Address) throws {
+		
+		// Make sure the buffer is valid...
+		if buffer == nil || bufSize == 0 {
+			
+			throw Error(code: Socket.SOCKET_ERR_INVALID_BUFFER, reason: nil)
+		}
+		
+		// The socket must've been created and must be connected...
+		if self.socketfd == Socket.SOCKET_INVALID_DESCRIPTOR {
+			
+			throw Error(code: Socket.SOCKET_ERR_BAD_DESCRIPTOR, reason: nil)
+		}
+		
+		// The socket must've been created for UDP...
+		guard let sig = self.signature where sig.proto == .UDP else {
+			
+			throw Error(code: Socket.SOCKET_ERR_WRONG_PROTOCOL, reason: "This is not a UDP socket.")
+		}
+		
+	}
+	
+	///
+	/// Write data to a UDP socket.
+	///
+	/// - Parameters:
+	///		- data: 	The NSData object containing the data to write.
+	///		- address: 	Address to write data to.
+	///
+	public func write(from data: NSData, to addresss: Address) throws {
+		
+		// The socket must've been created...
+		if self.socketfd == Socket.SOCKET_INVALID_DESCRIPTOR {
+			
+			throw Error(code: Socket.SOCKET_ERR_BAD_DESCRIPTOR, reason: nil)
+		}
+		
+		// The socket must've been created for UDP...
+		guard let sig = self.signature where sig.proto == .UDP else {
+			
+			throw Error(code: Socket.SOCKET_ERR_WRONG_PROTOCOL, reason: "This is not a UDP socket.")
+		}
+		
+		// If there's no data in the NSData object, why bother? Fail silently...
+		if data.length == 0 {
+			return
+		}
+	}
+	
+	// MARK: -- Utility
+	
+	///
+	/// Determines if this socket can be read from or written to.
+	///
+	/// - Returns: Tuple containing two boolean values, one for readable and one for writable.
+	///
+	public func isReadableOrWritable() throws -> (readable: Bool, writable: Bool) {
+		
+		// The socket must've been created and must be connected...
+		if self.socketfd == Socket.SOCKET_INVALID_DESCRIPTOR {
+			
+			throw Error(code: Socket.SOCKET_ERR_BAD_DESCRIPTOR, reason: nil)
+		}
+		
+		if !self.isConnected {
+			
+			throw Error(code: Socket.SOCKET_ERR_NOT_CONNECTED, reason: nil)
+		}
+		
+		// Create a read and write file descriptor set for this socket...
+		var readfds = fd_set()
+		fdZero(&readfds)
+		fdSet(self.socketfd, set: &readfds)
+		
+		var writefds = fd_set()
+		fdZero(&writefds)
+		fdSet(self.socketfd, set: &writefds)
+		
+		// Create a timeout of zero (i.e. don't wait)...
+		var timeout = timeval()
+		
+		// See if there's data on the socket...
+		let count = select(self.socketfd + 1, &readfds, &writefds, nil, &timeout)
+		
+		// A count of less than zero indicates select failed...
+		if count < 0 {
+			
+			throw Error(code: Socket.SOCKET_ERR_SELECT_FAILED, reason: self.lastError())
+		}
+		
+		// Return a tuple containing whether or not this socket is readable and/or writable...
+		return (fdIsSet(self.socketfd, set: &readfds), fdIsSet(self.socketfd, set: &writefds))
 	}
 	
 	///
