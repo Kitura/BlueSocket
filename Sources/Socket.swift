@@ -328,7 +328,7 @@ public class Socket: SocketReader, SocketWriter {
 			
 			return "Signature: family: \(protocolFamily), type: \(socketType), protocol: \(proto), address: \(address), hostname: \(hostname), port: \(port)"
 		}
-		
+
 		// MARK: -- Public Functions
 		
 		///
@@ -338,15 +338,15 @@ public class Socket: SocketReader, SocketWriter {
 		///		- protocolFamily:	The family of the socket to create.
 		///		- socketType:		The type of socket to create.
 		///		- proto:			The protocool to use for the socket.
-		/// 	- address:		Address info for the socket.
+		/// 	- address:			Address info for the socket.
 		///
 		/// - Returns: New Signature instance
 		///
 		public init?(protocolFamily: Int32, socketType: Int32, proto: Int32, address: Address?) throws {
 			
-			guard let family = ProtocolFamily.getFamily(protocolFamily),
-				let type = SocketType.getType(socketType),
-				let pro = SocketProtocol.getProtocol(proto) else {
+			guard let family = ProtocolFamily.getFamily(value: protocolFamily),
+				let type = SocketType.getType(value: socketType),
+				let pro = SocketProtocol.getProtocol(value: proto) else {
 					
 					throw Error(code: Socket.SOCKET_ERR_BAD_SIGNATURE_PARAMETERS, reason: "Bad family, type or protocol passed.")
 			}
@@ -365,8 +365,8 @@ public class Socket: SocketReader, SocketWriter {
 		///	- Parameters:
 		///		- socketType:		The type of socket to create.
 		///		- proto:			The protocool to use for the socket.
-		/// 	- hostname:		Hostname for this signature.
-		/// 	- port:			Port for this signature.
+		/// 	- hostname:			Hostname for this signature.
+		/// 	- port:				Port for this signature.
 		///
 		/// - Returns: New Signature instance
 		///
@@ -405,9 +405,9 @@ public class Socket: SocketReader, SocketWriter {
 		private init?(protocolFamily: Int32, socketType: Int32, proto: Int32, address: Address?, hostname: String?, port: Int32?) throws {
 			
 			// This constructor requires all items be present...
-			guard let family = ProtocolFamily.getFamily(protocolFamily),
-				let type = SocketType.getType(socketType),
-				let pro = SocketProtocol.getProtocol(proto),
+			guard let family = ProtocolFamily.getFamily(value: protocolFamily),
+				let type = SocketType.getType(value: socketType),
+				let pro = SocketProtocol.getProtocol(value: proto),
 				let _ = hostname,
 				let port = port else {
 					
@@ -533,10 +533,8 @@ public class Socket: SocketReader, SocketWriter {
 			print("Creating read buffer of size: \(readBufferSize)")
 			if readBufferSize != oldValue {
 				
-				if readBuffer != nil {
-					readBuffer.deinitialize()
-					readBuffer.deallocateCapacity(oldValue)
-				}
+				readBuffer.deinitialize()
+				readBuffer.deallocateCapacity(oldValue)
 				readBuffer = UnsafeMutablePointer<CChar>(allocatingCapacity: readBufferSize)
 				readBuffer.initialize(with:0)
 			}
@@ -582,7 +580,7 @@ public class Socket: SocketReader, SocketWriter {
 		
 		guard let sig = signature,
 			let host = sig.hostname else {
-				return Socket.NO_HOSTNAME
+			return Socket.NO_HOSTNAME
 		}
 		
 		return host
@@ -637,13 +635,13 @@ public class Socket: SocketReader, SocketWriter {
 	/// Create a configured Socket instance.
 	///
 	/// - Parameters:
-	///		- family:	The family of the socket to create.
+ 	///		- family:	The family of the socket to create.
 	///		- type:		The type of socket to create.
 	///		- proto:	The protocool to use for the socket.
 	///
 	/// - Returns: New Socket instance
 	///
-	public class func makeConfigured(family family: ProtocolFamily, type: SocketType, proto: SocketProtocol) throws -> Socket {
+	public class func makeConfigured(family: ProtocolFamily, type: SocketType, proto: SocketProtocol) throws -> Socket {
 		
 		if type == .DGRAM || proto == .UDP {
 			
@@ -673,12 +671,12 @@ public class Socket: SocketReader, SocketWriter {
 	/// Create an instance for existing open socket fd.
 	///
 	/// - Parameters:
-	///		- fd: 				Open file descriptor.
-	///		- remoteAddress: 	The sockaddr_storage associated with the open fd.
+ 	///		- fd: 				Open file descriptor.
+	///		- remoteAddress: 	The Address associated with the open fd.
 	///
 	/// - Returns: New Socket instance
 	///
-	public class func makeFrom(nativeHandle nativeHandle: Int32, address: Address?) throws -> Socket {
+	public class func makeFrom(nativeHandle: Int32, address: Address?) throws -> Socket {
 		
 		guard let addr = address else {
 			
@@ -691,7 +689,7 @@ public class Socket: SocketReader, SocketWriter {
 	///
 	/// Extract the string form of IP address and the port.
 	///
-	/// - Parameter fromAddress: The sockaddr_storage struct.
+	/// - Parameter fromAddress: The Address struct.
 	///
 	/// - Returns: Optional Tuple containing the hostname and port.
 	///
@@ -764,7 +762,7 @@ public class Socket: SocketReader, SocketWriter {
 	/// Internal initializer to create a configured Socket instance.
 	///
 	/// - Parameters:
-	///		- family:	The family of the socket to create.
+ 	///		- family:	The family of the socket to create.
 	///		- type:		The type of socket to create.
 	///		- proto:	The protocool to use for the socket.
 	///
@@ -818,8 +816,8 @@ public class Socket: SocketReader, SocketWriter {
 	/// Private constructor to create an instance for existing open socket fd.
 	///
 	/// - Parameters:
-	///		- fd: 				Open file descriptor.
-	///		- remoteAddress: 	The sockaddr_storage associated with the open fd.
+ 	///		- fd: 				Open file descriptor.
+	///		- remoteAddress: 	The Address associated with the open fd.
 	///
 	/// - Returns: New Socket instance
 	///
@@ -1059,7 +1057,7 @@ public class Socket: SocketReader, SocketWriter {
 	/// Connects to the named host on the specified port.
 	///
 	/// - Parameters:
-	///		- host:	The host name to connect to.
+ 	///		- host:	The host name to connect to.
 	///		- port:	The port to be used.
 	///
 	public func connect(to host: String, port: Int32) throws {
@@ -1104,7 +1102,7 @@ public class Socket: SocketReader, SocketWriter {
 				ai_next: nil)
 		#endif
 		
-		var targetInfo = UnsafeMutablePointer<addrinfo>(allocatingCapacity: 1)
+		var targetInfo: UnsafeMutablePointer<addrinfo>? = UnsafeMutablePointer<addrinfo>(allocatingCapacity: 1)
 		
 		// Retrieve the info on our target...
 		var status: Int32 = getaddrinfo(host, String(port), &hints, &targetInfo)
@@ -1133,9 +1131,9 @@ public class Socket: SocketReader, SocketWriter {
 		while (info != nil) {
 			
 			#if os(Linux)
-				socketDescriptor = Glibc.socket(info.pointee.ai_family, info.pointee.ai_socktype, info.pointee.ai_protocol)
+				socketDescriptor = Glibc.socket(info!.pointee.ai_family, info!.pointee.ai_socktype, info!.pointee.ai_protocol)
 			#else
-				socketDescriptor = Darwin.socket(info.pointee.ai_family, info.pointee.ai_socktype, info.pointee.ai_protocol)
+				socketDescriptor = Darwin.socket(info!.pointee.ai_family, info!.pointee.ai_socktype, info!.pointee.ai_protocol)
 			#endif
 			if socketDescriptor == -1 {
 				continue
@@ -1143,9 +1141,9 @@ public class Socket: SocketReader, SocketWriter {
 			
 			// Connect to the server...
 			#if os(Linux)
-				status = Glibc.connect(socketDescriptor!, info.pointee.ai_addr, info.pointee.ai_addrlen)
+				status = Glibc.connect(socketDescriptor!, info!.pointee.ai_addr, info!.pointee.ai_addrlen)
 			#else
-				status = Darwin.connect(socketDescriptor!, info.pointee.ai_addr, info.pointee.ai_addrlen)
+				status = Darwin.connect(socketDescriptor!, info!.pointee.ai_addr, info!.pointee.ai_addrlen)
 			#endif
 			
 			// Break if successful...
@@ -1160,7 +1158,7 @@ public class Socket: SocketReader, SocketWriter {
 				Darwin.close(socketDescriptor!)
 			#endif
 			socketDescriptor = nil
-			info = info.pointee.ai_next
+			info = info?.pointee.ai_next
 		}
 		
 		// Throw if there is a status error...
@@ -1185,23 +1183,23 @@ public class Socket: SocketReader, SocketWriter {
 		self.socketfd = socketDescriptor!
 		self.isConnected = true
 		var address: Address
-		if info.pointee.ai_family == Int32(AF_INET6) {
+		if info!.pointee.ai_family == Int32(AF_INET6) {
 			
 			var addr = sockaddr_in6()
-			memcpy(&addr, info.pointee.ai_addr, Int(sizeofValue(addr)))
+			memcpy(&addr, info!.pointee.ai_addr, Int(sizeofValue(addr)))
 			address = .IPV6(addr)
-			
+		
 		} else {
 			
 			var addr = sockaddr_in()
-			memcpy(&addr, info.pointee.ai_addr, Int(sizeofValue(addr)))
+			memcpy(&addr, info!.pointee.ai_addr, Int(sizeofValue(addr)))
 			address = .IPV4(addr)
 			
 		}
 		try self.signature = Signature(
-			protocolFamily: Int32(info.pointee.ai_family),
-			socketType: info.pointee.ai_socktype,
-			proto: info.pointee.ai_protocol,
+			protocolFamily: Int32(info!.pointee.ai_family),
+			socketType: info!.pointee.ai_socktype,
+			proto: info!.pointee.ai_protocol,
 			address: address,
 			hostname: host,
 			port: port)
@@ -1228,7 +1226,7 @@ public class Socket: SocketReader, SocketWriter {
 			// Otherwise, make sure we've got a hostname and port...
 			guard let hostname = signature.hostname
 				where signature.port != Socket.SOCKET_INVALID_PORT else {
-					
+				
 					throw Error(code: Socket.SOCKET_ERR_MISSING_CONNECTION_DATA, reason: "Unable to access hostname and port.")
 			}
 			
@@ -1280,7 +1278,7 @@ public class Socket: SocketReader, SocketWriter {
 	/// Listen on a port, limiting the maximum number of pending connections.
 	///
 	/// - Parameters:
-	///		- port: 					The port to listen on.
+ 	///		- port: 					The port to listen on.
 	/// 	- maxPendingConnections: 	The maximum number of pending connections to allow.
 	///
 	public func listen(on port: Int, maxPendingConnections: Int) throws {
@@ -1332,7 +1330,7 @@ public class Socket: SocketReader, SocketWriter {
 				ai_next: nil)
 		#endif
 		
-		var targetInfo = UnsafeMutablePointer<addrinfo>(allocatingCapacity: 1)
+		var targetInfo: UnsafeMutablePointer<addrinfo>? = UnsafeMutablePointer<addrinfo>(allocatingCapacity: 1)
 		
 		// Retrieve the info on our target...
 		let status: Int32 = getaddrinfo(nil, String(port), &hints, &targetInfo)
@@ -1361,14 +1359,14 @@ public class Socket: SocketReader, SocketWriter {
 			
 			// Try to bind the socket to the address...
 			#if os(Linux)
-				if Glibc.bind(self.socketfd, info.pointee.ai_addr, info.pointee.ai_addrlen) == 0 {
-					
+				if Glibc.bind(self.socketfd, info!.pointee.ai_addr, info!.pointee.ai_addrlen) == 0 {
+				
 					// Success... We've found our address...
 					bound = true
 					break
 				}
 			#else
-				if Darwin.bind(self.socketfd, info.pointee.ai_addr, info.pointee.ai_addrlen) == 0 {
+				if Darwin.bind(self.socketfd, info!.pointee.ai_addr, info!.pointee.ai_addrlen) == 0 {
 					
 					// Success... We've found our address...
 					bound = true
@@ -1377,7 +1375,7 @@ public class Socket: SocketReader, SocketWriter {
 			#endif
 			
 			// Try the next one...
-			info = info.pointee.ai_next
+			info = info?.pointee.ai_next
 		}
 		
 		// Throw an error if we weren't able to bind to an address...
@@ -1388,16 +1386,16 @@ public class Socket: SocketReader, SocketWriter {
 		
 		// Save the address info...
 		var address: Address
-		if info.pointee.ai_family == Int32(AF_INET6) {
+		if info!.pointee.ai_family == Int32(AF_INET6) {
 			
 			var addr = sockaddr_in6()
-			memcpy(&addr, info.pointee.ai_addr, Int(sizeofValue(addr)))
+			memcpy(&addr, info!.pointee.ai_addr, Int(sizeofValue(addr)))
 			address = .IPV6(addr)
 			
 		} else {
 			
 			var addr = sockaddr_in()
-			memcpy(&addr, info.pointee.ai_addr, Int(sizeofValue(addr)))
+			memcpy(&addr, info!.pointee.ai_addr, Int(sizeofValue(addr)))
 			address = .IPV4(addr)
 			
 		}
@@ -1413,7 +1411,7 @@ public class Socket: SocketReader, SocketWriter {
 		// Now listen for connections...
 		#if os(Linux)
 			if Glibc.listen(self.socketfd, Int32(maxPendingConnections)) < 0 {
-				
+			
 				throw Error(code: Socket.SOCKET_ERR_LISTEN_FAILED, reason: self.lastError())
 			}
 		#else
@@ -1432,7 +1430,7 @@ public class Socket: SocketReader, SocketWriter {
 	/// Read data from the socket.
 	///
 	/// - Parameters:
-	///		- buffer: The buffer to return the data in.
+ 	///		- buffer: The buffer to return the data in.
 	/// 	- bufSize: The size of the buffer.
 	///
 	/// - Throws: `Socket.SOCKET_ERR_RECV_BUFFER_TOO_SMALL` if the buffer provided is too small.
@@ -1444,7 +1442,7 @@ public class Socket: SocketReader, SocketWriter {
 	public func read(into buffer: UnsafeMutablePointer<CChar>, bufSize: Int) throws -> Int {
 		
 		// Make sure the buffer is valid...
-		if buffer == nil || bufSize == 0 {
+		if bufSize == 0 {
 			
 			throw Error(code: Socket.SOCKET_ERR_INVALID_BUFFER, reason: nil)
 		}
@@ -1593,7 +1591,7 @@ public class Socket: SocketReader, SocketWriter {
 	/// Read data from a UDP socket.
 	///
 	/// - Parameters:
-	///		- data: 	The buffer to return the data in.
+ 	///		- data: 	The buffer to return the data in.
 	///		- address: 	Address to write data to.
 	///
 	/// - Returns: The number of bytes returned in the buffer.
@@ -1632,7 +1630,7 @@ public class Socket: SocketReader, SocketWriter {
 	public func read(into buffer: UnsafeMutablePointer<CChar>, bufSize: Int, from address: Address) throws -> Int {
 		
 		// Make sure the buffer is valid...
-		if buffer == nil || bufSize == 0 {
+		if bufSize == 0 {
 			
 			throw Error(code: Socket.SOCKET_ERR_INVALID_BUFFER, reason: nil)
 		}
@@ -1658,13 +1656,13 @@ public class Socket: SocketReader, SocketWriter {
 	/// Write data to the socket.
 	///
 	/// - Parameters:
-	///		- buffer: 	The buffer containing the data to write.
+ 	///		- buffer: 	The buffer containing the data to write.
 	/// 	- bufSize: 	The size of the buffer.
 	///
 	public func write(from buffer: UnsafePointer<Void>, bufSize: Int) throws {
 		
 		// Make sure the buffer is valid...
-		if buffer == nil || bufSize == 0 {
+		if bufSize == 0 {
 			
 			throw Error(code: Socket.SOCKET_ERR_INVALID_BUFFER, reason: nil)
 		}
@@ -1758,7 +1756,7 @@ public class Socket: SocketReader, SocketWriter {
 		try string.nulTerminatedUTF8.withUnsafeBufferPointer() {
 			
 			// The count returned by nullTerminatedUTF8 includes the null terminator...
-			try self.write(from: $0.baseAddress, bufSize: $0.count-1)
+			try self.write(from: $0.baseAddress!, bufSize: $0.count-1)
 		}
 	}
 	
@@ -1773,7 +1771,7 @@ public class Socket: SocketReader, SocketWriter {
 	public func write(from buffer: UnsafePointer<Void>, bufSize: Int, to addresss: Address) throws {
 		
 		// Make sure the buffer is valid...
-		if buffer == nil || bufSize == 0 {
+		if bufSize == 0 {
 			
 			throw Error(code: Socket.SOCKET_ERR_INVALID_BUFFER, reason: nil)
 		}
@@ -1783,7 +1781,7 @@ public class Socket: SocketReader, SocketWriter {
 			
 			throw Error(code: Socket.SOCKET_ERR_BAD_DESCRIPTOR, reason: nil)
 		}
-		
+
 		// The socket must've been created for UDP...
 		guard let sig = self.signature where sig.proto == .UDP else {
 			
@@ -1841,12 +1839,12 @@ public class Socket: SocketReader, SocketWriter {
 		
 		// Create a read and write file descriptor set for this socket...
 		var readfds = fd_set()
-		fdZero(&readfds)
-		fdSet(self.socketfd, set: &readfds)
+		fdZero(set: &readfds)
+		fdSet(fd: self.socketfd, set: &readfds)
 		
 		var writefds = fd_set()
-		fdZero(&writefds)
-		fdSet(self.socketfd, set: &writefds)
+		fdZero(set: &writefds)
+		fdSet(fd: self.socketfd, set: &writefds)
 		
 		// Create a timeout of zero (i.e. don't wait)...
 		var timeout = timeval()
@@ -1861,7 +1859,7 @@ public class Socket: SocketReader, SocketWriter {
 		}
 		
 		// Return a tuple containing whether or not this socket is readable and/or writable...
-		return (fdIsSet(self.socketfd, set: &readfds), fdIsSet(self.socketfd, set: &writefds))
+		return (fdIsSet(fd: self.socketfd, set: &readfds), fdIsSet(fd: self.socketfd, set: &writefds))
 	}
 	
 	///
@@ -1905,12 +1903,9 @@ public class Socket: SocketReader, SocketWriter {
 	private func readDataIntoStorage() throws -> Int {
 		
 		// Clear the buffer...
-		if self.readBuffer != nil {
-			
-			self.readBuffer.deinitialize()
-			self.readBuffer.initialize(with: 0x0)
-			memset(self.readBuffer, 0x0, self.readBufferSize)
-		}
+		self.readBuffer.deinitialize()
+		self.readBuffer.initialize(with: 0x0)
+		memset(self.readBuffer, 0x0, self.readBufferSize)
 		
 		// Read all the available data...
 		var count: Int = 0
@@ -1937,8 +1932,11 @@ public class Socket: SocketReader, SocketWriter {
 			}
 			
 			if count > 0 {
-				
-				self.readStorage.appendBytes(self.readBuffer, length: count)
+				#if os(Linux)
+					self.readStorage.appendBytes(self.readBuffer, length: count)
+				#else
+					self.readStorage.append(self.readBuffer, length: count)
+				#endif
 			}
 			
 			// Didn't fill the buffer so we've got everything available...
