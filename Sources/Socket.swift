@@ -621,18 +621,8 @@ public class Socket: SocketReader, SocketWriter {
 	// MARK: Class Methods
 	
 	///
-	/// Creates a default pre-configured Socket instance.
-	///		Default socket created with family: .INET, type: .STREAM, proto: .TCP
-	///
-	/// - Returns: New Socket instance
-	///
-	public class func makeDefault() throws -> Socket {
-		
-		return try Socket(family: .INET, type: .STREAM, proto: .TCP)
-	}
-	
-	///
 	/// Create a configured Socket instance.
+	/// **Note:** Calling with no passed parameters will create a default socket: IPV4, STREAM, TCP.
 	///
 	/// - Parameters:
 	///		- family:	The family of the socket to create.
@@ -641,7 +631,7 @@ public class Socket: SocketReader, SocketWriter {
 	///
 	/// - Returns: New Socket instance
 	///
-	public class func makeConfigured(family: ProtocolFamily, type: SocketType, proto: SocketProtocol) throws -> Socket {
+	public class func create(family: ProtocolFamily = .INET, type: SocketType = .STREAM, proto: SocketProtocol = .TCP) throws -> Socket {
 		
 		if type == .DGRAM || proto == .UDP {
 			
@@ -658,7 +648,7 @@ public class Socket: SocketReader, SocketWriter {
 	///
 	/// - Returns: New Socket instance. **Note:** Connection status should be checked via the *isConnected* property on the returned socket.
 	///
-	public class func makeConnected(using signature: Signature) throws -> Socket {
+	public class func create(connectedUsing signature: Signature) throws -> Socket {
 		
 		let socket = try Socket(family: signature.protocolFamily, type: signature.socketType, proto: signature.proto)
 		
@@ -676,7 +666,7 @@ public class Socket: SocketReader, SocketWriter {
 	///
 	/// - Returns: New Socket instance
 	///
-	public class func makeFrom(nativeHandle: Int32, address: Address?) throws -> Socket {
+	public class func create(fromNativeHandle nativeHandle: Int32, address: Address?) throws -> Socket {
 		
 		guard let addr = address else {
 			
