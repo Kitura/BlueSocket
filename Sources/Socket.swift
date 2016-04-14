@@ -108,13 +108,13 @@ public class Socket: SocketReader, SocketWriter {
 		///
 		/// Return enum equivalent of a raw value
 		///
-		/// - Parameter value: Value for which enum value is desired
+		/// - Parameter forValue: Value for which enum value is desired
 		///
 		/// - Returns: Optional contain enum value or nil
 		///
-		static func getFamily(value: Int32) -> ProtocolFamily? {
+		static func getFamily(forValue: Int32) -> ProtocolFamily? {
 			
-			switch value {
+			switch forValue {
 				
 			case Int32(AF_INET):
 				return .INET
@@ -165,14 +165,14 @@ public class Socket: SocketReader, SocketWriter {
 		///
 		/// Return enum equivalent of a raw value
 		///
-		/// - Parameter value: Value for which enum value is desired
+		/// - Parameter forValue: Value for which enum value is desired
 		///
 		/// - Returns: Optional contain enum value or nil
 		///
-		static func getType(value: Int32) -> SocketType? {
+		static func getType(forValue: Int32) -> SocketType? {
 			
 			#if os(Linux)
-				switch value {
+				switch forValue {
 					
 				case Int32(SOCK_STREAM.rawValue):
 					return .STREAM
@@ -182,7 +182,7 @@ public class Socket: SocketReader, SocketWriter {
 					return nil
 				}
 			#else
-				switch value {
+				switch forValue {
 					
 				case SOCK_STREAM:
 					return .STREAM
@@ -225,13 +225,13 @@ public class Socket: SocketReader, SocketWriter {
 		///
 		/// Return enum equivalent of a raw value
 		///
-		/// - Parameter value: Value for which enum value is desired
+		/// - Parameter forValue: Value for which enum value is desired
 		///
 		/// - Returns: Optional contain enum value or nil
 		///
-		static func getProtocol(value: Int32) -> SocketProtocol? {
+		static func getProtocol(forValue: Int32) -> SocketProtocol? {
 			
-			switch value {
+			switch forValue {
 				
 			case Int32(IPPROTO_TCP):
 				return .TCP
@@ -328,7 +328,7 @@ public class Socket: SocketReader, SocketWriter {
 			
 			return "Signature: family: \(protocolFamily), type: \(socketType), protocol: \(proto), address: \(address), hostname: \(hostname), port: \(port)"
 		}
-
+		
 		// MARK: -- Public Functions
 		
 		///
@@ -344,9 +344,9 @@ public class Socket: SocketReader, SocketWriter {
 		///
 		public init?(protocolFamily: Int32, socketType: Int32, proto: Int32, address: Address?) throws {
 			
-			guard let family = ProtocolFamily.getFamily(value: protocolFamily),
-				let type = SocketType.getType(value: socketType),
-				let pro = SocketProtocol.getProtocol(value: proto) else {
+			guard let family = ProtocolFamily.getFamily(forValue: protocolFamily),
+				let type = SocketType.getType(forValue: socketType),
+				let pro = SocketProtocol.getProtocol(forValue: proto) else {
 					
 					throw Error(code: Socket.SOCKET_ERR_BAD_SIGNATURE_PARAMETERS, reason: "Bad family, type or protocol passed.")
 			}
@@ -405,9 +405,9 @@ public class Socket: SocketReader, SocketWriter {
 		private init?(protocolFamily: Int32, socketType: Int32, proto: Int32, address: Address?, hostname: String?, port: Int32?) throws {
 			
 			// This constructor requires all items be present...
-			guard let family = ProtocolFamily.getFamily(value: protocolFamily),
-				let type = SocketType.getType(value: socketType),
-				let pro = SocketProtocol.getProtocol(value: proto),
+			guard let family = ProtocolFamily.getFamily(forValue: protocolFamily),
+				let type = SocketType.getType(forValue: socketType),
+				let pro = SocketProtocol.getProtocol(forValue: proto),
 				let _ = hostname,
 				let port = port else {
 					
@@ -580,7 +580,7 @@ public class Socket: SocketReader, SocketWriter {
 		
 		guard let sig = signature,
 			let host = sig.hostname else {
-			return Socket.NO_HOSTNAME
+				return Socket.NO_HOSTNAME
 		}
 		
 		return host
@@ -635,7 +635,7 @@ public class Socket: SocketReader, SocketWriter {
 	/// Create a configured Socket instance.
 	///
 	/// - Parameters:
- 	///		- family:	The family of the socket to create.
+	///		- family:	The family of the socket to create.
 	///		- type:		The type of socket to create.
 	///		- proto:	The protocool to use for the socket.
 	///
@@ -671,7 +671,7 @@ public class Socket: SocketReader, SocketWriter {
 	/// Create an instance for existing open socket fd.
 	///
 	/// - Parameters:
- 	///		- fd: 				Open file descriptor.
+	///		- fd: 				Open file descriptor.
 	///		- remoteAddress: 	The Address associated with the open fd.
 	///
 	/// - Returns: New Socket instance
@@ -762,7 +762,7 @@ public class Socket: SocketReader, SocketWriter {
 	/// Internal initializer to create a configured Socket instance.
 	///
 	/// - Parameters:
- 	///		- family:	The family of the socket to create.
+	///		- family:	The family of the socket to create.
 	///		- type:		The type of socket to create.
 	///		- proto:	The protocool to use for the socket.
 	///
@@ -816,7 +816,7 @@ public class Socket: SocketReader, SocketWriter {
 	/// Private constructor to create an instance for existing open socket fd.
 	///
 	/// - Parameters:
- 	///		- fd: 				Open file descriptor.
+	///		- fd: 				Open file descriptor.
 	///		- remoteAddress: 	The Address associated with the open fd.
 	///
 	/// - Returns: New Socket instance
@@ -1057,7 +1057,7 @@ public class Socket: SocketReader, SocketWriter {
 	/// Connects to the named host on the specified port.
 	///
 	/// - Parameters:
- 	///		- host:	The host name to connect to.
+	///		- host:	The host name to connect to.
 	///		- port:	The port to be used.
 	///
 	public func connect(to host: String, port: Int32) throws {
@@ -1188,7 +1188,7 @@ public class Socket: SocketReader, SocketWriter {
 			var addr = sockaddr_in6()
 			memcpy(&addr, info!.pointee.ai_addr, Int(sizeofValue(addr)))
 			address = .IPV6(addr)
-		
+			
 		} else {
 			
 			var addr = sockaddr_in()
@@ -1226,7 +1226,7 @@ public class Socket: SocketReader, SocketWriter {
 			// Otherwise, make sure we've got a hostname and port...
 			guard let hostname = signature.hostname
 				where signature.port != Socket.SOCKET_INVALID_PORT else {
-				
+					
 					throw Error(code: Socket.SOCKET_ERR_MISSING_CONNECTION_DATA, reason: "Unable to access hostname and port.")
 			}
 			
@@ -1278,7 +1278,7 @@ public class Socket: SocketReader, SocketWriter {
 	/// Listen on a port, limiting the maximum number of pending connections.
 	///
 	/// - Parameters:
- 	///		- port: 					The port to listen on.
+	///		- port: 					The port to listen on.
 	/// 	- maxPendingConnections: 	The maximum number of pending connections to allow.
 	///
 	public func listen(on port: Int, maxPendingConnections: Int) throws {
@@ -1360,7 +1360,7 @@ public class Socket: SocketReader, SocketWriter {
 			// Try to bind the socket to the address...
 			#if os(Linux)
 				if Glibc.bind(self.socketfd, info!.pointee.ai_addr, info!.pointee.ai_addrlen) == 0 {
-				
+					
 					// Success... We've found our address...
 					bound = true
 					break
@@ -1411,7 +1411,7 @@ public class Socket: SocketReader, SocketWriter {
 		// Now listen for connections...
 		#if os(Linux)
 			if Glibc.listen(self.socketfd, Int32(maxPendingConnections)) < 0 {
-			
+				
 				throw Error(code: Socket.SOCKET_ERR_LISTEN_FAILED, reason: self.lastError())
 			}
 		#else
@@ -1430,7 +1430,7 @@ public class Socket: SocketReader, SocketWriter {
 	/// Read data from the socket.
 	///
 	/// - Parameters:
- 	///		- buffer: The buffer to return the data in.
+	///		- buffer: The buffer to return the data in.
 	/// 	- bufSize: The size of the buffer.
 	///
 	/// - Throws: `Socket.SOCKET_ERR_RECV_BUFFER_TOO_SMALL` if the buffer provided is too small.
@@ -1591,7 +1591,7 @@ public class Socket: SocketReader, SocketWriter {
 	/// Read data from a UDP socket.
 	///
 	/// - Parameters:
- 	///		- data: 	The buffer to return the data in.
+	///		- data: 	The buffer to return the data in.
 	///		- address: 	Address to write data to.
 	///
 	/// - Returns: The number of bytes returned in the buffer.
@@ -1656,7 +1656,7 @@ public class Socket: SocketReader, SocketWriter {
 	/// Write data to the socket.
 	///
 	/// - Parameters:
- 	///		- buffer: 	The buffer containing the data to write.
+	///		- buffer: 	The buffer containing the data to write.
 	/// 	- bufSize: 	The size of the buffer.
 	///
 	public func write(from buffer: UnsafePointer<Void>, bufSize: Int) throws {
@@ -1781,7 +1781,7 @@ public class Socket: SocketReader, SocketWriter {
 			
 			throw Error(code: Socket.SOCKET_ERR_BAD_DESCRIPTOR, reason: nil)
 		}
-
+		
 		// The socket must've been created for UDP...
 		guard let sig = self.signature where sig.proto == .UDP else {
 			
