@@ -661,8 +661,8 @@ public class Socket: SocketReader, SocketWriter {
 	/// Create an instance for existing open socket fd.
 	///
 	/// - Parameters:
-	///		- fd: 				Open file descriptor.
-	///		- remoteAddress: 	The Address associated with the open fd.
+	///		- nativeHandle: Open file descriptor.
+	///		- address: 		The Address associated with the open fd.
 	///
 	/// - Returns: New Socket instance
 	///
