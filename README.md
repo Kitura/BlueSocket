@@ -106,7 +106,7 @@ In addition to reading from a socket, BlueSocket also supplies three methods for
 ### Complete Example
 
 The following example shows how to create a simple echo server.
-```
+```swift
 #if os(OSX) || os(iOS) || os(tvOS) || os(watchOS)
 	import Darwin
 	import Foundation
