@@ -42,10 +42,10 @@ import Socket
 ### Creating a socket.
 
 BlueSocket provides four different factory methods that are used to create an instance.  These are:
-- `makeDefault()` - This creates a fully configured default socket. A Default socket created with `family: .INET`, `type: .STREAM`, and `proto: .TCP`.
-- `makeConfigured(family family: ProtocolFamily, type: SocketType, proto: SocketProtocol)` - This API allows you to create a configured socket customized for your needs.  You can customize the protocol family, socket type and socket protocol.
-- `makeConnected(using signature: Signature)` - This API will allow you create a socket and have it attempt to connect to a server based on the information you pass in the `Socket.Signature`.
-- `makeFrom(nativeHandle nativeHandle: Int32, address: Address?)` - This API lets you wrap a native file descriptor in a new instance of Socket.
+- `create()` - This creates a fully configured default socket. A Default socket created with `family: .INET`, `type: .STREAM`, and `proto: .TCP`.
+- `create(family family: ProtocolFamily, type: SocketType, proto: SocketProtocol)` - This API allows you to create a configured socket customized for your needs.  You can customize the protocol family, socket type and socket protocol.
+- `create(connectedUsing signature: Signature)` - This API will allow you create a socket and have it attempt to connect to a server based on the information you pass in the `Socket.Signature`.
+- `create(fromNativeHandle nativeHandle: Int32, address: Address?)` - This API lets you wrap a native file descriptor in a new instance of Socket.
 
 ### Closing a socket.
 
@@ -63,7 +63,7 @@ The second way allow you to limit the maximum number of incoming connection. In 
 
 The following example creates a default socket and then starts listening on port `1337`.  *Note: Exception handling omitted for brevity, see the complete example below for an example of exception handling.*
 ```
-var socket = try Socket.makeDefault()
+var socket = try Socket.create()
 guard let socket = socket else {
   fatalError("Could not create socket.")
 }
@@ -78,7 +78,7 @@ When a listening socket detects an incoming connection request, control is retur
 
 ### Connecting a socket to a server.
 
-In addition to the `makeConnected()` factory method described above, BlueSocket supports two additional functions for connecting a Socket instance to a server. They are:
+In addition to the `create(connectedUsing:)` factory method described above, BlueSocket supports two additional functions for connecting a Socket instance to a server. They are:
 - `connect(to host: String, port: Int32)` - This API allows you to connect to a server based on the `hostname` and `port` you provide.
 - `connect(using signature: Signature)` - This API allows you specify the connection information by providing a `Socket.Signature` instance containing the information.  Refer to `Socket.Signature` in *Socket.swift* for more information.
 
@@ -140,7 +140,7 @@ class EchoServer {
 		
 		do {
 			
-			try self.listenSocket = Socket.makeDefault()
+			try self.listenSocket = Socket.create()
 			
 			guard let socket = self.listenSocket else {
 				
