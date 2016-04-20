@@ -62,7 +62,7 @@ The second way allow you to limit the maximum number of incoming connection. In 
 #### Example:
 
 The following example creates a default socket and then starts listening on port `1337`.  *Note: Exception handling omitted for brevity, see the complete example below for an example of exception handling.*
-```
+```swift
 var socket = try Socket.create()
 guard let socket = socket else {
   fatalError("Could not create socket.")
