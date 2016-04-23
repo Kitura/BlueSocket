@@ -427,7 +427,7 @@ public class Socket: SocketReader, SocketWriter {
 	
 	// MARK: -- Error
 	
-	public class Error: ErrorProtocol, CustomStringConvertible {
+	public struct Error: ErrorProtocol, CustomStringConvertible {
 		
 		// MARK: -- Public Properties
 		
@@ -439,12 +439,12 @@ public class Socket: SocketReader, SocketWriter {
 		///
 		/// The error code: **see constants above for possible errors**
 		///
-		public var errorCode: Int32
+		public private(set) var errorCode: Int32
 		
 		///
 		/// The reason for the error **(if available)**
 		///
-		public var errorReason: String?
+		public private(set) var errorReason: String?
 		
 		///
 		/// Returns a string description of the error.
@@ -458,7 +458,7 @@ public class Socket: SocketReader, SocketWriter {
 		///
 		/// The buffer size needed to complete the read.
 		///
-		public var bufferSizeNeeded: Int32
+		public private(set) var bufferSizeNeeded: Int32
 		
 		// MARK: -- Public Functions
 		
@@ -485,7 +485,7 @@ public class Socket: SocketReader, SocketWriter {
 		///
 		///	- Returns: Error Instance
 		///
-		convenience init(bufferSize: Int) {
+		init(bufferSize: Int) {
 			
 			self.init(code: Socket.SOCKET_ERR_RECV_BUFFER_TOO_SMALL, reason: nil)
 			self.bufferSizeNeeded = Int32(bufferSize)
@@ -1179,13 +1179,17 @@ public class Socket: SocketReader, SocketWriter {
 			memcpy(&addr, info!.pointee.ai_addr, Int(sizeofValue(addr)))
 			address = .IPV6(addr)
 			
-		} else {
+		} else if info!.pointee.ai_family == Int32(AF_INET) {
 			
 			var addr = sockaddr_in()
 			memcpy(&addr, info!.pointee.ai_addr, Int(sizeofValue(addr)))
 			address = .IPV4(addr)
 			
+		} else {
+			
+			throw Error(code: Socket.SOCKET_ERR_WRONG_PROTOCOL, reason: "Unable to determine connected socket protocol family.")
 		}
+		
 		try self.signature = Signature(
 			protocolFamily: Int32(info!.pointee.ai_family),
 			socketType: info!.pointee.ai_socktype,
@@ -1382,12 +1386,15 @@ public class Socket: SocketReader, SocketWriter {
 			memcpy(&addr, info!.pointee.ai_addr, Int(sizeofValue(addr)))
 			address = .IPV6(addr)
 			
-		} else {
+		} else if info!.pointee.ai_family == Int32(AF_INET) {
 			
 			var addr = sockaddr_in()
 			memcpy(&addr, info!.pointee.ai_addr, Int(sizeofValue(addr)))
 			address = .IPV4(addr)
 			
+		} else {
+			
+			throw Error(code: Socket.SOCKET_ERR_WRONG_PROTOCOL, reason: "Unable to determine listening socket protocol family.")
 		}
 		
 		self.signature?.address = address
