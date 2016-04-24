@@ -28,6 +28,9 @@
 
 // MARK: Socket
 
+///
+/// Low level BSD sockets wrapper.
+///
 public class Socket: SocketReader, SocketWriter {
 	
 	// MARK: Constants
@@ -1836,12 +1839,12 @@ public class Socket: SocketReader, SocketWriter {
 		
 		// Create a read and write file descriptor set for this socket...
 		var readfds = fd_set()
-		fdZero(set: &readfds)
-		fdSet(fd: self.socketfd, set: &readfds)
+		FD.ZERO(set: &readfds)
+		FD.SET(fd: self.socketfd, set: &readfds)
 		
 		var writefds = fd_set()
-		fdZero(set: &writefds)
-		fdSet(fd: self.socketfd, set: &writefds)
+		FD.ZERO(set: &writefds)
+		FD.SET(fd: self.socketfd, set: &writefds)
 		
 		// Create a timeout of zero (i.e. don't wait)...
 		var timeout = timeval()
@@ -1856,7 +1859,7 @@ public class Socket: SocketReader, SocketWriter {
 		}
 		
 		// Return a tuple containing whether or not this socket is readable and/or writable...
-		return (fdIsSet(fd: self.socketfd, set: &readfds), fdIsSet(fd: self.socketfd, set: &writefds))
+		return (FD.ISSET(fd: self.socketfd, set: &readfds), FD.ISSET(fd: self.socketfd, set: &writefds))
 	}
 	
 	///

@@ -114,16 +114,18 @@ public extension sockaddr_in6 {
 
 #if os(Linux)
 	
+public struct FD {
+
 	/// Replacement for FD_ZERO macro
 	
-	func fdZero(set: inout fd_set) {
+	public static func ZERO(set: inout fd_set) {
 		set.__fds_bits = (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
 	}
 	
 	
 	/// Replacement for FD_SET macro
 	
-	func fdSet(fd: Int32, set: inout fd_set) {
+	public static func SET(fd: Int32, set: inout fd_set) {
 		let intOffset = Int(fd / 16)
 		let bitOffset: Int = Int(fd % 16)
 		let mask: Int = 1 << bitOffset
@@ -151,7 +153,7 @@ public extension sockaddr_in6 {
 	
 	/// Replacement for FD_CLR macro
 	
-	func fdClr(fd: Int32, set: inout fd_set) {
+	public static func CLR(fd: Int32, set: inout fd_set) {
 		let intOffset = Int(fd / 16)
 		let bitOffset: Int = Int(fd % 16)
 		let mask: Int = ~(1 << bitOffset)
@@ -179,7 +181,7 @@ public extension sockaddr_in6 {
 	
 	/// Replacement for FD_ISSET macro
 	
-	func fdIsSet(fd: Int32, set: inout fd_set) -> Bool {
+	public static func ISSET(fd: Int32, set: inout fd_set) -> Bool {
 		let intOffset = Int(fd / 16)
 		let bitOffset = Int(fd % 16)
 		let mask: Int = 1 << bitOffset
@@ -204,19 +206,22 @@ public extension sockaddr_in6 {
 		}
 		
 	}
+}
 	
 #else
 	
+public struct FD {
+
 	/// Replacement for FD_ZERO macro
 	
-	func fdZero(set: inout fd_set) {
+	public static func ZERO(set: inout fd_set) {
 		set.fds_bits = (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
 	}
 	
 	
 	/// Replacement for FD_SET macro
 	
-	func fdSet(fd: Int32, set: inout fd_set) {
+	public static func SET(fd: Int32, set: inout fd_set) {
 		let intOffset = Int(fd / 32)
 		let bitOffset = fd % 32
 		let mask = 1 << bitOffset
@@ -260,7 +265,7 @@ public extension sockaddr_in6 {
 	
 	/// Replacement for FD_CLR macro
 	
-	func fdClr(fd: Int32, set: inout fd_set) {
+	public static func CLR(fd: Int32, set: inout fd_set) {
 		let intOffset = Int(fd / 32)
 		let bitOffset = fd % 32
 		let mask = ~(1 << bitOffset)
@@ -304,7 +309,7 @@ public extension sockaddr_in6 {
 	
 	/// Replacement for FD_ISSET macro
 	
-	func fdIsSet(fd: Int32, set: inout fd_set) -> Bool {
+	public static func ISSET(fd: Int32, set: inout fd_set) -> Bool {
 		let intOffset = Int(fd / 32)
 		let bitOffset = fd % 32
 		let mask = 1 << bitOffset
@@ -345,5 +350,6 @@ public extension sockaddr_in6 {
 		}
 		
 	}
+}
 	
 #endif

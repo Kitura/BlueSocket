@@ -22,6 +22,9 @@ import Foundation
 
 // MARK: Reader
 
+///
+/// Socket reader protocol
+///
 public protocol SocketReader {
 	
 	///
@@ -32,7 +35,7 @@ public protocol SocketReader {
 	func readString() throws -> String?
 	
 	///
-	/// Reads all available data
+	/// Reads all available data into an NSMutableData object.
 	///
 	/// - Parameter data: NSMutableData object to contain read data.
 	///
@@ -43,10 +46,13 @@ public protocol SocketReader {
 
 // MARK: Writer
 
+///
+/// Socket writer protocol
+///
 public protocol SocketWriter {
 	
 	///
-	/// Writes data
+	/// Writes data from NSData object.
 	///
 	/// - Parameter data: NSData object containing the data to be written.
 	///
