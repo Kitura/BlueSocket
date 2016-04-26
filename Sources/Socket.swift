@@ -1571,12 +1571,7 @@ public class Socket: SocketReader, SocketWriter {
 		if count > 0 {
 			
 			// - Yes, move to caller's buffer...
-			//		@TODO: Fix this when Linux Foundation catches up...
-			#if os(Linux)
-				data.appendData(self.readStorage)
-			#else
-				data.append(self.readStorage)
-			#endif
+			data.append(self.readStorage)
 			
 			returnCount = self.readStorage.length
 			
@@ -1932,11 +1927,7 @@ public class Socket: SocketReader, SocketWriter {
 			}
 			
 			if count > 0 {
-				#if os(Linux)
-					self.readStorage.appendBytes(self.readBuffer, length: count)
-				#else
-					self.readStorage.append(self.readBuffer, length: count)
-				#endif
+				self.readStorage.append(self.readBuffer, length: count)
 			}
 			
 			// Didn't fill the buffer so we've got everything available...
