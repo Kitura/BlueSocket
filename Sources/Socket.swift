@@ -874,54 +874,70 @@ public class Socket: SocketReader, SocketWriter {
 		}
 		
 		// Accept the remote connection...
-		var socketfd2: Int32
-		var address: Address
-		switch self.signature!.protocolFamily {
+		var socketfd2: Int32 = Socket.SOCKET_INVALID_DESCRIPTOR
+		var address: Address? = nil
+		
+		var keepRunning: Bool = true
+		repeat {
 			
-		case .INET:
-			var acceptAddr = sockaddr_in()
-			var addrSize = socklen_t(sizeofValue(acceptAddr))
-			
-			#if os(Linux)
-				let fd = withUnsafeMutablePointer(&acceptAddr) {
-					Glibc.accept(self.socketfd, UnsafeMutablePointer($0), &addrSize)
-				}
-			#else
-				let fd = withUnsafeMutablePointer(&acceptAddr) {
-					Darwin.accept(self.socketfd, UnsafeMutablePointer($0), &addrSize)
-				}
-			#endif
-			if fd < 0 {
+			switch self.signature!.protocolFamily {
 				
-				throw Error(code: Socket.SOCKET_ERR_ACCEPT_FAILED, reason: self.lastError())
-			}
-			socketfd2 = fd
-			address = .IPV4(acceptAddr)
-			
-		case .INET6:
-			var acceptAddr = sockaddr_in6()
-			var addrSize = socklen_t(sizeofValue(acceptAddr))
-			
-			#if os(Linux)
-				let fd = withUnsafeMutablePointer(&acceptAddr) {
-					Glibc.accept(self.socketfd, UnsafeMutablePointer($0), &addrSize)
-				}
-			#else
-				let fd = withUnsafeMutablePointer(&acceptAddr) {
-					Darwin.accept(self.socketfd, UnsafeMutablePointer($0), &addrSize)
-				}
-			#endif
-			if fd < 0 {
+			case .INET:
+				var acceptAddr = sockaddr_in()
+				var addrSize = socklen_t(sizeofValue(acceptAddr))
 				
-				throw Error(code: Socket.SOCKET_ERR_ACCEPT_FAILED, reason: self.lastError())
+				#if os(Linux)
+					let fd = withUnsafeMutablePointer(&acceptAddr) {
+						Glibc.accept(self.socketfd, UnsafeMutablePointer($0), &addrSize)
+					}
+				#else
+					let fd = withUnsafeMutablePointer(&acceptAddr) {
+						Darwin.accept(self.socketfd, UnsafeMutablePointer($0), &addrSize)
+					}
+				#endif
+				if fd < 0 {
+					
+					if errno == EINTR {
+						continue
+					}
+					
+					throw Error(code: Socket.SOCKET_ERR_ACCEPT_FAILED, reason: self.lastError())
+				}
+				socketfd2 = fd
+				address = .IPV4(acceptAddr)
+				
+			case .INET6:
+				var acceptAddr = sockaddr_in6()
+				var addrSize = socklen_t(sizeofValue(acceptAddr))
+				
+				#if os(Linux)
+					let fd = withUnsafeMutablePointer(&acceptAddr) {
+						Glibc.accept(self.socketfd, UnsafeMutablePointer($0), &addrSize)
+					}
+				#else
+					let fd = withUnsafeMutablePointer(&acceptAddr) {
+						Darwin.accept(self.socketfd, UnsafeMutablePointer($0), &addrSize)
+					}
+				#endif
+				if fd < 0 {
+					
+					if errno == EINTR {
+						continue
+					}
+					
+					throw Error(code: Socket.SOCKET_ERR_ACCEPT_FAILED, reason: self.lastError())
+				}
+				socketfd2 = fd
+				address = .IPV6(acceptAddr)
 			}
-			socketfd2 = fd
-			address = .IPV6(acceptAddr)
-		}
+			
+			keepRunning = false
+			
+		} while keepRunning
 		
 		// Create and return the new socket...
 		//	Note: The current socket continues to listen.
-		return try Socket(fd: socketfd2, remoteAddress: address)
+		return try Socket(fd: socketfd2, remoteAddress: address!)
 	}
 	
 	///
@@ -946,50 +962,66 @@ public class Socket: SocketReader, SocketWriter {
 		}
 		
 		// Accept the remote connection...
-		var socketfd2: Int32
-		var address: Address
-		switch self.signature!.protocolFamily {
+		var socketfd2: Int32 = Socket.SOCKET_INVALID_DESCRIPTOR
+		var address: Address? = nil
+		
+		var keepRunning: Bool = true
+		repeat {
 			
-		case .INET:
-			var acceptAddr = sockaddr_in()
-			var addrSize = socklen_t(sizeofValue(acceptAddr))
-			
-			#if os(Linux)
-				let fd = withUnsafeMutablePointer(&acceptAddr) {
-					Glibc.accept(self.socketfd, UnsafeMutablePointer($0), &addrSize)
-				}
-			#else
-				let fd = withUnsafeMutablePointer(&acceptAddr) {
-					Darwin.accept(self.socketfd, UnsafeMutablePointer($0), &addrSize)
-				}
-			#endif
-			if fd < 0 {
+			switch self.signature!.protocolFamily {
 				
-				throw Error(code: Socket.SOCKET_ERR_ACCEPT_FAILED, reason: self.lastError())
-			}
-			socketfd2 = fd
-			address = .IPV4(acceptAddr)
-			
-		case .INET6:
-			var acceptAddr = sockaddr_in6()
-			var addrSize = socklen_t(sizeofValue(acceptAddr))
-			
-			#if os(Linux)
-				let fd = withUnsafeMutablePointer(&acceptAddr) {
-					Glibc.accept(self.socketfd, UnsafeMutablePointer($0), &addrSize)
-				}
-			#else
-				let fd = withUnsafeMutablePointer(&acceptAddr) {
-					Darwin.accept(self.socketfd, UnsafeMutablePointer($0), &addrSize)
-				}
-			#endif
-			if fd < 0 {
+			case .INET:
+				var acceptAddr = sockaddr_in()
+				var addrSize = socklen_t(sizeofValue(acceptAddr))
 				
-				throw Error(code: Socket.SOCKET_ERR_ACCEPT_FAILED, reason: self.lastError())
+				#if os(Linux)
+					let fd = withUnsafeMutablePointer(&acceptAddr) {
+						Glibc.accept(self.socketfd, UnsafeMutablePointer($0), &addrSize)
+					}
+				#else
+					let fd = withUnsafeMutablePointer(&acceptAddr) {
+						Darwin.accept(self.socketfd, UnsafeMutablePointer($0), &addrSize)
+					}
+				#endif
+				if fd < 0 {
+					
+					if errno == EINTR {
+						continue
+					}
+					
+					throw Error(code: Socket.SOCKET_ERR_ACCEPT_FAILED, reason: self.lastError())
+				}
+				socketfd2 = fd
+				address = .IPV4(acceptAddr)
+				
+			case .INET6:
+				var acceptAddr = sockaddr_in6()
+				var addrSize = socklen_t(sizeofValue(acceptAddr))
+				
+				#if os(Linux)
+					let fd = withUnsafeMutablePointer(&acceptAddr) {
+						Glibc.accept(self.socketfd, UnsafeMutablePointer($0), &addrSize)
+					}
+				#else
+					let fd = withUnsafeMutablePointer(&acceptAddr) {
+						Darwin.accept(self.socketfd, UnsafeMutablePointer($0), &addrSize)
+					}
+				#endif
+				if fd < 0 {
+					
+					if errno == EINTR {
+						continue
+					}
+					
+					throw Error(code: Socket.SOCKET_ERR_ACCEPT_FAILED, reason: self.lastError())
+				}
+				socketfd2 = fd
+				address = .IPV6(acceptAddr)
 			}
-			socketfd2 = fd
-			address = .IPV6(acceptAddr)
-		}
+			
+			keepRunning = false
+			
+		} while keepRunning
 		
 		// Close the old socket...
 		self.close()
@@ -1000,7 +1032,7 @@ public class Socket: SocketReader, SocketWriter {
 		// Replace the existing socketfd with the new one...
 		self.socketfd = socketfd2
 		
-		if let (hostname, port) = Socket.hostnameAndPort(from: address) {
+		if let (hostname, port) = Socket.hostnameAndPort(from: address!) {
 			self.signature!.hostname = hostname
 			self.signature!.port = port
 		}
