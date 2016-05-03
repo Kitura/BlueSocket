@@ -10,17 +10,18 @@ Socket framework for Swift using the Swift Package Manager. Works on OS X and Li
 ## Prerequisites
 
 ### Swift
-* Swift Open Source `swift-DEVELOPMENT-SNAPSHOT-2016-04-25-a` toolchain or higher (**REQUIRED for latest release**)
+* Swift Open Source `swift-DEVELOPMENT-SNAPSHOT-2016-04-25-a` toolchain (**Minimum REQUIRED for latest release**)
+* Swift Open Source `swift-DEVELOPMENT-SNAPSHOT-2016-05-03-a` toolchain (**Recommended**)
 
 ### OS X
 
 * OS X 10.11.0 (*El Capitan*) or higher
-* Xcode Version 7.3.1 (7D1012) or higher using the above toolchain (*Recommended*)
+* Xcode Version 7.3.1 (7D1012) or higher using the one of the above toolchains (*Recommended*)
 
 ### Linux
 
 * Ubuntu 15.10 (or 14.04 but only tested on 15.10)
-* Swift Open Source toolchain listed above
+* One of the Swift Open Source toolchains listed above
 
 ## Build
 
