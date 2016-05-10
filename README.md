@@ -42,7 +42,7 @@ import Socket
 ### Creating a socket.
 
 BlueSocket provides four different factory methods that are used to create an instance.  These are:
-- `create()` - This creates a fully configured default socket. A Default socket created with `family: .INET`, `type: .STREAM`, and `proto: .TCP`.
+- `create()` - This creates a fully configured default socket. A Default socket created with `family: .inet`, `type: .stream`, and `proto: .tcp`.
 - `create(family family: ProtocolFamily, type: SocketType, proto: SocketProtocol)` - This API allows you to create a configured socket customized for your needs.  You can customize the protocol family, socket type and socket protocol.
 - `create(connectedUsing signature: Signature)` - This API will allow you create a socket and have it attempt to connect to a server based on the information you pass in the `Socket.Signature`.
 - `create(fromNativeHandle nativeHandle: Int32, address: Address?)` - This API lets you wrap a native file descriptor in a new instance of Socket.

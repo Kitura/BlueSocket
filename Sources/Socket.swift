@@ -87,12 +87,16 @@ public class Socket: SocketReader, SocketWriter {
 	/// Socket Protocol Family Values
 	///
 	/// **Note:** Only the following are supported at this time:
-	///			INET = AF_INET (IPV4)
-	///			INET6 = AF_INET6 (IPV6)
+	///			inet = AF_INET (IPV4)
+	///			inet6 = AF_INET6 (IPV6)
 	///
 	public enum ProtocolFamily {
 		
-		case INET, INET6
+		/// AF_INET (IPV4)
+		case inet
+		
+		/// AF_INET6 (IPV6)
+		case inet6
 		
 		///
 		/// Return the value for a particular case
@@ -101,10 +105,10 @@ public class Socket: SocketReader, SocketWriter {
 			
 			switch self {
 				
-			case .INET:
+			case .inet:
 				return Int32(AF_INET)
 				
-			case .INET6:
+			case .inet6:
 				return Int32(AF_INET6)
 			}
 		}
@@ -120,9 +124,9 @@ public class Socket: SocketReader, SocketWriter {
 			switch forValue {
 				
 			case Int32(AF_INET):
-				return .INET
+				return .inet
 			case Int32(AF_INET6):
-				return .INET6
+				return .inet6
 			default:
 				return nil
 			}
@@ -136,12 +140,16 @@ public class Socket: SocketReader, SocketWriter {
 	/// Socket Type Values
 	///
 	/// **Note:** Only the following are supported at this time:
-	///			STREAM = SOCK_STREAM (Provides sequenced, reliable, two-way, connection-based byte streams.)
-	///			DGRAM = SOCK_DGRAM (Supports datagrams (connectionless, unreliable messages of a fixed maximum length).)
+	///			stream = SOCK_STREAM (Provides sequenced, reliable, two-way, connection-based byte streams.)
+	///			datagram = SOCK_DGRAM (Supports datagrams (connectionless, unreliable messages of a fixed maximum length).)
 	///
 	public enum SocketType {
 		
-		case STREAM, DGRAM
+		/// SOCK_STREAM (Provides sequenced, reliable, two-way, connection-based byte streams.)
+		case stream
+		
+		/// SOCK_DGRAM (Supports datagrams (connectionless, unreliable messages of a fixed maximum length).)
+		case datagram
 		
 		///
 		/// Return the value for a particular case
@@ -150,13 +158,13 @@ public class Socket: SocketReader, SocketWriter {
 			
 			switch self {
 				
-			case .STREAM:
+			case .stream:
 				#if os(Linux)
 					return Int32(SOCK_STREAM.rawValue)
 				#else
 					return SOCK_STREAM
 				#endif
-			case .DGRAM:
+			case .datagram:
 				#if os(Linux)
 					return Int32(SOCK_DGRAM.rawValue)
 				#else
@@ -178,9 +186,9 @@ public class Socket: SocketReader, SocketWriter {
 				switch forValue {
 					
 				case Int32(SOCK_STREAM.rawValue):
-					return .STREAM
+					return .stream
 				case Int32(SOCK_DGRAM.rawValue):
-					return .DGRAM
+					return .datagram
 				default:
 					return nil
 				}
@@ -188,9 +196,9 @@ public class Socket: SocketReader, SocketWriter {
 				switch forValue {
 					
 				case SOCK_STREAM:
-					return .STREAM
+					return .stream
 				case SOCK_DGRAM:
-					return .DGRAM
+					return .datagram
 				default:
 					return nil
 				}
@@ -204,12 +212,16 @@ public class Socket: SocketReader, SocketWriter {
 	/// Socket Protocol Values
 	///
 	/// **Note:** Only the following are supported at this time:
-	///			TCP = IPPROTO_TCP
-	///			UDP = IPPROTO_UDP
+	///			tcp = IPPROTO_TCP
+	///			udp = IPPROTO_UDP
 	///
 	public enum SocketProtocol: Int32 {
 		
-		case TCP, UDP
+		/// IPPROTO_TCP
+		case tcp
+		
+		/// IPPROTO_UDP
+		case udp
 		
 		///
 		/// Return the value for a particular case
@@ -218,9 +230,9 @@ public class Socket: SocketReader, SocketWriter {
 			
 			switch self {
 				
-			case .TCP:
+			case .tcp:
 				return Int32(IPPROTO_TCP)
-			case .UDP:
+			case .udp:
 				return Int32(IPPROTO_UDP)
 			}
 		}
@@ -237,9 +249,9 @@ public class Socket: SocketReader, SocketWriter {
 			switch forValue {
 				
 			case Int32(IPPROTO_TCP):
-				return .TCP
+				return .tcp
 			case Int32(IPPROTO_UDP):
-				return .UDP
+				return .udp
 			default:
 				return nil
 			}
@@ -253,8 +265,11 @@ public class Socket: SocketReader, SocketWriter {
 	///
 	public enum Address {
 		
-		case IPV4(sockaddr_in)
-		case IPV6(sockaddr_in6)
+		/// sockaddr_in
+		case ipv4(sockaddr_in)
+		
+		/// sockaddr_in6
+		case ipv6(sockaddr_in6)
 		
 		///
 		/// Size of address
@@ -263,9 +278,9 @@ public class Socket: SocketReader, SocketWriter {
 			
 			switch self {
 				
-			case .IPV4(let addr):
+			case .ipv4(let addr):
 				return sizeofValue(addr)
-			case .IPV6(let addr):
+			case .ipv6(let addr):
 				return sizeofValue(addr)
 			}
 		}
@@ -277,10 +292,10 @@ public class Socket: SocketReader, SocketWriter {
 			
 			switch self {
 				
-			case .IPV4(let addr):
+			case .ipv4(let addr):
 				return addr.asAddr()
 				
-			case .IPV6(let addr):
+			case .ipv6(let addr):
 				return addr.asAddr()
 			}
 		}
@@ -383,7 +398,7 @@ public class Socket: SocketReader, SocketWriter {
 			}
 			
 			// Default to IPV4 socket protocol family...
-			self.protocolFamily = .INET
+			self.protocolFamily = .inet
 			
 			self.socketType = socketType
 			self.proto = proto
@@ -625,7 +640,7 @@ public class Socket: SocketReader, SocketWriter {
 	
 	///
 	/// Create a configured Socket instance.
-	/// **Note:** Calling with no passed parameters will create a default socket: IPV4, STREAM, TCP.
+	/// **Note:** Calling with no passed parameters will create a default socket: IPV4, stream, TCP.
 	///
 	/// - Parameters:
 	///		- family:	The family of the socket to create.
@@ -634,9 +649,9 @@ public class Socket: SocketReader, SocketWriter {
 	///
 	/// - Returns: New Socket instance
 	///
-	public class func create(family: ProtocolFamily = .INET, type: SocketType = .STREAM, proto: SocketProtocol = .TCP) throws -> Socket {
+	public class func create(family: ProtocolFamily = .inet, type: SocketType = .stream, proto: SocketProtocol = .tcp) throws -> Socket {
 		
-		if type == .DGRAM || proto == .UDP {
+		if type == .datagram || proto == .udp {
 			
 			throw Error(code: Socket.SOCKET_ERR_NOT_SUPPORTED_YET, reason: "Full support for Datagrams and UDP not available yet.")
 			
@@ -695,7 +710,7 @@ public class Socket: SocketReader, SocketWriter {
 		
 		switch address {
 			
-		case .IPV4(let address_in):
+		case .ipv4(let address_in):
 			var addr_in = address_in
 			let addr = addr_in.asAddr()
 			bufLen = Int(INET_ADDRSTRLEN)
@@ -703,7 +718,7 @@ public class Socket: SocketReader, SocketWriter {
 			inet_ntop(Int32(addr.sa_family), &addr_in.sin_addr, &buf, socklen_t(bufLen))
 			port = Int32(UInt16(addr_in.sin_port).byteSwapped)
 			
-		case .IPV6(let address_in):
+		case .ipv6(let address_in):
 			var addr_in = address_in
 			let addr = addr_in.asAddr()
 			bufLen = Int(INET6_ADDRSTRLEN)
@@ -882,7 +897,7 @@ public class Socket: SocketReader, SocketWriter {
 			
 			switch self.signature!.protocolFamily {
 				
-			case .INET:
+			case .inet:
 				var acceptAddr = sockaddr_in()
 				var addrSize = socklen_t(sizeofValue(acceptAddr))
 				
@@ -904,9 +919,9 @@ public class Socket: SocketReader, SocketWriter {
 					throw Error(code: Socket.SOCKET_ERR_ACCEPT_FAILED, reason: self.lastError())
 				}
 				socketfd2 = fd
-				address = .IPV4(acceptAddr)
+				address = .ipv4(acceptAddr)
 				
-			case .INET6:
+			case .inet6:
 				var acceptAddr = sockaddr_in6()
 				var addrSize = socklen_t(sizeofValue(acceptAddr))
 				
@@ -928,7 +943,7 @@ public class Socket: SocketReader, SocketWriter {
 					throw Error(code: Socket.SOCKET_ERR_ACCEPT_FAILED, reason: self.lastError())
 				}
 				socketfd2 = fd
-				address = .IPV6(acceptAddr)
+				address = .ipv6(acceptAddr)
 			}
 			
 			keepRunning = false
@@ -970,7 +985,7 @@ public class Socket: SocketReader, SocketWriter {
 			
 			switch self.signature!.protocolFamily {
 				
-			case .INET:
+			case .inet:
 				var acceptAddr = sockaddr_in()
 				var addrSize = socklen_t(sizeofValue(acceptAddr))
 				
@@ -992,9 +1007,9 @@ public class Socket: SocketReader, SocketWriter {
 					throw Error(code: Socket.SOCKET_ERR_ACCEPT_FAILED, reason: self.lastError())
 				}
 				socketfd2 = fd
-				address = .IPV4(acceptAddr)
+				address = .ipv4(acceptAddr)
 				
-			case .INET6:
+			case .inet6:
 				var acceptAddr = sockaddr_in6()
 				var addrSize = socklen_t(sizeofValue(acceptAddr))
 				
@@ -1016,7 +1031,7 @@ public class Socket: SocketReader, SocketWriter {
 					throw Error(code: Socket.SOCKET_ERR_ACCEPT_FAILED, reason: self.lastError())
 				}
 				socketfd2 = fd
-				address = .IPV6(acceptAddr)
+				address = .ipv6(acceptAddr)
 			}
 			
 			keepRunning = false
@@ -1104,7 +1119,7 @@ public class Socket: SocketReader, SocketWriter {
 		}
 		
 		// Create the hints for our search...
-		let socketType: SocketType = .STREAM
+		let socketType: SocketType = .stream
 		#if os(Linux)
 			var hints = addrinfo(
 				ai_flags: AI_PASSIVE,
@@ -1212,13 +1227,13 @@ public class Socket: SocketReader, SocketWriter {
 			
 			var addr = sockaddr_in6()
 			memcpy(&addr, info!.pointee.ai_addr, Int(sizeofValue(addr)))
-			address = .IPV6(addr)
+			address = .ipv6(addr)
 			
 		} else if info!.pointee.ai_family == Int32(AF_INET) {
 			
 			var addr = sockaddr_in()
 			memcpy(&addr, info!.pointee.ai_addr, Int(sizeofValue(addr)))
-			address = .IPV4(addr)
+			address = .ipv4(addr)
 			
 		} else {
 			
@@ -1419,13 +1434,13 @@ public class Socket: SocketReader, SocketWriter {
 			
 			var addr = sockaddr_in6()
 			memcpy(&addr, info!.pointee.ai_addr, Int(sizeofValue(addr)))
-			address = .IPV6(addr)
+			address = .ipv6(addr)
 			
 		} else if info!.pointee.ai_family == Int32(AF_INET) {
 			
 			var addr = sockaddr_in()
 			memcpy(&addr, info!.pointee.ai_addr, Int(sizeofValue(addr)))
-			address = .IPV4(addr)
+			address = .ipv4(addr)
 			
 		} else {
 			
@@ -1632,7 +1647,7 @@ public class Socket: SocketReader, SocketWriter {
 		}
 		
 		// The socket must've been created for UDP...
-		guard let sig = self.signature where sig.proto == .UDP else {
+		guard let sig = self.signature where sig.proto == .udp else {
 			
 			throw Error(code: Socket.SOCKET_ERR_WRONG_PROTOCOL, reason: "This is not a UDP socket.")
 		}
@@ -1669,7 +1684,7 @@ public class Socket: SocketReader, SocketWriter {
 		}
 		
 		// The socket must've been created for UDP...
-		guard let sig = self.signature where sig.proto == .UDP else {
+		guard let sig = self.signature where sig.proto == .udp else {
 			
 			throw Error(code: Socket.SOCKET_ERR_WRONG_PROTOCOL, reason: "This is not a UDP socket.")
 		}
@@ -1810,7 +1825,7 @@ public class Socket: SocketReader, SocketWriter {
 		}
 		
 		// The socket must've been created for UDP...
-		guard let sig = self.signature where sig.proto == .UDP else {
+		guard let sig = self.signature where sig.proto == .udp else {
 			
 			throw Error(code: Socket.SOCKET_ERR_WRONG_PROTOCOL, reason: "This is not a UDP socket.")
 		}
@@ -1833,7 +1848,7 @@ public class Socket: SocketReader, SocketWriter {
 		}
 		
 		// The socket must've been created for UDP...
-		guard let sig = self.signature where sig.proto == .UDP else {
+		guard let sig = self.signature where sig.proto == .udp else {
 			
 			throw Error(code: Socket.SOCKET_ERR_WRONG_PROTOCOL, reason: "This is not a UDP socket.")
 		}
