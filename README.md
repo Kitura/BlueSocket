@@ -196,15 +196,13 @@ class EchoServer {
 		
 		} catch let error {
 
-			if error is Socket.Error {
-
-				let socketError = error as! Socket.Error
-				print("Error reported: \(socketError.description)")
-
-			} else {
+			guard let socketError = error as? Socket.Error else {
 
 				print("Unexpected error...")
+				return
 			}
+
+			print("Error reported: \(socketError.description)")
 		}
 	}
 }
