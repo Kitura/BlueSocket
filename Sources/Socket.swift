@@ -762,6 +762,88 @@ public class Socket: SocketReader, SocketWriter {
 		return (readables, writables)
 	}
 	
+	///
+	/// Monitor an array of sockets, returning when data is available or timeout occurs.
+	///
+	/// - Parameters:
+	///		- sockets:		An array of sockets to be monitored.
+	///		- timeout:		Timeout (in msec) before returning.
+	///
+	/// - Returns: An optional array of sockets which have data available or nil if a timeout expires.
+	///
+	public class func wait(for sockets: [Socket], timeout: UInt) throws -> [Socket]? {
+		
+		// Validate we have sockets to look for and they are valid...
+		for socket in sockets {
+			
+			if socket.socketfd == Socket.SOCKET_INVALID_DESCRIPTOR {
+				
+				throw Error(code: Socket.SOCKET_ERR_BAD_DESCRIPTOR, reason: nil)
+			}
+			if !socket.isConnected {
+				
+				throw Error(code: Socket.SOCKET_ERR_NOT_CONNECTED, reason: nil)
+			}
+		}
+		
+		// Setup the timeout...
+		var timer = timeval()
+		if timeout > 0 {
+			
+			// Note: timeval expects microseconds, convert now...
+			let uSecs = timeout * 1000
+			
+			// Get seconds...
+			let secs = Int32(Double(uSecs) * 0.001)
+			timer.tv_sec = Int(secs)
+			
+			// Now the leftover microseconds...
+			#if os(Linux)
+				timer.tv_usec = Int(Double(uSecs % 1000))
+			#else
+				timer.tv_usec = Int32(Double(uSecs % 1000))
+			#endif
+		}
+		
+		// Setup the array of readfds...
+		var readfds = fd_set()
+		FD.ZERO(set: &readfds)
+		
+		var highSocketfd: Int32 = 0
+		for socket in sockets {
+			
+			if socket.socketfd > highSocketfd {
+				highSocketfd = socket.socketfd
+			}
+			FD.SET(fd: socket.socketfd, set: &readfds)
+		}
+		
+		// Issue the select...
+		let count = select(highSocketfd + 1, &readfds, nil, nil, &timer)
+		
+		// A count of less than zero indicates select failed...
+		if count < 0 {
+			
+			throw Error(code: Socket.SOCKET_ERR_SELECT_FAILED, reason: String(validatingUTF8: strerror(errno)) ?? "Error: \(errno)")
+		}
+		
+		// A count equal zero, indicates we timed out...
+		if count == 0 {
+			return nil
+		}
+		
+		// Build the array of returned sockets...
+		var dataSockets = [Socket]()
+		for socket in sockets {
+			
+			if FD.ISSET(fd: socket.socketfd, set: &readfds) {
+				dataSockets.append(socket)
+			}
+		}
+		
+		return dataSockets
+	}
+	
 	// MARK: Lifecycle Methods
 	
 	// MARK: -- Public
