@@ -101,6 +101,7 @@ In addition to reading from a socket, BlueSocket also supplies three methods for
 
 - `hostnameAndPort(from address: Address)` - This class function provides a means to extract the hostname and port from a given `Socket.Address`. On successful completion, a tuple containing the hostname and port are returned.
 - `checkStatus(for sockets: [Socket])` - This class function allows you check status of an array of Socket instances. Upon completion, a tuple containing two Socket arrays is returned. The first array contains the Socket instances are that have data available to be read and the second array contains Socket instances that can be written to.
+- `wait(for sockets: [Socket], timeout: UInt)` - This class function allow for monitoring an array of `Socket` instances, waiting for either a timeout to occur or data to be readable at one of the monitored `Socket` instances. If a timeout occurs, this API will return `nil`.  If data is available on one or more of the monitored `Socket` instances, those instances will be returned in an array.
 - `isReadableOrWritable()` - This instance function allows to determine whether a Socket instance is readable and/or writable.  A tuple is returned containing two `Bool` values.  The first, if true, indicates the Socket instance has data to read, the second, if true, indicates that the Socket instance can be written to.
 - `setBlocking(shouldBlock: Bool)` - This instance function allows you control whether or not this Socket instance should be in blocking mode or not.
 
