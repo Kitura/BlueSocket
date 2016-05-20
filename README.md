@@ -31,6 +31,7 @@ To build Socket from the command line:
 % cd <path-to-clone>
 % swift build
 ```
+
 ## Using BlueSocket
 
 ### Before starting
@@ -74,7 +75,7 @@ try socket.listen(on: 1337)
 ### Accepting a connection from a listening socket.
 
 When a listening socket detects an incoming connection request, control is returned to your program.  You can then either accept the connection or continue listening or both if your application is multi-threaded. **BlueSocket** supports two distinct ways of accepting an incoming connection. They are:
-- `acceptClientConnection()` - This function accepts the connection and returns a *new* Socket instance based on the newly connected socket. The instance that was listening in unaffected.
+- `acceptClientConnection()` - This function accepts the connection and returns a *new* `Socket` instance based on the newly connected socket. The instance that was listening in unaffected.
 - `acceptConnection()` - This function accepts the incoming connection, *replacing and closing* the existing listening socket. The properties that were formerly associated with the listening socket are replaced by the properties that are relevant to the newly connected socket.
 
 ### Connecting a socket to a server.
@@ -101,7 +102,7 @@ In addition to reading from a socket, **BlueSocket** also supplies three methods
 
 - `hostnameAndPort(from address: Address)` - This *class function* provides a means to extract the hostname and port from a given `Socket.Address`. On successful completion, a tuple containing the `hostname` and `port` are returned.
 - `checkStatus(for sockets: [Socket])` - This *class function* allows you to check status of an array of `Socket` instances. Upon completion, a tuple containing two `Socket` arrays is returned. The first array contains the `Socket` instances are that have data available to be read and the second array contains `Socket` instances that can be written to. This API does *not* block. It will check the status of each `Socket` instance and then return the results.
-- `wait(for sockets: [Socket], timeout: UInt)` - This *class function* allows for monitoring an array of `Socket` instances, waiting for either a timeout to occur or data to be readable at one of the monitored `Socket` instances. If a timeout of zero (0) is specified, this API will check each socket and return immediately. Otherwise, it will wait unit either the timeout expires or data is readable from one or more of the monitored `Socket` instances. If a timeout occurs, this API will return `nil`.  If data is available on one or more of the monitored `Socket` instances, those instances will be returned in an array.
+- `wait(for sockets: [Socket], timeout: UInt)` - This *class function* allows for monitoring an array of `Socket` instances, waiting for either a timeout to occur or data to be readable at one of the monitored `Socket` instances. If a timeout of zero (0) is specified, this API will check each socket and return immediately. Otherwise, it will wait until either the timeout expires or data is readable from one or more of the monitored `Socket` instances. If a timeout occurs, this API will return `nil`.  If data is available on one or more of the monitored `Socket` instances, those instances will be returned in an array.
 - `isReadableOrWritable()` - This *instance function* allows to determine whether a `Socket` instance is readable and/or writable.  A tuple is returned containing two `Bool` values.  The first, if true, indicates the `Socket` instance has data to read, the second, if true, indicates that the `Socket` instance can be written to.
 - `setBlocking(shouldBlock: Bool)` - This *instance function* allows you control whether or not this `Socket` instance should be placed in blocking mode or not. **Note:** All `Socket` instances are, by *default*, created in *blocking mode*.
 
