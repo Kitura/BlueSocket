@@ -790,18 +790,21 @@ public class Socket: SocketReader, SocketWriter {
 		var timer = timeval()
 		if timeout > 0 {
 			
-			// Note: timeval expects microseconds, convert now...
-			let uSecs = timeout * 1000
+			// First get seconds...
+			let secs = Int(Double(timeout / 1000))
+			timer.tv_sec = secs
 			
-			// Get seconds...
-			let secs = Int32(Double(uSecs) * 0.001)
-			timer.tv_sec = Int(secs)
+			// Now get the leftover millisecs...
+			let msecs = Int32(Double(timeout % 1000))
+			
+			// Note: timeval expects microseconds, convert now...
+			let uSecs = msecs * 1000
 			
 			// Now the leftover microseconds...
 			#if os(Linux)
-				timer.tv_usec = Int(Double(uSecs % 1000))
+				timer.tv_usec = Int(uSecs)
 			#else
-				timer.tv_usec = Int32(Double(uSecs % 1000))
+				timer.tv_usec = Int32(uSecs)
 			#endif
 		}
 		
