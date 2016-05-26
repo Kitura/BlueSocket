@@ -93,8 +93,8 @@
 		8C0F4BF81C4E84CC008B2B0A /* Sources */ = {
 			isa = PBXGroup;
 			children = (
-				8C0F4C021C4E8630008B2B0A /* SocketProtocols.swift */,
 				8C0F4C031C4E8630008B2B0A /* Socket.swift */,
+				8C0F4C021C4E8630008B2B0A /* SocketProtocols.swift */,
 				8C0F4C041C4E8630008B2B0A /* SocketUtils.swift */,
 				8C0F4C011C4E85F7008B2B0A /* Supporting Files */,
 			);

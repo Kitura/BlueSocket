@@ -65,3 +65,101 @@ public protocol SocketWriter {
 	///
 	func write(from string: String) throws
 }
+
+// MARK: SSLServiceDelegate
+
+///
+/// SSL Service Delegate Protocol
+///
+public protocol SSLServiceDelegate {
+	
+	///
+	/// Initialize SSL Service
+	///
+	/// - Parameter isServer:	True for initializing a server, otherwise a client.
+	///
+	func initialize(isServer: Bool) throws
+	
+	///
+	/// Deinitialize SSL Service
+	///
+	func deinitialize()
+	
+	///
+	/// Processing on acceptance from a listening socket
+	///
+	func onAccept(socket: Socket) throws
+	
+	///
+	/// Processing on connection to a listening socket
+	///
+	func onConnect(socket: Socket) throws
+	
+	///
+	/// Do connection verification
+	///
+	func verifyConnection(socket: Socket) throws
+	
+	///
+	/// Low level writer
+	///
+	/// - Parameters:
+	///		- buffer:		Buffer pointer.
+	///		- bufSize:		Size of the buffer.
+	///
+	///	- Returns the number of bytes written. Zero indicates SSL shutdown, less than zero indicates error.
+	///
+	func send(buffer: UnsafePointer<Void>!, bufSize: Int) -> Int
+	
+	///
+	/// Low level reader
+	///
+	/// - Parameters:
+	///		- buffer:		Buffer pointer.
+	///		- bufSize:		Size of the buffer.
+	///
+	///	- Returns the number of bytes read. Zero indicates SSL shutdown, less than zero indicates error.
+	///
+	func recv(buffer: UnsafeMutablePointer<Void>!, bufSize: Int) -> Int
+	
+}
+
+// MARK: SSLError
+
+///
+/// SSL Service Error
+///
+public enum SSLError: ErrorProtocol, CustomStringConvertible {
+	
+	/// success
+	case success
+	
+	/// Failure with error code and reason
+	case fail(UInt, String)
+	
+	/// The error code itself
+	public var code: Int {
+		
+		switch self {
+			
+		case .success:
+			return 0
+			
+		case .fail(let (code, _)):
+			return Int(code)
+		}
+	}
+	
+	public var description: String {
+		
+		switch self {
+			
+		case .success:
+			return "Success"
+			
+		case .fail(let (_, reason)):
+			return reason
+		}
+	}
+}
+

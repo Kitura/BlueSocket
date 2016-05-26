@@ -508,6 +508,17 @@ public class Socket: SocketReader, SocketWriter {
 			self.init(code: Socket.SOCKET_ERR_RECV_BUFFER_TOO_SMALL, reason: nil)
 			self.bufferSizeNeeded = Int32(bufferSize)
 		}
+		
+		///
+		/// Initializes an Error instance using SSLError
+		///
+		/// - Parameter error: SSLError instance to be transformed
+		///
+		/// - Returns: Error Instance
+		init(with error: SSLError) {
+			
+			self.init(code: error.code, reason: error.description)
+		}
 	}
 	
 	// MARK: Properties
@@ -528,6 +539,11 @@ public class Socket: SocketReader, SocketWriter {
 	
 	
 	// MARK: -- Public
+	
+	///
+	/// The delegate that provides the SSL implementation.
+	///
+	public var delegate: SSLServiceDelegate?
 	
 	///
 	/// Internal Read buffer size for all open sockets.
@@ -901,6 +917,9 @@ public class Socket: SocketReader, SocketWriter {
 		// Destroy and free the readBuffer...
 		self.readBuffer.deinitialize()
 		self.readBuffer.deallocateCapacity(self.readBufferSize)
+		
+		// If we have a delegate, tell it to cleanup too...
+		self.delegate?.deinitialize()
 	}
 	
 	// MARK: -- Private
@@ -1035,9 +1054,28 @@ public class Socket: SocketReader, SocketWriter {
 			
 		} while keepRunning
 		
-		// Create and return the new socket...
+		// Create the new socket...
 		//	Note: The current socket continues to listen.
-		return try Socket(fd: socketfd2, remoteAddress: address!)
+		let newSocket = try Socket(fd: socketfd2, remoteAddress: address!)
+		
+		// Let the delegate do post accept handling and verification...
+		do {
+			
+			try self.delegate?.onAccept(socket: newSocket)
+			try self.delegate?.verifyConnection(socket: newSocket)
+			
+		} catch let error {
+			
+			guard let sslError = error as? SSLError else {
+				
+				throw error
+			}
+			
+			throw Error(with: sslError)
+		}
+		
+		// Return the new socket...
+		return newSocket
 	}
 	
 	///
@@ -1140,6 +1178,22 @@ public class Socket: SocketReader, SocketWriter {
 		// We're connected but no longer listening...
 		self.isConnected = true
 		self.isListening = false
+		
+		// Let the delegate do post accept handling and verification...
+		do {
+			
+			try self.delegate?.onAccept(socket: self)
+			try self.delegate?.verifyConnection(socket: self)
+			
+		} catch let error {
+			
+			guard let sslError = error as? SSLError else {
+				
+				throw error
+			}
+			
+			throw Error(with: sslError)
+		}
 	}
 	
 	// MARK: -- Close
@@ -1201,6 +1255,21 @@ public class Socket: SocketReader, SocketWriter {
 		if host.utf8.count == 0 {
 			
 			throw Error(code: Socket.SOCKET_ERR_INVALID_HOSTNAME, reason: nil)
+		}
+		
+		// Tell the delegate to initialize as a client...
+		do {
+			
+			try self.delegate?.initialize(isServer: false)
+			
+		} catch let error {
+			
+			guard let sslError = error as? SSLError else {
+				
+				throw error
+			}
+			
+			throw Error(with: sslError)
 		}
 		
 		// Create the hints for our search...
@@ -1333,6 +1402,21 @@ public class Socket: SocketReader, SocketWriter {
 			hostname: host,
 			port: port)
 		
+		// Let the delegate do post connect handling and verification...
+		do {
+			
+			try self.delegate?.onConnect(socket: self)
+			try self.delegate?.verifyConnection(socket: self)
+			
+		} catch let error {
+			
+			guard let sslError = error as? SSLError else {
+				
+				throw error
+			}
+			
+			throw Error(with: sslError)
+		}
 	}
 	
 	///
@@ -1364,6 +1448,21 @@ public class Socket: SocketReader, SocketWriter {
 			return
 		}
 		
+		// Tell the delegate to initialize as a client...
+		do {
+			
+			try self.delegate?.initialize(isServer: false)
+			
+		} catch let error {
+			
+			guard let sslError = error as? SSLError else {
+				
+				throw error
+			}
+			
+			throw Error(with: sslError)
+		}
+		
 		// Now, do the connection using the supplied address...
 		var remoteAddr = signature.address!.addr
 		
@@ -1388,6 +1487,22 @@ public class Socket: SocketReader, SocketWriter {
 			sig.port = Int32(port)
 			self.signature = sig
 			self.isConnected = true
+		}
+		
+		// Let the delegate do post connect handling and verification...
+		do {
+			
+			try self.delegate?.onConnect(socket: self)
+			try self.delegate?.verifyConnection(socket: self)
+			
+		} catch let error {
+			
+			guard let sslError = error as? SSLError else {
+				
+				throw error
+			}
+			
+			throw Error(with: sslError)
 		}
 	}
 	
@@ -1434,6 +1549,21 @@ public class Socket: SocketReader, SocketWriter {
 		guard let sig = self.signature else {
 			
 			throw Error(code: Socket.SOCKET_ERR_INTERNAL, reason: "Socket signature not found.")
+		}
+		
+		// Tell the delegate to initialize as a server...
+		do {
+			
+			try self.delegate?.initialize(isServer: true)
+			
+		} catch let error {
+			
+			guard let sslError = error as? SSLError else {
+				
+				throw error
+			}
+			
+			throw Error(with: sslError)
 		}
 		
 		// Create the hints for our search...
@@ -1814,11 +1944,18 @@ public class Socket: SocketReader, SocketWriter {
 		#endif
 		while sent < bufSize {
 			
-			#if os(Linux)
-				let s = Glibc.send(self.socketfd, buffer.advanced(by: sent), Int(bufSize - sent), sendFlags)
-			#else
-				let s = Darwin.send(self.socketfd, buffer.advanced(by: sent), Int(bufSize - sent), sendFlags)
-			#endif
+			var s = 0
+			if self.delegate != nil {
+				
+				s = self.delegate!.send(buffer: buffer.advanced(by: sent), bufSize: Int(bufSize - sent))
+				
+			} else {
+				#if os(Linux)
+					s = Glibc.send(self.socketfd, buffer.advanced(by: sent), Int(bufSize - sent), sendFlags)
+				#else
+					s = Darwin.send(self.socketfd, buffer.advanced(by: sent), Int(bufSize - sent), sendFlags)
+				#endif
+			}
 			if s <= 0 {
 				
 				throw Error(code: Socket.SOCKET_ERR_WRITE_FAILED, reason: self.lastError())
@@ -1860,11 +1997,18 @@ public class Socket: SocketReader, SocketWriter {
 		let buffer = data.bytes
 		while sent < data.length {
 			
-			#if os(Linux)
-				let s = Glibc.send(self.socketfd, buffer.advanced(by: sent), Int(data.length - sent), sendFlags)
-			#else
-				let s = Darwin.send(self.socketfd, buffer.advanced(by: sent), Int(data.length - sent), sendFlags)
-			#endif
+			var s = 0
+			if self.delegate != nil {
+				
+				s = self.delegate!.send(buffer: buffer.advanced(by: sent), bufSize: Int(data.length - sent))
+				
+			} else {
+				#if os(Linux)
+					s = Glibc.send(self.socketfd, buffer.advanced(by: sent), Int(data.length - sent), sendFlags)
+				#else
+					s = Darwin.send(self.socketfd, buffer.advanced(by: sent), Int(data.length - sent), sendFlags)
+				#endif
+			}
 			if s <= 0 {
 				
 				throw Error(code: Socket.SOCKET_ERR_WRITE_FAILED, reason: self.lastError())
@@ -2038,11 +2182,17 @@ public class Socket: SocketReader, SocketWriter {
 		var count: Int = 0
 		repeat {
 			
-			#if os(Linux)
-				count = Glibc.recv(self.socketfd, self.readBuffer, self.readBufferSize, 0)
-			#else
-				count = Darwin.recv(self.socketfd, self.readBuffer, self.readBufferSize, 0)
-			#endif
+			if self.delegate != nil {
+				
+				count = self.delegate!.recv(buffer: self.readBuffer, bufSize: self.readBufferSize)
+				
+			} else {
+				#if os(Linux)
+					count = Glibc.recv(self.socketfd, self.readBuffer, self.readBufferSize, 0)
+				#else
+					count = Darwin.recv(self.socketfd, self.readBuffer, self.readBufferSize, 0)
+				#endif
+			}
 			
 			// Check for error...
 			if count < 0 {
