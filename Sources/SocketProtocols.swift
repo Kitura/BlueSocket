@@ -88,10 +88,14 @@ public protocol SSLServiceDelegate {
 	///
 	/// Processing on acceptance from a listening socket
 	///
+	/// - Parameter socket:	The connected Socket instance.
+	///
 	func onAccept(socket: Socket) throws
 	
 	///
 	/// Processing on connection to a listening socket
+	///
+	/// - Parameter socket:	The connected Socket instance.
 	///
 	func onConnect(socket: Socket) throws
 	
