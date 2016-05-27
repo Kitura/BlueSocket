@@ -1947,7 +1947,19 @@ public class Socket: SocketReader, SocketWriter {
 			var s = 0
 			if self.delegate != nil {
 				
-				s = self.delegate!.send(buffer: buffer.advanced(by: sent), bufSize: Int(bufSize - sent))
+				do {
+					
+					s = try self.delegate!.send(buffer: buffer.advanced(by: sent), bufSize: Int(bufSize - sent))
+					
+				} catch let error {
+					
+					guard let err = error as? SSLError else {
+						
+						throw error
+					}
+					
+					throw Error(with: err)
+				}
 				
 			} else {
 				#if os(Linux)
@@ -2000,7 +2012,19 @@ public class Socket: SocketReader, SocketWriter {
 			var s = 0
 			if self.delegate != nil {
 				
-				s = self.delegate!.send(buffer: buffer.advanced(by: sent), bufSize: Int(data.length - sent))
+				do {
+
+					s = try self.delegate!.send(buffer: buffer.advanced(by: sent), bufSize: Int(data.length - sent))
+					
+				} catch let error {
+					
+					guard let err = error as? SSLError else {
+						
+						throw error
+					}
+					
+					throw Error(with: err)
+				}
 				
 			} else {
 				#if os(Linux)
@@ -2184,7 +2208,19 @@ public class Socket: SocketReader, SocketWriter {
 			
 			if self.delegate != nil {
 				
-				count = self.delegate!.recv(buffer: self.readBuffer, bufSize: self.readBufferSize)
+				do {
+
+					count = try self.delegate!.recv(buffer: self.readBuffer, bufSize: self.readBufferSize)
+					
+				} catch let error {
+					
+					guard let err = error as? SSLError else {
+						
+						throw error
+					}
+					
+					throw Error(with: err)
+				}
 				
 			} else {
 				#if os(Linux)
