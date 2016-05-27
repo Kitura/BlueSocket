@@ -135,7 +135,7 @@ public enum SSLError: ErrorProtocol, CustomStringConvertible {
 	case success
 	
 	/// Failure with error code and reason
-	case fail(UInt, String)
+	case fail(Int, String)
 	
 	/// The error code itself
 	public var code: Int {
