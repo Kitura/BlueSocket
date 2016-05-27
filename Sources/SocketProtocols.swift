@@ -98,7 +98,7 @@ public protocol SSLServiceDelegate {
 	///
 	/// Do connection verification
 	///
-	func verifyConnection(socket: Socket) throws
+	func verifyConnection() throws
 	
 	///
 	/// Low level writer

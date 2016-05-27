@@ -1062,7 +1062,7 @@ public class Socket: SocketReader, SocketWriter {
 		do {
 			
 			try self.delegate?.onAccept(socket: newSocket)
-			try self.delegate?.verifyConnection(socket: newSocket)
+			try self.delegate?.verifyConnection()
 			
 		} catch let error {
 			
@@ -1183,7 +1183,7 @@ public class Socket: SocketReader, SocketWriter {
 		do {
 			
 			try self.delegate?.onAccept(socket: self)
-			try self.delegate?.verifyConnection(socket: self)
+			try self.delegate?.verifyConnection()
 			
 		} catch let error {
 			
@@ -1406,7 +1406,7 @@ public class Socket: SocketReader, SocketWriter {
 		do {
 			
 			try self.delegate?.onConnect(socket: self)
-			try self.delegate?.verifyConnection(socket: self)
+			try self.delegate?.verifyConnection()
 			
 		} catch let error {
 			
@@ -1493,7 +1493,7 @@ public class Socket: SocketReader, SocketWriter {
 		do {
 			
 			try self.delegate?.onConnect(socket: self)
-			try self.delegate?.verifyConnection(socket: self)
+			try self.delegate?.verifyConnection()
 			
 		} catch let error {
 			
