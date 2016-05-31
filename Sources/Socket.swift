@@ -469,7 +469,7 @@ public class Socket: SocketReader, SocketWriter {
 		///
 		public var description: String {
 			
-			let reason = self.errorReason ?? "Reason: Unavailable"
+			let reason: String = self.errorReason ?? "Reason: Unavailable"
 			return "Error code: \(self.errorCode), \(reason)"
 		}
 		
