@@ -1209,14 +1209,14 @@ public class Socket: SocketReader, SocketWriter {
 			//		or the socket will be left hanging until it times out.
 			#if os(Linux)
 				if self.isListening {
-					Glibc.shutdown(self.socketfd, Int32(SHUT_RDWR))
+					let _ = Glibc.shutdown(self.socketfd, Int32(SHUT_RDWR))
 				}
-				Glibc.close(self.socketfd)
+				let _ = Glibc.close(self.socketfd)
 			#else
 				if self.isListening {
-					Darwin.shutdown(self.socketfd, Int32(SHUT_RDWR))
+					let _ = Darwin.shutdown(self.socketfd, Int32(SHUT_RDWR))
 				}
-				Darwin.close(self.socketfd)
+				let _ = Darwin.close(self.socketfd)
 			#endif
 			
 			self.socketfd = Socket.SOCKET_INVALID_DESCRIPTOR
@@ -1347,9 +1347,9 @@ public class Socket: SocketReader, SocketWriter {
 			
 			// Close the socket that was opened... Protocol family may have changed...
 			#if os(Linux)
-				Glibc.close(socketDescriptor!)
+				let _ = Glibc.close(socketDescriptor!)
 			#else
-				Darwin.close(socketDescriptor!)
+				let _ = Darwin.close(socketDescriptor!)
 			#endif
 			socketDescriptor = nil
 			info = info?.pointee.ai_next
@@ -1360,9 +1360,9 @@ public class Socket: SocketReader, SocketWriter {
 			
 			if socketDescriptor != nil {
 				#if os(Linux)
-					Glibc.close(socketDescriptor!)
+					let _ = Glibc.close(socketDescriptor!)
 				#else
-					Darwin.close(socketDescriptor!)
+					let _ = Darwin.close(socketDescriptor!)
 				#endif
 			}
 			throw Error(code: Socket.SOCKET_ERR_GETADDRINFO_FAILED, reason: self.lastError())
@@ -1783,9 +1783,10 @@ public class Socket: SocketReader, SocketWriter {
 			throw Error(code: Socket.SOCKET_ERR_INTERNAL, reason: "Unable to create temporary NSData...")
 		}
 		
-		try self.read(into: data)
+		let rc = try self.read(into: data)
 		
-		guard let str = NSString(data: data, encoding: NSUTF8StringEncoding) else {
+		guard let str = NSString(data: data, encoding: NSUTF8StringEncoding)
+			where rc > 0 else {
 			
 			throw Error(code: Socket.SOCKET_ERR_INTERNAL, reason: "Unable to convert data to NSString.")
 		}
