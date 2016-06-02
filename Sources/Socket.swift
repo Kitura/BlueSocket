@@ -340,11 +340,16 @@ public class Socket: SocketReader, SocketWriter {
 		public private(set) var address: Address? = nil
 		
 		///
+		/// Flag to indicate whether `Socket` is secure or not.
+		///
+		public private(set) var isSecure: Bool = false
+		
+		///
 		/// Returns a string description of the error.
 		///
 		public var description: String {
 			
-			return "Signature: family: \(protocolFamily), type: \(socketType), protocol: \(proto), address: \(address), hostname: \(hostname), port: \(port)"
+			return "Signature: family: \(protocolFamily), type: \(socketType), protocol: \(proto), address: \(address), hostname: \(hostname), port: \(port), secure: \(isSecure)"
 		}
 		
 		// MARK: -- Public Functions
@@ -1063,6 +1068,7 @@ public class Socket: SocketReader, SocketWriter {
 			
 			try self.delegate?.onAccept(socket: newSocket)
 			try self.delegate?.verifyConnection()
+			newSocket.signature?.isSecure = true
 			
 		} catch let error {
 			
@@ -1184,6 +1190,7 @@ public class Socket: SocketReader, SocketWriter {
 			
 			try self.delegate?.onAccept(socket: self)
 			try self.delegate?.verifyConnection()
+			self.signature?.isSecure = true
 			
 		} catch let error {
 			
@@ -1225,6 +1232,7 @@ public class Socket: SocketReader, SocketWriter {
 		if let _ = self.signature {
 			self.signature!.hostname = Socket.NO_HOSTNAME
 			self.signature!.port = Socket.SOCKET_INVALID_PORT
+			self.signature!.isSecure = false
 		}
 		self.isConnected = false
 		self.isListening = false
@@ -1407,6 +1415,7 @@ public class Socket: SocketReader, SocketWriter {
 			
 			try self.delegate?.onConnect(socket: self)
 			try self.delegate?.verifyConnection()
+			self.signature?.isSecure = true
 			
 		} catch let error {
 			
@@ -1494,6 +1503,7 @@ public class Socket: SocketReader, SocketWriter {
 			
 			try self.delegate?.onConnect(socket: self)
 			try self.delegate?.verifyConnection()
+			self.signature?.isSecure = true
 			
 		} catch let error {
 			
