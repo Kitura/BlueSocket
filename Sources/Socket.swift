@@ -1209,14 +1209,14 @@ public class Socket: SocketReader, SocketWriter {
 			//		or the socket will be left hanging until it times out.
 			#if os(Linux)
 				if self.isListening {
-					let _ = Glibc.shutdown(self.socketfd, Int32(SHUT_RDWR))
+					_ = Glibc.shutdown(self.socketfd, Int32(SHUT_RDWR))
 				}
-				let _ = Glibc.close(self.socketfd)
+				_ = Glibc.close(self.socketfd)
 			#else
 				if self.isListening {
-					let _ = Darwin.shutdown(self.socketfd, Int32(SHUT_RDWR))
+					_ = Darwin.shutdown(self.socketfd, Int32(SHUT_RDWR))
 				}
-				let _ = Darwin.close(self.socketfd)
+				_ = Darwin.close(self.socketfd)
 			#endif
 			
 			self.socketfd = Socket.SOCKET_INVALID_DESCRIPTOR
@@ -1347,9 +1347,9 @@ public class Socket: SocketReader, SocketWriter {
 			
 			// Close the socket that was opened... Protocol family may have changed...
 			#if os(Linux)
-				let _ = Glibc.close(socketDescriptor!)
+				_ = Glibc.close(socketDescriptor!)
 			#else
-				let _ = Darwin.close(socketDescriptor!)
+				_ = Darwin.close(socketDescriptor!)
 			#endif
 			socketDescriptor = nil
 			info = info?.pointee.ai_next
@@ -1360,9 +1360,9 @@ public class Socket: SocketReader, SocketWriter {
 			
 			if socketDescriptor != nil {
 				#if os(Linux)
-					let _ = Glibc.close(socketDescriptor!)
+					_ = Glibc.close(socketDescriptor!)
 				#else
-					let _ = Darwin.close(socketDescriptor!)
+					_ = Darwin.close(socketDescriptor!)
 				#endif
 			}
 			throw Error(code: Socket.SOCKET_ERR_GETADDRINFO_FAILED, reason: self.lastError())
