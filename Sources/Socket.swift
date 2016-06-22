@@ -1066,9 +1066,11 @@ public class Socket: SocketReader, SocketWriter {
 		// Let the delegate do post accept handling and verification...
 		do {
 			
-			try self.delegate?.onAccept(socket: newSocket)
-			try self.delegate?.verifyConnection()
-			newSocket.signature?.isSecure = true
+			if self.delegate != nil {
+				try self.delegate?.onAccept(socket: newSocket)
+				try self.delegate?.verifyConnection()
+				newSocket.signature?.isSecure = true
+			}
 			
 		} catch let error {
 			
@@ -1188,9 +1190,11 @@ public class Socket: SocketReader, SocketWriter {
 		// Let the delegate do post accept handling and verification...
 		do {
 			
-			try self.delegate?.onAccept(socket: self)
-			try self.delegate?.verifyConnection()
-			self.signature?.isSecure = true
+			if self.delegate != nil {
+				try self.delegate?.onAccept(socket: self)
+				try self.delegate?.verifyConnection()
+				self.signature?.isSecure = true
+			}
 			
 		} catch let error {
 			
@@ -1413,9 +1417,11 @@ public class Socket: SocketReader, SocketWriter {
 		// Let the delegate do post connect handling and verification...
 		do {
 			
-			try self.delegate?.onConnect(socket: self)
-			try self.delegate?.verifyConnection()
-			self.signature?.isSecure = true
+			if self.delegate != nil {
+				try self.delegate?.onConnect(socket: self)
+				try self.delegate?.verifyConnection()
+				self.signature?.isSecure = true
+			}
 			
 		} catch let error {
 			
@@ -1501,9 +1507,11 @@ public class Socket: SocketReader, SocketWriter {
 		// Let the delegate do post connect handling and verification...
 		do {
 			
-			try self.delegate?.onConnect(socket: self)
-			try self.delegate?.verifyConnection()
-			self.signature?.isSecure = true
+			if self.delegate != nil {
+				try self.delegate?.onConnect(socket: self)
+				try self.delegate?.verifyConnection()
+				self.signature?.isSecure = true
+			}
 			
 		} catch let error {
 			
@@ -1795,15 +1803,22 @@ public class Socket: SocketReader, SocketWriter {
 		
 		let rc = try self.read(into: data)
 		
-		guard let str = NSString(data: data, encoding: NSUTF8StringEncoding)
-			where rc > 0 else {
-			
-			throw Error(code: Socket.SOCKET_ERR_INTERNAL, reason: "Unable to convert data to NSString.")
-		}
-		
 		#if os(Linux)
+			guard let str = NSString(data: data, encoding: NSUTF8StringEncoding)
+				where rc > 0 else {
+			
+				throw Error(code: Socket.SOCKET_ERR_INTERNAL, reason: "Unable to convert data to NSString.")
+			}
 			return str.bridge()
+		
 		#else
+			guard let str = NSString(data: data as Data, encoding: String.Encoding.utf8.rawValue)
+				where rc > 0 else {
+					
+					throw Error(code: Socket.SOCKET_ERR_INTERNAL, reason: "Unable to convert data to NSString.")
+			}
+
+			
 			return str as String
 		#endif
 		
@@ -1844,7 +1859,11 @@ public class Socket: SocketReader, SocketWriter {
 		if count > 0 {
 			
 			// - Yes, move to caller's buffer...
-			data.append(self.readStorage)
+			#if os(Linux)
+				data.append(self.readStorage)
+			#else
+				data.append(self.readStorage as Data)
+			#endif
 			
 			returnCount = self.readStorage.length
 			
