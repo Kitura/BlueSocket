@@ -78,6 +78,7 @@ public class Socket: SocketReader, SocketWriter {
 	public static let SOCKET_ERR_BAD_SIGNATURE_PARAMETERS	= -9976
 	public static let SOCKET_ERR_INTERNAL					= -9975
 	public static let SOCKET_ERR_WRONG_PROTOCOL				= -9974
+	public static let SOCKET_ERR_NOT_ACTIVE					= -9973
 	
 	// MARK: Enums
 	
@@ -602,6 +603,14 @@ public class Socket: SocketReader, SocketWriter {
 	public private(set) var isListening: Bool = false
 	
 	///
+	/// True if the socket is listening or connected.
+	///
+	public var isActive: Bool {
+		
+		return isListening || isConnected
+	}
+	
+	///
 	/// Listening port (-1 if not listening)
 	///
 	public var listeningPort: Int32 {
@@ -788,11 +797,12 @@ public class Socket: SocketReader, SocketWriter {
 	///
 	/// - Parameters:
 	///		- sockets:		An array of sockets to be monitored.
-	///		- timeout:		Timeout (in msec) before returning.
+	///		- timeout:		Timeout (in msec) before returning.  A timeout value of 0 will return immediately.
+	///		- waitForever:	If true, this function will wait indefinitely regardless of timeout value. Defaults to false.
 	///
 	/// - Returns: An optional array of sockets which have data available or nil if a timeout expires.
 	///
-	public class func wait(for sockets: [Socket], timeout: UInt) throws -> [Socket]? {
+	public class func wait(for sockets: [Socket], timeout: UInt, waitForever: Bool = false) throws -> [Socket]? {
 		
 		// Validate we have sockets to look for and they are valid...
 		for socket in sockets {
@@ -801,15 +811,15 @@ public class Socket: SocketReader, SocketWriter {
 				
 				throw Error(code: Socket.SOCKET_ERR_BAD_DESCRIPTOR, reason: nil)
 			}
-			if !socket.isConnected {
+			if !socket.isActive {
 				
-				throw Error(code: Socket.SOCKET_ERR_NOT_CONNECTED, reason: nil)
+				throw Error(code: Socket.SOCKET_ERR_NOT_ACTIVE, reason: nil)
 			}
 		}
 		
 		// Setup the timeout...
 		var timer = timeval()
-		if timeout > 0 {
+		if timeout > 0  && !waitForever {
 			
 			// First get seconds...
 			let secs = Int(Double(timeout / 1000))
@@ -843,7 +853,12 @@ public class Socket: SocketReader, SocketWriter {
 		}
 		
 		// Issue the select...
-		let count = select(highSocketfd + 1, &readfds, nil, nil, &timer)
+		var count: Int32 = 0
+		if waitForever {
+			count = select(highSocketfd + 1, &readfds, nil, nil, nil)
+		} else {
+			count = select(highSocketfd + 1, &readfds, nil, nil, &timer)
+		}
 		
 		// A count of less than zero indicates select failed...
 		if count < 0 {
