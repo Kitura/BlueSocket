@@ -20,11 +20,11 @@
 
 #if os(OSX) || os(iOS) || os(tvOS) || os(watchOS)
 	import Darwin
-	import Foundation
 #elseif os(Linux)
-	import Foundation
 	import Glibc
 #endif
+
+import Foundation
 
 // MARK: Socket
 
@@ -39,7 +39,10 @@ public class Socket: SocketReader, SocketWriter {
 	
 	public static let SOCKET_MINIMUM_READ_BUFFER_SIZE		= 1024
 	public static let SOCKET_DEFAULT_READ_BUFFER_SIZE		= 4096
-	public static let SOCKET_DEFAULT_MAX_CONNECTIONS		= 5
+	public static let SOCKET_DEFAULT_MAX_BACKLOG			= 50
+	#if os(OSX)
+	public static let SOCKET_MAX_DARWIN_BACKLOG				= 128
+	#endif
 	
 	public static let SOCKET_INVALID_PORT					= Int32(0)
 	public static let SOCKET_INVALID_DESCRIPTOR 			= Int32(-1)
@@ -582,10 +585,10 @@ public class Socket: SocketReader, SocketWriter {
 	}
 	
 	///
-	/// Maximum number of pending connections per listening socket.
-	///		**Note:** Default value is `Socket.SOCKET_DEFAULT_MAX_CONNECTIONS`
+	/// Maximum size of the queue containing pending connections.
+	///		**Note:** Default value is `Socket.SOCKET_DEFAULT_MAX_BACKLOG`
 	///
-	public var maxPendingConnections: Int = Socket.SOCKET_DEFAULT_MAX_CONNECTIONS
+	public var maxBacklogSize: Int = Socket.SOCKET_DEFAULT_MAX_BACKLOG
 	
 	///
 	/// True if this socket is connected. False otherwise. (Readonly)
@@ -1542,23 +1545,13 @@ public class Socket: SocketReader, SocketWriter {
 	// MARK: -- Listen
 	
 	///
-	/// Listen on a port using the default for max pending connections.
-	///
-	/// - Parameter port: The port to listen on.
-	///
-	public func listen(on port: Int) throws {
-		
-		return try self.listen(on: port, maxPendingConnections: self.maxPendingConnections)
-	}
-	
-	///
 	/// Listen on a port, limiting the maximum number of pending connections.
 	///
 	/// - Parameters:
-	///		- port: 					The port to listen on.
-	/// 	- maxPendingConnections: 	The maximum number of pending connections to allow.
+	///		- port: 				The port to listen on.
+	/// 	- maxBacklogSize: 		The maximum size of the queue containing pending connections. Default is *Socket.SOCKET_DEFAULT_MAX_BACKLOG*.
 	///
-	public func listen(on port: Int, maxPendingConnections: Int) throws {
+	public func listen(on port: Int, maxBacklogSize: Int = Socket.SOCKET_DEFAULT_MAX_BACKLOG) throws {
 		
 		// Set a flag so that this address can be re-used immediately after the connection
 		// closes.  (TCP normally imposes a delay before an address can be re-used.)
@@ -1568,10 +1561,10 @@ public class Socket: SocketReader, SocketWriter {
 			throw Error(code: Socket.SOCKET_ERR_SETSOCKOPT_FAILED, reason: self.lastError())
 		}
 		
-		// Set the socket to ignore SIGPIPE to avoid dying on interrupted connections...
-		//	Note: Linux does not support the SO_NOSIGPIPE option. Instead, we use the
-		//		  MSG_NOSIGNAL flags passed to send.  See the writeData() functions below.
 		#if !os(Linux)
+			// Set the socket to ignore SIGPIPE to avoid dying on interrupted connections...
+			//	Note: Linux does not support the SO_NOSIGPIPE option. Instead, we use the
+			//		  MSG_NOSIGNAL flags passed to send.  See the writeData() functions below.
 			if setsockopt(self.socketfd, SOL_SOCKET, SO_NOSIGPIPE, &on, socklen_t(sizeof(Int32.self))) < 0 {
 				
 				throw Error(code: Socket.SOCKET_ERR_SETSOCKOPT_FAILED, reason: self.lastError())
@@ -1705,12 +1698,12 @@ public class Socket: SocketReader, SocketWriter {
 		
 		// Now listen for connections...
 		#if os(Linux)
-			if Glibc.listen(self.socketfd, Int32(maxPendingConnections)) < 0 {
+			if Glibc.listen(self.socketfd, Int32(maxBacklogSize)) < 0 {
 				
 				throw Error(code: Socket.SOCKET_ERR_LISTEN_FAILED, reason: self.lastError())
 			}
 		#else
-			if Darwin.listen(self.socketfd, Int32(maxPendingConnections)) < 0 {
+			if Darwin.listen(self.socketfd, Int32(maxBacklogSize)) < 0 {
 				
 				throw Error(code: Socket.SOCKET_ERR_LISTEN_FAILED, reason: self.lastError())
 			}

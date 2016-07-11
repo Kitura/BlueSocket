@@ -1,7 +1,7 @@
 # BlueSocket
 
 ## Overview
-Socket framework for Swift using the Swift Package Manager. Works on OS X and Linux.
+Socket framework for Swift using the Swift Package Manager. Works on macOS and Linux.
 
 ## Contents
 
@@ -12,9 +12,9 @@ Socket framework for Swift using the Swift Package Manager. Works on OS X and Li
 ### Swift
 * Swift Open Source `swift-DEVELOPMENT-SNAPSHOT-2016-06-20-a` toolchain (**Minimum REQUIRED for latest release**)
 
-### OS X
+### macOS
 
-* OS X 10.11.0 (*El Capitan*) or higher
+* macOS 10.11.0 (*El Capitan*) or higher
 * Xcode Version 8.0 beta (8S128d) or higher using the above toolchain (*Recommended*)
 
 ### Linux
@@ -59,10 +59,9 @@ To close the socket of an open instance, the following function is provided:
 
 ### Listen on a socket.
 
-**BlueSocket** supports two ways to listen for an connection on a socket. These are:
-- `listen(on port: Int)`
-- `listen(on port: Int, maxPendingConnections: Int)`
-The first requires that you only specify a port upon which the socket will listen for connections. The second way allow you to limit the maximum number of incoming connection. In both cases, the function will determine the appropriate socket configuration based on the `port` specified.
+To use **BlueSocket** to listen for an connection on a socket the following API is provided:
+- `listen(on port: Int, maxBacklogSize: Int = Socket.SOCKET_DEFAULT_MAX_BACKLOG)`
+The first parameter `port`, is the port to be used to listen on. The second paramete, `maxBacklogSize` allows you to set the size of the queue holding pending connections. The function will determine the appropriate socket configuration based on the `port` specified.  For convenience on macOS, the constant `Socket.SOCKET_MAX_DARWIN_BACKLOG` can be set to use the maximum allowed backlog size.  The default value for all platforms is `Socket.SOCKET_DEFAULT_MAX_BACKLOG`, currently set to *5*.
 
 #### Example:
 
