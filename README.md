@@ -61,7 +61,7 @@ To close the socket of an open instance, the following function is provided:
 
 To use **BlueSocket** to listen for an connection on a socket the following API is provided:
 - `listen(on port: Int, maxBacklogSize: Int = Socket.SOCKET_DEFAULT_MAX_BACKLOG)`
-The first parameter `port`, is the port to be used to listen on. The second paramete, `maxBacklogSize` allows you to set the size of the queue holding pending connections. The function will determine the appropriate socket configuration based on the `port` specified.  For convenience on macOS, the constant `Socket.SOCKET_MAX_DARWIN_BACKLOG` can be set to use the maximum allowed backlog size.  The default value for all platforms is `Socket.SOCKET_DEFAULT_MAX_BACKLOG`, currently set to *5*.
+The first parameter `port`, is the port to be used to listen on. The second parameter, `maxBacklogSize` allows you to set the size of the queue holding pending connections. The function will determine the appropriate socket configuration based on the `port` specified.  For convenience on macOS, the constant `Socket.SOCKET_MAX_DARWIN_BACKLOG` can be set to use the maximum allowed backlog size.  The default value for all platforms is `Socket.SOCKET_DEFAULT_MAX_BACKLOG`, currently set to *50*. For server use, it may be necessary to increase this value.
 
 #### Example:
 
