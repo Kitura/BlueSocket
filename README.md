@@ -153,7 +153,7 @@ class EchoServer {
 				return
 			}
 			
-			try socket.listen(on: self.port, maxBacklog: 10)
+			try socket.listen(on: self.port, maxBacklogSize: 10)
 			
 			print("Listening on port: \(self.port)")
 			
@@ -172,7 +172,7 @@ class EchoServer {
 				
 				if bytesRead > 0 {
 					
-					guard let response = NSString(data: readData, encoding: NSUTF8StringEncoding) else {
+					guard let response = String(data: readData as Data, encoding: String.Encoding.utf8) else {
 						
 						print("Error decoding response...")
 						readData.length = 0
