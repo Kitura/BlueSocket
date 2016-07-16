@@ -153,7 +153,7 @@ class EchoServer {
 				return
 			}
 			
-			try socket.listen(on: self.port, maxBacklog: 10)
+			try socket.listen(on: self.port, maxBacklogSize: 10)
 			
 			print("Listening on port: \(self.port)")
 			
