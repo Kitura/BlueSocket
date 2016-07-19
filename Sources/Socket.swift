@@ -618,7 +618,7 @@ public class Socket: SocketReader, SocketWriter {
 	///
 	public var listeningPort: Int32 {
 		
-		guard let sig = signature where isListening else {
+		guard let sig = signature, isListening else {
 			return Int32(-1)
 		}
 		return sig.port
@@ -642,7 +642,7 @@ public class Socket: SocketReader, SocketWriter {
 	///
 	public var remotePort: Int32 {
 		
-		guard let sig = signature where sig.port != Socket.SOCKET_INVALID_PORT else {
+		guard let sig = signature, sig.port != Socket.SOCKET_INVALID_PORT else {
 			return Socket.SOCKET_INVALID_PORT
 		}
 		
@@ -1470,8 +1470,8 @@ public class Socket: SocketReader, SocketWriter {
 		} else {
 			
 			// Otherwise, make sure we've got a hostname and port...
-			guard let hostname = signature.hostname
-				where signature.port != Socket.SOCKET_INVALID_PORT else {
+			guard let hostname = signature.hostname,
+			      signature.port != Socket.SOCKET_INVALID_PORT else {
 					
 					throw Error(code: Socket.SOCKET_ERR_MISSING_CONNECTION_DATA, reason: "Unable to access hostname and port.")
 			}
@@ -1812,16 +1812,16 @@ public class Socket: SocketReader, SocketWriter {
 		let rc = try self.read(into: data)
 		
 		#if os(Linux)
-			guard let str = NSString(data: data, encoding: NSUTF8StringEncoding)
-				where rc > 0 else {
+			guard let str = NSString(data: data, encoding: NSUTF8StringEncoding),
+			      rc > 0 else {
 			
 				throw Error(code: Socket.SOCKET_ERR_INTERNAL, reason: "Unable to convert data to NSString.")
 			}
 			return str.bridge()
 		
 		#else
-			guard let str = NSString(data: data as Data, encoding: String.Encoding.utf8.rawValue)
-				where rc > 0 else {
+			guard let str = NSString(data: data as Data, encoding: String.Encoding.utf8.rawValue),
+			      rc > 0 else {
 					
 					throw Error(code: Socket.SOCKET_ERR_INTERNAL, reason: "Unable to convert data to NSString.")
 			}
@@ -1900,7 +1900,7 @@ public class Socket: SocketReader, SocketWriter {
 		}
 		
 		// The socket must've been created for UDP...
-		guard let sig = self.signature where sig.proto == .udp else {
+		guard let sig = self.signature, sig.proto == .udp else {
 			
 			throw Error(code: Socket.SOCKET_ERR_WRONG_PROTOCOL, reason: "This is not a UDP socket.")
 		}
@@ -1937,7 +1937,7 @@ public class Socket: SocketReader, SocketWriter {
 		}
 		
 		// The socket must've been created for UDP...
-		guard let sig = self.signature where sig.proto == .udp else {
+		guard let sig = self.signature, sig.proto == .udp else {
 			
 			throw Error(code: Socket.SOCKET_ERR_WRONG_PROTOCOL, reason: "This is not a UDP socket.")
 		}
@@ -2116,7 +2116,7 @@ public class Socket: SocketReader, SocketWriter {
 		}
 		
 		// The socket must've been created for UDP...
-		guard let sig = self.signature where sig.proto == .udp else {
+		guard let sig = self.signature, sig.proto == .udp else {
 			
 			throw Error(code: Socket.SOCKET_ERR_WRONG_PROTOCOL, reason: "This is not a UDP socket.")
 		}
@@ -2139,7 +2139,7 @@ public class Socket: SocketReader, SocketWriter {
 		}
 		
 		// The socket must've been created for UDP...
-		guard let sig = self.signature where sig.proto == .udp else {
+		guard let sig = self.signature, sig.proto == .udp else {
 			
 			throw Error(code: Socket.SOCKET_ERR_WRONG_PROTOCOL, reason: "This is not a UDP socket.")
 		}
