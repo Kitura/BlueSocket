@@ -18,14 +18,13 @@
 // 	limitations under the License.
 //
 
-#if os(OSX) || os(iOS) || os(tvOS) || os(watchOS)
+#if os(macOS) || os(iOS) || os(tvOS) || os(watchOS)
 	import Darwin
-	import Foundation
 #elseif os(Linux)
-	import Foundation
 	import Glibc
 #endif
 
+import Foundation
 
 // MARK: sockaddr_storage Extension
 

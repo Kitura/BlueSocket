@@ -133,7 +133,7 @@ public protocol SSLServiceDelegate {
 ///
 /// SSL Service Error
 ///
-public enum SSLError: ErrorProtocol, CustomStringConvertible {
+public enum SSLError: Error, CustomStringConvertible {
 	
 	/// success
 	case success

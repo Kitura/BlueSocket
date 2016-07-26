@@ -10,12 +10,12 @@ Socket framework for Swift using the Swift Package Manager. Works on macOS and L
 ## Prerequisites
 
 ### Swift
-* Swift Open Source `swift-DEVELOPMENT-SNAPSHOT-2016-06-20-a` toolchain (**Minimum REQUIRED for latest release**)
+* Swift Open Source `swift-DEVELOPMENT-SNAPSHOT-2016-07-25-a` toolchain (**Minimum REQUIRED for latest release**)
 
 ### macOS
 
-* macOS 10.11.0 (*El Capitan*) or higher
-* Xcode Version 8.0 beta (8S128d) or higher using the above toolchain (*Recommended*)
+* macOS 10.11.6 (*El Capitan*) or higher
+* Xcode Version 8.0 beta 3 (8S174q) or higher using the above toolchain (*Recommended*)
 
 ### Linux
 
@@ -112,7 +112,7 @@ In addition to reading from a socket, **BlueSocket** also supplies three methods
 
 The following example shows how to create a simple echo server.
 ```swift
-#if os(OSX) || os(iOS) || os(tvOS) || os(watchOS)
+#if os(macOS) || os(iOS) || os(tvOS) || os(watchOS)
 	import Darwin
 	import Foundation
 	import Socket
