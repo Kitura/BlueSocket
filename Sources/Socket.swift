@@ -375,7 +375,7 @@ public class Socket: SocketReader, SocketWriter {
 				let type = SocketType.getType(forValue: socketType),
 				let pro = SocketProtocol.getProtocol(forValue: proto) else {
 					
-					throw SocketError(code: Socket.SOCKET_ERR_BAD_SIGNATURE_PARAMETERS, reason: "Bad family, type or protocol passed.")
+					throw Error(code: Socket.SOCKET_ERR_BAD_SIGNATURE_PARAMETERS, reason: "Bad family, type or protocol passed.")
 			}
 			
 			self.protocolFamily = family
@@ -403,7 +403,7 @@ public class Socket: SocketReader, SocketWriter {
 			guard let _ = hostname,
 				let port = port else {
 					
-					throw SocketError(code: Socket.SOCKET_ERR_BAD_SIGNATURE_PARAMETERS, reason: "Missing hostname, port or both.")
+					throw Error(code: Socket.SOCKET_ERR_BAD_SIGNATURE_PARAMETERS, reason: "Missing hostname, port or both.")
 			}
 			
 			// Default to IPV4 socket protocol family...
@@ -438,7 +438,7 @@ public class Socket: SocketReader, SocketWriter {
 				let _ = hostname,
 				let port = port else {
 					
-					throw SocketError(code: Socket.SOCKET_ERR_BAD_SIGNATURE_PARAMETERS, reason: "Incomplete parameters.")
+					throw Error(code: Socket.SOCKET_ERR_BAD_SIGNATURE_PARAMETERS, reason: "Incomplete parameters.")
 			}
 			
 			self.protocolFamily = family
@@ -452,9 +452,9 @@ public class Socket: SocketReader, SocketWriter {
 		}
 	}
 	
-	// MARK: -- SocketError
+	// MARK: -- Error
 	
-	public struct SocketError: Error, CustomStringConvertible {
+	public struct Error: Swift.Error, CustomStringConvertible {
 		
 		// MARK: -- Public Properties
 		
@@ -479,7 +479,7 @@ public class Socket: SocketReader, SocketWriter {
 		public var description: String {
 			
 			let reason: String = self.errorReason ?? "Reason: Unavailable"
-			return "SocketError code: \(self.errorCode), \(reason)"
+			return "Error code: \(self.errorCode), \(reason)"
 		}
 		
 		///
@@ -490,13 +490,13 @@ public class Socket: SocketReader, SocketWriter {
 		// MARK: -- Public Functions
 		
 		///
-		/// Initializes an SocketError Instance
+		/// Initializes an Error Instance
 		///
 		/// - Parameters:
 		///		- code:		Error code
 		/// 	- reason:	Optional Error Reason
 		///
-		/// - Returns: SocketError instance
+		/// - Returns: Error instance
 		///
 		init(code: Int, reason: String?) {
 			
@@ -510,7 +510,7 @@ public class Socket: SocketReader, SocketWriter {
 		///
 		///	- Parameter bufferSize:	Required buffer size
 		///
-		///	- Returns: SocketError Instance
+		///	- Returns: Error Instance
 		///
 		init(bufferSize: Int) {
 			
@@ -519,11 +519,11 @@ public class Socket: SocketReader, SocketWriter {
 		}
 		
 		///
-		/// Initializes an SocketError instance using SSLError
+		/// Initializes an Error instance using SSLError
 		///
 		/// - Parameter error: SSLError instance to be transformed
 		///
-		/// - Returns: SocketError Instance
+		/// - Returns: Error Instance
 		init(with error: SSLError) {
 			
 			self.init(code: error.code, reason: error.description)
@@ -686,7 +686,7 @@ public class Socket: SocketReader, SocketWriter {
 		
 		if type == .datagram || proto == .udp {
 			
-			throw SocketError(code: Socket.SOCKET_ERR_NOT_SUPPORTED_YET, reason: "Full support for Datagrams and UDP not available yet.")
+			throw Error(code: Socket.SOCKET_ERR_NOT_SUPPORTED_YET, reason: "Full support for Datagrams and UDP not available yet.")
 			
 		}
 		return try Socket(family: family, type: type, proto: proto)
@@ -721,7 +721,7 @@ public class Socket: SocketReader, SocketWriter {
 		
 		guard let addr = address else {
 			
-			throw SocketError(code: Socket.SOCKET_ERR_MISSING_CONNECTION_DATA, reason: "Unable to access socket connection data.")
+			throw Error(code: Socket.SOCKET_ERR_MISSING_CONNECTION_DATA, reason: "Unable to access socket connection data.")
 		}
 		
 		return try Socket(fd: nativeHandle, remoteAddress: addr)
@@ -812,11 +812,11 @@ public class Socket: SocketReader, SocketWriter {
 			
 			if socket.socketfd == Socket.SOCKET_INVALID_DESCRIPTOR {
 				
-				throw SocketError(code: Socket.SOCKET_ERR_BAD_DESCRIPTOR, reason: nil)
+				throw Error(code: Socket.SOCKET_ERR_BAD_DESCRIPTOR, reason: nil)
 			}
 			if !socket.isActive {
 				
-				throw SocketError(code: Socket.SOCKET_ERR_NOT_ACTIVE, reason: nil)
+				throw Error(code: Socket.SOCKET_ERR_NOT_ACTIVE, reason: nil)
 			}
 		}
 		
@@ -866,7 +866,7 @@ public class Socket: SocketReader, SocketWriter {
 		// A count of less than zero indicates select failed...
 		if count < 0 {
 			
-			throw SocketError(code: Socket.SOCKET_ERR_SELECT_FAILED, reason: String(validatingUTF8: strerror(errno)) ?? "Error: \(errno)")
+			throw Error(code: Socket.SOCKET_ERR_SELECT_FAILED, reason: String(validatingUTF8: strerror(errno)) ?? "Error: \(errno)")
 		}
 		
 		// A count equal zero, indicates we timed out...
@@ -916,7 +916,7 @@ public class Socket: SocketReader, SocketWriter {
 		if self.socketfd < 0 {
 			
 			self.socketfd = Socket.SOCKET_INVALID_DESCRIPTOR
-			throw SocketError(code: Socket.SOCKET_ERR_UNABLE_TO_CREATE_SOCKET, reason: self.lastError())
+			throw Error(code: Socket.SOCKET_ERR_UNABLE_TO_CREATE_SOCKET, reason: self.lastError())
 		}
 		
 		// Create the signature...
@@ -1002,17 +1002,17 @@ public class Socket: SocketReader, SocketWriter {
 		// The socket must've been created, not connected and listening...
 		if self.socketfd == Socket.SOCKET_INVALID_DESCRIPTOR {
 			
-			throw SocketError(code: Socket.SOCKET_ERR_BAD_DESCRIPTOR, reason: nil)
+			throw Error(code: Socket.SOCKET_ERR_BAD_DESCRIPTOR, reason: nil)
 		}
 		
 		if self.isConnected {
 			
-			throw SocketError(code: Socket.SOCKET_ERR_ALREADY_CONNECTED, reason: nil)
+			throw Error(code: Socket.SOCKET_ERR_ALREADY_CONNECTED, reason: nil)
 		}
 		
 		if !self.isListening {
 			
-			throw SocketError(code: Socket.SOCKET_ERR_NOT_LISTENING, reason: nil)
+			throw Error(code: Socket.SOCKET_ERR_NOT_LISTENING, reason: nil)
 		}
 		
 		// Accept the remote connection...
@@ -1043,7 +1043,7 @@ public class Socket: SocketReader, SocketWriter {
 						continue
 					}
 					
-					throw SocketError(code: Socket.SOCKET_ERR_ACCEPT_FAILED, reason: self.lastError())
+					throw Error(code: Socket.SOCKET_ERR_ACCEPT_FAILED, reason: self.lastError())
 				}
 				socketfd2 = fd
 				address = .ipv4(acceptAddr)
@@ -1067,7 +1067,7 @@ public class Socket: SocketReader, SocketWriter {
 						continue
 					}
 					
-					throw SocketError(code: Socket.SOCKET_ERR_ACCEPT_FAILED, reason: self.lastError())
+					throw Error(code: Socket.SOCKET_ERR_ACCEPT_FAILED, reason: self.lastError())
 				}
 				socketfd2 = fd
 				address = .ipv6(acceptAddr)
@@ -1097,7 +1097,7 @@ public class Socket: SocketReader, SocketWriter {
 				throw error
 			}
 			
-			throw SocketError(with: sslError)
+			throw Error(with: sslError)
 		}
 		
 		// Return the new socket...
@@ -1112,17 +1112,17 @@ public class Socket: SocketReader, SocketWriter {
 		// The socket must've been created, not connected and listening...
 		if self.socketfd == Socket.SOCKET_INVALID_DESCRIPTOR {
 			
-			throw SocketError(code: Socket.SOCKET_ERR_BAD_DESCRIPTOR, reason: nil)
+			throw Error(code: Socket.SOCKET_ERR_BAD_DESCRIPTOR, reason: nil)
 		}
 		
 		if self.isConnected {
 			
-			throw SocketError(code: Socket.SOCKET_ERR_ALREADY_CONNECTED, reason: nil)
+			throw Error(code: Socket.SOCKET_ERR_ALREADY_CONNECTED, reason: nil)
 		}
 		
 		if !self.isListening {
 			
-			throw SocketError(code: Socket.SOCKET_ERR_NOT_LISTENING, reason: nil)
+			throw Error(code: Socket.SOCKET_ERR_NOT_LISTENING, reason: nil)
 		}
 		
 		// Accept the remote connection...
@@ -1153,7 +1153,7 @@ public class Socket: SocketReader, SocketWriter {
 						continue
 					}
 					
-					throw SocketError(code: Socket.SOCKET_ERR_ACCEPT_FAILED, reason: self.lastError())
+					throw Error(code: Socket.SOCKET_ERR_ACCEPT_FAILED, reason: self.lastError())
 				}
 				socketfd2 = fd
 				address = .ipv4(acceptAddr)
@@ -1177,7 +1177,7 @@ public class Socket: SocketReader, SocketWriter {
 						continue
 					}
 					
-					throw SocketError(code: Socket.SOCKET_ERR_ACCEPT_FAILED, reason: self.lastError())
+					throw Error(code: Socket.SOCKET_ERR_ACCEPT_FAILED, reason: self.lastError())
 				}
 				socketfd2 = fd
 				address = .ipv6(acceptAddr)
@@ -1221,7 +1221,7 @@ public class Socket: SocketReader, SocketWriter {
 				throw error
 			}
 			
-			throw SocketError(with: sslError)
+			throw Error(with: sslError)
 		}
 	}
 	
@@ -1274,17 +1274,17 @@ public class Socket: SocketReader, SocketWriter {
 		// The socket must've been created and must not be connected...
 		if self.socketfd == Socket.SOCKET_INVALID_DESCRIPTOR {
 			
-			throw SocketError(code: Socket.SOCKET_ERR_BAD_DESCRIPTOR, reason: nil)
+			throw Error(code: Socket.SOCKET_ERR_BAD_DESCRIPTOR, reason: nil)
 		}
 		
 		if self.isConnected {
 			
-			throw SocketError(code: Socket.SOCKET_ERR_ALREADY_CONNECTED, reason: nil)
+			throw Error(code: Socket.SOCKET_ERR_ALREADY_CONNECTED, reason: nil)
 		}
 		
 		if host.utf8.count == 0 {
 			
-			throw SocketError(code: Socket.SOCKET_ERR_INVALID_HOSTNAME, reason: nil)
+			throw Error(code: Socket.SOCKET_ERR_INVALID_HOSTNAME, reason: nil)
 		}
 		
 		// Tell the delegate to initialize as a client...
@@ -1299,7 +1299,7 @@ public class Socket: SocketReader, SocketWriter {
 				throw error
 			}
 			
-			throw SocketError(with: sslError)
+			throw Error(with: sslError)
 		}
 		
 		// Create the hints for our search...
@@ -1338,7 +1338,7 @@ public class Socket: SocketReader, SocketWriter {
 			} else {
 				errorString = String(validatingUTF8: gai_strerror(errno)) ?? "Unknown error code."
 			}
-			throw SocketError(code: Socket.SOCKET_ERR_GETADDRINFO_FAILED, reason: errorString)
+			throw Error(code: Socket.SOCKET_ERR_GETADDRINFO_FAILED, reason: errorString)
 		}
 		
 		// Defer cleanup of our target info...
@@ -1395,7 +1395,7 @@ public class Socket: SocketReader, SocketWriter {
 					_ = Darwin.close(socketDescriptor!)
 				#endif
 			}
-			throw SocketError(code: Socket.SOCKET_ERR_GETADDRINFO_FAILED, reason: self.lastError())
+			throw Error(code: Socket.SOCKET_ERR_GETADDRINFO_FAILED, reason: self.lastError())
 		}
 		
 		// Close the existing socket (if open) before replacing it...
@@ -1421,7 +1421,7 @@ public class Socket: SocketReader, SocketWriter {
 			
 		} else {
 			
-			throw SocketError(code: Socket.SOCKET_ERR_WRONG_PROTOCOL, reason: "Unable to determine connected socket protocol family.")
+			throw Error(code: Socket.SOCKET_ERR_WRONG_PROTOCOL, reason: "Unable to determine connected socket protocol family.")
 		}
 		
 		try self.signature = Signature(
@@ -1448,7 +1448,7 @@ public class Socket: SocketReader, SocketWriter {
 				throw error
 			}
 			
-			throw SocketError(with: sslError)
+			throw Error(with: sslError)
 		}
 	}
 	
@@ -1464,7 +1464,7 @@ public class Socket: SocketReader, SocketWriter {
 			
 			guard let _ = signature.address else {
 				
-				throw SocketError(code: Socket.SOCKET_ERR_MISSING_CONNECTION_DATA, reason: "Unable to access connection data.")
+				throw Error(code: Socket.SOCKET_ERR_MISSING_CONNECTION_DATA, reason: "Unable to access connection data.")
 			}
 			
 		} else {
@@ -1473,7 +1473,7 @@ public class Socket: SocketReader, SocketWriter {
 			guard let hostname = signature.hostname,
 				signature.port != Socket.SOCKET_INVALID_PORT else {
 					
-					throw SocketError(code: Socket.SOCKET_ERR_MISSING_CONNECTION_DATA, reason: "Unable to access hostname and port.")
+					throw Error(code: Socket.SOCKET_ERR_MISSING_CONNECTION_DATA, reason: "Unable to access hostname and port.")
 			}
 			
 			// Connect using hostname and port....
@@ -1493,7 +1493,7 @@ public class Socket: SocketReader, SocketWriter {
 				throw error
 			}
 			
-			throw SocketError(with: sslError)
+			throw Error(with: sslError)
 		}
 		
 		// Now, do the connection using the supplied address...
@@ -1510,7 +1510,7 @@ public class Socket: SocketReader, SocketWriter {
 		#endif
 		if rc < 0 {
 			
-			throw SocketError(code: Socket.SOCKET_ERR_CONNECT_FAILED, reason: self.lastError())
+			throw Error(code: Socket.SOCKET_ERR_CONNECT_FAILED, reason: self.lastError())
 		}
 		
 		if let (hostname, port) = Socket.hostnameAndPort(from: signature.address!) {
@@ -1538,7 +1538,7 @@ public class Socket: SocketReader, SocketWriter {
 				throw error
 			}
 			
-			throw SocketError(with: sslError)
+			throw Error(with: sslError)
 		}
 	}
 	
@@ -1558,7 +1558,7 @@ public class Socket: SocketReader, SocketWriter {
 		var on: Int32 = 1
 		if setsockopt(self.socketfd, SOL_SOCKET, SO_REUSEADDR, &on, socklen_t(sizeof(Int32.self))) < 0 {
 			
-			throw SocketError(code: Socket.SOCKET_ERR_SETSOCKOPT_FAILED, reason: self.lastError())
+			throw Error(code: Socket.SOCKET_ERR_SETSOCKOPT_FAILED, reason: self.lastError())
 		}
 		
 		#if !os(Linux)
@@ -1567,14 +1567,14 @@ public class Socket: SocketReader, SocketWriter {
 			//		  MSG_NOSIGNAL flags passed to send.  See the writeData() functions below.
 			if setsockopt(self.socketfd, SOL_SOCKET, SO_NOSIGPIPE, &on, socklen_t(sizeof(Int32.self))) < 0 {
 				
-				throw SocketError(code: Socket.SOCKET_ERR_SETSOCKOPT_FAILED, reason: self.lastError())
+				throw Error(code: Socket.SOCKET_ERR_SETSOCKOPT_FAILED, reason: self.lastError())
 			}
 		#endif
 		
 		// Get the signature for the socket...
 		guard let sig = self.signature else {
 			
-			throw SocketError(code: Socket.SOCKET_ERR_INTERNAL, reason: "Socket signature not found.")
+			throw Error(code: Socket.SOCKET_ERR_INTERNAL, reason: "Socket signature not found.")
 		}
 		
 		// Tell the delegate to initialize as a server...
@@ -1589,7 +1589,7 @@ public class Socket: SocketReader, SocketWriter {
 				throw error
 			}
 			
-			throw SocketError(with: sslError)
+			throw Error(with: sslError)
 		}
 		
 		// Create the hints for our search...
@@ -1627,7 +1627,7 @@ public class Socket: SocketReader, SocketWriter {
 			} else {
 				errorString = String(validatingUTF8: gai_strerror(errno)) ?? "Unknown error code."
 			}
-			throw SocketError(code: Socket.SOCKET_ERR_GETADDRINFO_FAILED, reason: errorString)
+			throw Error(code: Socket.SOCKET_ERR_GETADDRINFO_FAILED, reason: errorString)
 		}
 		
 		// Defer cleanup of our target info...
@@ -1666,7 +1666,7 @@ public class Socket: SocketReader, SocketWriter {
 		// Throw an error if we weren't able to bind to an address...
 		if !bound {
 			
-			throw SocketError(code: Socket.SOCKET_ERR_BIND_FAILED, reason: self.lastError())
+			throw Error(code: Socket.SOCKET_ERR_BIND_FAILED, reason: self.lastError())
 		}
 		
 		// Save the address info...
@@ -1685,7 +1685,7 @@ public class Socket: SocketReader, SocketWriter {
 			
 		} else {
 			
-			throw SocketError(code: Socket.SOCKET_ERR_WRONG_PROTOCOL, reason: "Unable to determine listening socket protocol family.")
+			throw Error(code: Socket.SOCKET_ERR_WRONG_PROTOCOL, reason: "Unable to determine listening socket protocol family.")
 		}
 		
 		self.signature?.address = address
@@ -1700,12 +1700,12 @@ public class Socket: SocketReader, SocketWriter {
 		#if os(Linux)
 			if Glibc.listen(self.socketfd, Int32(maxBacklogSize)) < 0 {
 				
-				throw SocketError(code: Socket.SOCKET_ERR_LISTEN_FAILED, reason: self.lastError())
+				throw Error(code: Socket.SOCKET_ERR_LISTEN_FAILED, reason: self.lastError())
 			}
 		#else
 			if Darwin.listen(self.socketfd, Int32(maxBacklogSize)) < 0 {
 				
-				throw SocketError(code: Socket.SOCKET_ERR_LISTEN_FAILED, reason: self.lastError())
+				throw Error(code: Socket.SOCKET_ERR_LISTEN_FAILED, reason: self.lastError())
 			}
 		#endif
 		
@@ -1732,18 +1732,18 @@ public class Socket: SocketReader, SocketWriter {
 		// Make sure the buffer is valid...
 		if bufSize == 0 {
 			
-			throw SocketError(code: Socket.SOCKET_ERR_INVALID_BUFFER, reason: nil)
+			throw Error(code: Socket.SOCKET_ERR_INVALID_BUFFER, reason: nil)
 		}
 		
 		// The socket must've been created and must be connected...
 		if self.socketfd == Socket.SOCKET_INVALID_DESCRIPTOR {
 			
-			throw SocketError(code: Socket.SOCKET_ERR_BAD_DESCRIPTOR, reason: nil)
+			throw Error(code: Socket.SOCKET_ERR_BAD_DESCRIPTOR, reason: nil)
 		}
 		
 		if !self.isConnected {
 			
-			throw SocketError(code: Socket.SOCKET_ERR_NOT_CONNECTED, reason: nil)
+			throw Error(code: Socket.SOCKET_ERR_NOT_CONNECTED, reason: nil)
 		}
 		
 		// See if we have cached data to send back...
@@ -1751,7 +1751,7 @@ public class Socket: SocketReader, SocketWriter {
 			
 			if bufSize < self.readStorage.length {
 				
-				throw SocketError(bufferSize: self.readStorage.length)
+				throw Error(bufferSize: self.readStorage.length)
 			}
 			
 			let returnCount = self.readStorage.length
@@ -1782,7 +1782,7 @@ public class Socket: SocketReader, SocketWriter {
 			if bufSize < self.readStorage.length {
 				
 				// Nope, throw an exception telling the caller how big the buffer must be...
-				throw SocketError(bufferSize: self.readStorage.length)
+				throw Error(bufferSize: self.readStorage.length)
 			}
 			
 			// - We've read data, copy to the callers buffer...
@@ -1807,7 +1807,7 @@ public class Socket: SocketReader, SocketWriter {
 		
 		guard let data = NSMutableData(capacity: 2000) else {
 			
-			throw SocketError(code: Socket.SOCKET_ERR_INTERNAL, reason: "Unable to create temporary NSMutableData...")
+			throw Error(code: Socket.SOCKET_ERR_INTERNAL, reason: "Unable to create temporary NSMutableData...")
 		}
 		
 		let rc = try self.read(into: data)
@@ -1815,7 +1815,7 @@ public class Socket: SocketReader, SocketWriter {
 		guard let str = NSString(bytes: data.bytes, length: data.length, encoding: String.Encoding.utf8.rawValue),
 			rc > 0 else {
 				
-				throw SocketError(code: Socket.SOCKET_ERR_INTERNAL, reason: "Unable to convert data to NSString.")
+				throw Error(code: Socket.SOCKET_ERR_INTERNAL, reason: "Unable to convert data to NSString.")
 		}
 
 		#if os(Linux)
@@ -1839,12 +1839,12 @@ public class Socket: SocketReader, SocketWriter {
 		// The socket must've been created and must be connected...
 		if self.socketfd == Socket.SOCKET_INVALID_DESCRIPTOR {
 			
-			throw SocketError(code: Socket.SOCKET_ERR_BAD_DESCRIPTOR, reason: nil)
+			throw Error(code: Socket.SOCKET_ERR_BAD_DESCRIPTOR, reason: nil)
 		}
 		
 		if !self.isConnected {
 			
-			throw SocketError(code: Socket.SOCKET_ERR_NOT_CONNECTED, reason: nil)
+			throw Error(code: Socket.SOCKET_ERR_NOT_CONNECTED, reason: nil)
 		}
 		
 		// Read all available bytes...
@@ -1890,14 +1890,14 @@ public class Socket: SocketReader, SocketWriter {
 		// The socket must've been created...
 		if self.socketfd == Socket.SOCKET_INVALID_DESCRIPTOR {
 			
-			throw SocketError(code: Socket.SOCKET_ERR_BAD_DESCRIPTOR, reason: nil)
+			throw Error(code: Socket.SOCKET_ERR_BAD_DESCRIPTOR, reason: nil)
 		}
 		
 		// The socket must've been created for UDP...
 		guard let sig = self.signature,
 			sig.proto == .udp else {
 			
-			throw SocketError(code: Socket.SOCKET_ERR_WRONG_PROTOCOL, reason: "This is not a UDP socket.")
+			throw Error(code: Socket.SOCKET_ERR_WRONG_PROTOCOL, reason: "This is not a UDP socket.")
 		}
 		
 		return 0
@@ -1922,20 +1922,20 @@ public class Socket: SocketReader, SocketWriter {
 		// Make sure the buffer is valid...
 		if bufSize == 0 {
 			
-			throw SocketError(code: Socket.SOCKET_ERR_INVALID_BUFFER, reason: nil)
+			throw Error(code: Socket.SOCKET_ERR_INVALID_BUFFER, reason: nil)
 		}
 		
 		// The socket must've been created...
 		if self.socketfd == Socket.SOCKET_INVALID_DESCRIPTOR {
 			
-			throw SocketError(code: Socket.SOCKET_ERR_BAD_DESCRIPTOR, reason: nil)
+			throw Error(code: Socket.SOCKET_ERR_BAD_DESCRIPTOR, reason: nil)
 		}
 		
 		// The socket must've been created for UDP...
 		guard let sig = self.signature,
 			sig.proto == .udp else {
 			
-			throw SocketError(code: Socket.SOCKET_ERR_WRONG_PROTOCOL, reason: "This is not a UDP socket.")
+			throw Error(code: Socket.SOCKET_ERR_WRONG_PROTOCOL, reason: "This is not a UDP socket.")
 		}
 		
 		return 0
@@ -1955,18 +1955,18 @@ public class Socket: SocketReader, SocketWriter {
 		// Make sure the buffer is valid...
 		if bufSize == 0 {
 			
-			throw SocketError(code: Socket.SOCKET_ERR_INVALID_BUFFER, reason: nil)
+			throw Error(code: Socket.SOCKET_ERR_INVALID_BUFFER, reason: nil)
 		}
 		
 		// The socket must've been created and must be connected...
 		if self.socketfd == Socket.SOCKET_INVALID_DESCRIPTOR {
 			
-			throw SocketError(code: Socket.SOCKET_ERR_BAD_DESCRIPTOR, reason: nil)
+			throw Error(code: Socket.SOCKET_ERR_BAD_DESCRIPTOR, reason: nil)
 		}
 		
 		if !self.isConnected {
 			
-			throw SocketError(code: Socket.SOCKET_ERR_NOT_CONNECTED, reason: nil)
+			throw Error(code: Socket.SOCKET_ERR_NOT_CONNECTED, reason: nil)
 		}
 		
 		var sent = 0
@@ -1992,7 +1992,7 @@ public class Socket: SocketReader, SocketWriter {
 						throw error
 					}
 					
-					throw SocketError(with: err)
+					throw Error(with: err)
 				}
 				
 			} else {
@@ -2004,7 +2004,7 @@ public class Socket: SocketReader, SocketWriter {
 			}
 			if s <= 0 {
 				
-				throw SocketError(code: Socket.SOCKET_ERR_WRITE_FAILED, reason: self.lastError())
+				throw Error(code: Socket.SOCKET_ERR_WRITE_FAILED, reason: self.lastError())
 			}
 			sent += s
 		}
@@ -2020,12 +2020,12 @@ public class Socket: SocketReader, SocketWriter {
 		// The socket must've been created and must be connected...
 		if self.socketfd == Socket.SOCKET_INVALID_DESCRIPTOR {
 			
-			throw SocketError(code: Socket.SOCKET_ERR_BAD_DESCRIPTOR, reason: nil)
+			throw Error(code: Socket.SOCKET_ERR_BAD_DESCRIPTOR, reason: nil)
 		}
 		
 		if !self.isConnected {
 			
-			throw SocketError(code: Socket.SOCKET_ERR_NOT_CONNECTED, reason: nil)
+			throw Error(code: Socket.SOCKET_ERR_NOT_CONNECTED, reason: nil)
 		}
 		
 		// If there's no data in the NSData object, why bother? Fail silently...
@@ -2057,7 +2057,7 @@ public class Socket: SocketReader, SocketWriter {
 						throw error
 					}
 					
-					throw SocketError(with: err)
+					throw Error(with: err)
 				}
 				
 			} else {
@@ -2069,7 +2069,7 @@ public class Socket: SocketReader, SocketWriter {
 			}
 			if s <= 0 {
 				
-				throw SocketError(code: Socket.SOCKET_ERR_WRITE_FAILED, reason: self.lastError())
+				throw Error(code: Socket.SOCKET_ERR_WRITE_FAILED, reason: self.lastError())
 			}
 			sent += s
 		}
@@ -2102,20 +2102,20 @@ public class Socket: SocketReader, SocketWriter {
 		// Make sure the buffer is valid...
 		if bufSize == 0 {
 			
-			throw SocketError(code: Socket.SOCKET_ERR_INVALID_BUFFER, reason: nil)
+			throw Error(code: Socket.SOCKET_ERR_INVALID_BUFFER, reason: nil)
 		}
 		
 		// The socket must've been created and must be connected...
 		if self.socketfd == Socket.SOCKET_INVALID_DESCRIPTOR {
 			
-			throw SocketError(code: Socket.SOCKET_ERR_BAD_DESCRIPTOR, reason: nil)
+			throw Error(code: Socket.SOCKET_ERR_BAD_DESCRIPTOR, reason: nil)
 		}
 		
 		// The socket must've been created for UDP...
 		guard let sig = self.signature,
 			sig.proto == .udp else {
 			
-			throw SocketError(code: Socket.SOCKET_ERR_WRONG_PROTOCOL, reason: "This is not a UDP socket.")
+			throw Error(code: Socket.SOCKET_ERR_WRONG_PROTOCOL, reason: "This is not a UDP socket.")
 		}
 		
 	}
@@ -2132,14 +2132,14 @@ public class Socket: SocketReader, SocketWriter {
 		// The socket must've been created...
 		if self.socketfd == Socket.SOCKET_INVALID_DESCRIPTOR {
 			
-			throw SocketError(code: Socket.SOCKET_ERR_BAD_DESCRIPTOR, reason: nil)
+			throw Error(code: Socket.SOCKET_ERR_BAD_DESCRIPTOR, reason: nil)
 		}
 		
 		// The socket must've been created for UDP...
 		guard let sig = self.signature,
 			sig.proto == .udp else {
 			
-			throw SocketError(code: Socket.SOCKET_ERR_WRONG_PROTOCOL, reason: "This is not a UDP socket.")
+			throw Error(code: Socket.SOCKET_ERR_WRONG_PROTOCOL, reason: "This is not a UDP socket.")
 		}
 		
 		// If there's no data in the NSData object, why bother? Fail silently...
@@ -2160,12 +2160,12 @@ public class Socket: SocketReader, SocketWriter {
 		// The socket must've been created and must be connected...
 		if self.socketfd == Socket.SOCKET_INVALID_DESCRIPTOR {
 			
-			throw SocketError(code: Socket.SOCKET_ERR_BAD_DESCRIPTOR, reason: nil)
+			throw Error(code: Socket.SOCKET_ERR_BAD_DESCRIPTOR, reason: nil)
 		}
 		
 		if !self.isConnected {
 			
-			throw SocketError(code: Socket.SOCKET_ERR_NOT_CONNECTED, reason: nil)
+			throw Error(code: Socket.SOCKET_ERR_NOT_CONNECTED, reason: nil)
 		}
 		
 		// Create a read and write file descriptor set for this socket...
@@ -2186,7 +2186,7 @@ public class Socket: SocketReader, SocketWriter {
 		// A count of less than zero indicates select failed...
 		if count < 0 {
 			
-			throw SocketError(code: Socket.SOCKET_ERR_SELECT_FAILED, reason: self.lastError())
+			throw Error(code: Socket.SOCKET_ERR_SELECT_FAILED, reason: self.lastError())
 		}
 		
 		// Return a tuple containing whether or not this socket is readable and/or writable...
@@ -2203,7 +2203,7 @@ public class Socket: SocketReader, SocketWriter {
 		let flags = fcntl(self.socketfd, F_GETFL)
 		if flags < 0 {
 			
-			throw SocketError(code: Socket.SOCKET_ERR_GET_FCNTL_FAILED, reason: self.lastError())
+			throw Error(code: Socket.SOCKET_ERR_GET_FCNTL_FAILED, reason: self.lastError())
 		}
 		
 		var result: Int32 = 0
@@ -2218,7 +2218,7 @@ public class Socket: SocketReader, SocketWriter {
 		
 		if result < 0 {
 			
-			throw SocketError(code: Socket.SOCKET_ERR_SET_FCNTL_FAILED, reason: self.lastError())
+			throw Error(code: Socket.SOCKET_ERR_SET_FCNTL_FAILED, reason: self.lastError())
 		}
 		
 		self.isBlocking = shouldBlock
@@ -2255,7 +2255,7 @@ public class Socket: SocketReader, SocketWriter {
 						throw error
 					}
 					
-					throw SocketError(with: err)
+					throw Error(with: err)
 				}
 				
 			} else {
@@ -2277,7 +2277,7 @@ public class Socket: SocketReader, SocketWriter {
 				}
 				
 				// - Something went wrong...
-				throw SocketError(code: Socket.SOCKET_ERR_RECV_FAILED, reason: self.lastError())
+				throw Error(code: Socket.SOCKET_ERR_RECV_FAILED, reason: self.lastError())
 			}
 			
 			if count > 0 {
