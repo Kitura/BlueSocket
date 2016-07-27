@@ -1,3 +1,6 @@
+![](https://img.shields.io/badge/Swift-3.0-orange.svg?style=flat)
+![](https://img.shields.io/badge/Snapshot-7/25-blue.svg?style=flat)
+
 # BlueSocket
 
 ## Overview
