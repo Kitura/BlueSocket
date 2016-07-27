@@ -39,7 +39,7 @@
 		8CA9B1631C98A00400E607FB /* SocketTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SocketTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		8CA9B1651C98A00400E607FB /* SocketTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SocketTests.swift; path = Tests/SocketTests.swift; sourceTree = "<group>"; };
 		8CA9B1671C98A00400E607FB /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = Info.plist; path = Tests/Info.plist; sourceTree = "<group>"; };
-		8CC36E021C4EA1BE00BAA659 /* BlueSocket.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = BlueSocket.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		8CC36E021C4EA1BE00BAA659 /* Socket.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Socket.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		8CC36E041C4EA34700BAA659 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -84,7 +84,7 @@
 			isa = PBXGroup;
 			children = (
 				8C0F4BF61C4E84CC008B2B0A /* Socket.framework */,
-				8CC36E021C4EA1BE00BAA659 /* BlueSocket.framework */,
+				8CC36E021C4EA1BE00BAA659 /* Socket.framework */,
 				8CA9B1631C98A00400E607FB /* SocketTests.xctest */,
 			);
 			name = Products;
@@ -191,7 +191,7 @@
 			);
 			name = "Socket-iOS";
 			productName = ETSocket;
-			productReference = 8CC36E021C4EA1BE00BAA659 /* BlueSocket.framework */;
+			productReference = 8CC36E021C4EA1BE00BAA659 /* Socket.framework */;
 			productType = "com.apple.product-type.framework";
 		};
 /* End PBXNativeTarget section */
@@ -335,6 +335,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.3;
 				MACOSX_DEPLOYMENT_TARGET = 10.11;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -377,6 +378,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.3;
 				MACOSX_DEPLOYMENT_TARGET = 10.11;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = macosx;
@@ -464,10 +466,10 @@
 				FRAMEWORK_VERSION = A;
 				INFOPLIST_FILE = "$(SRCROOT)/Sources/Info.plist";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				IPHONEOS_DEPLOYMENT_TARGET = 9.2;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.3;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.ibm.oss.Socket;
-				PRODUCT_NAME = BlueSocket;
+				PRODUCT_NAME = Socket;
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
@@ -487,10 +489,10 @@
 				FRAMEWORK_VERSION = A;
 				INFOPLIST_FILE = "$(SRCROOT)/Sources/Info.plist";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				IPHONEOS_DEPLOYMENT_TARGET = 9.2;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.3;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.ibm.oss.Socket;
-				PRODUCT_NAME = BlueSocket;
+				PRODUCT_NAME = Socket;
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
