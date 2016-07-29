@@ -38,6 +38,16 @@ To build Socket from the command line:
 % swift build
 ```
 
+## Testing
+
+To run the supplied unit tests for **Socketr** from the command line:
+
+```
+% cd <path-to-clone>
+% swift build
+% swift test
+```
+
 ## Using BlueSocket
 
 ### Before starting
