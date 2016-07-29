@@ -15,7 +15,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "8CC36DF61C4EA1BE00BAA659"
-               BuildableName = "BlueSocket.framework"
+               BuildableName = "Socket.framework"
                BlueprintName = "Socket-iOS"
                ReferencedContainer = "container:BlueSocket.xcodeproj">
             </BuildableReference>
@@ -46,7 +46,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "8CC36DF61C4EA1BE00BAA659"
-            BuildableName = "BlueSocket.framework"
+            BuildableName = "Socket.framework"
             BlueprintName = "Socket-iOS"
             ReferencedContainer = "container:BlueSocket.xcodeproj">
          </BuildableReference>
@@ -64,7 +64,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "8CC36DF61C4EA1BE00BAA659"
-            BuildableName = "BlueSocket.framework"
+            BuildableName = "Socket.framework"
             BlueprintName = "Socket-iOS"
             ReferencedContainer = "container:BlueSocket.xcodeproj">
          </BuildableReference>
