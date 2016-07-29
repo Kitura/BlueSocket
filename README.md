@@ -40,7 +40,7 @@ To build Socket from the command line:
 
 ## Testing
 
-To run the supplied unit tests for **Socketr** from the command line:
+To run the supplied unit tests for **Socket** from the command line:
 
 ```
 % cd <path-to-clone>
