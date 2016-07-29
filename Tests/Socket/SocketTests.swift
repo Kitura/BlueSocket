@@ -7,18 +7,20 @@
 //
 
 import XCTest
-
-#if os(macOS) || os(iOS) || os(tvOS) || os(watchOS)
-    import Darwin
-#elseif os(Linux)
-    import Glibc
-#endif
-
 @testable import Socket
 
 class SocketTests: XCTestCase {
     
-    override func setUp() {
+	#if os(Linux)
+		static var allTests : [(String, (SocketTests) -> () throws -> Void)] {
+
+			return [
+				("testSocket", testSocket)
+			]
+		}
+	#endif
+	
+	override func setUp() {
         super.setUp()
         // Put setup code here. This method is called before the invocation of each test method in the class.
     }

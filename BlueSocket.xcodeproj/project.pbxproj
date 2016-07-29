@@ -38,12 +38,12 @@
 		8C0F4C041C4E8630008B2B0A /* SocketUtils.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SocketUtils.swift; sourceTree = "<group>"; };
 		8C0F4C081C4E866E008B2B0A /* Package.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Package.swift; sourceTree = "<group>"; };
 		8CA9B1631C98A00400E607FB /* SocketTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SocketTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		8CA9B1671C98A00400E607FB /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = Info.plist; path = Tests/Info.plist; sourceTree = "<group>"; };
 		8CC36E021C4EA1BE00BAA659 /* Socket.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Socket.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		8CC36E041C4EA34700BAA659 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		8CC721761D4BCA9400F5FD19 /* SocketTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = SocketTests.swift; path = Tests/Socket/SocketTests.swift; sourceTree = "<group>"; };
 		8CC721781D4BCAA600F5FD19 /* LinuxMain.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = LinuxMain.swift; path = Tests/LinuxMain.swift; sourceTree = "<group>"; };
 		8CC7217A1D4BCB1D00F5FD19 /* LICENSE */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
+		8CF04E231D4BD03D00C27814 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = Tests/Socket/Info.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -117,6 +117,7 @@
 		8CC721751D4BCA7D00F5FD19 /* Socket */ = {
 			isa = PBXGroup;
 			children = (
+				8CF04E231D4BD03D00C27814 /* Info.plist */,
 				8CC721761D4BCA9400F5FD19 /* SocketTests.swift */,
 			);
 			name = Socket;
@@ -127,7 +128,6 @@
 			children = (
 				8CC721781D4BCAA600F5FD19 /* LinuxMain.swift */,
 				8CC721751D4BCA7D00F5FD19 /* Socket */,
-				8CA9B1671C98A00400E607FB /* Info.plist */,
 			);
 			name = Tests;
 			sourceTree = "<group>";
@@ -447,7 +447,7 @@
 			buildSettings = {
 				CLANG_ANALYZER_NONNULL = YES;
 				COMBINE_HIDPI_IMAGES = YES;
-				INFOPLIST_FILE = Tests/Info.plist;
+				INFOPLIST_FILE = Tests/Socket/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.ibm.oss.SocketTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -459,7 +459,7 @@
 			buildSettings = {
 				CLANG_ANALYZER_NONNULL = YES;
 				COMBINE_HIDPI_IMAGES = YES;
-				INFOPLIST_FILE = Tests/Info.plist;
+				INFOPLIST_FILE = Tests/Socket/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.ibm.oss.SocketTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
