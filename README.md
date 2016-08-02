@@ -13,7 +13,7 @@ Socket framework for Swift using the Swift Package Manager. Works on macOS and L
 ## Prerequisites
 
 ### Swift
-* Swift Open Source `swift-DEVELOPMENT-SNAPSHOT-2016-07-25-a` toolchain (**Minimum REQUIRED for latest release**)
+* Swift Open Source `swift-DEVELOPMENT-SNAPSHOT-2016-07-29-a` toolchain (**Minimum REQUIRED for latest release**)
 
 ### macOS
 
