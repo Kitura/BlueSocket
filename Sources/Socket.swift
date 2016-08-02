@@ -1804,7 +1804,6 @@ public class Socket: SocketReader, SocketWriter {
 	///
 	public func readString() throws -> String? {
 		
-		
 		guard let data = NSMutableData(capacity: 2000) else {
 			
 			throw Error(code: Socket.SOCKET_ERR_INTERNAL, reason: "Unable to create temporary NSMutableData...")
@@ -1860,12 +1859,52 @@ public class Socket: SocketReader, SocketWriter {
 		var returnCount: Int = 0
 		if count > 0 {
 			
-			// - Yes, move to caller's buffer...
-			//#if os(Linux)
-			//	data.append(self.readStorage)
-			//#else
 			data.append(self.readStorage.bytes, length: self.readStorage.length)
-			//#endif
+
+			returnCount = self.readStorage.length
+			
+			// - Reset the storage buffer...
+			self.readStorage.length = 0
+		}
+		
+		return returnCount
+	}
+	
+	///
+	/// Read data from the socket.
+	///
+	/// - Parameter data: The buffer to return the data in.
+	///
+	/// - Returns: The number of bytes returned in the buffer.
+	///
+	public func read(into data: inout Data) throws -> Int {
+		
+		// The socket must've been created and must be connected...
+		if self.socketfd == Socket.SOCKET_INVALID_DESCRIPTOR {
+			
+			throw Error(code: Socket.SOCKET_ERR_BAD_DESCRIPTOR, reason: nil)
+		}
+		
+		if !self.isConnected {
+			
+			throw Error(code: Socket.SOCKET_ERR_NOT_CONNECTED, reason: nil)
+		}
+		
+		// Read all available bytes...
+		let count = try self.readDataIntoStorage()
+		
+		// Check for disconnect...
+		if count == 0 {
+			
+			return count
+		}
+		
+		// Did we get data?
+		var returnCount: Int = 0
+		if count > 0 {
+			
+			// - Yes, move to caller's buffer...
+			data.append(self.readStorage.bytes.assumingMemoryBound(to: UInt8.self), count: self.readStorage.length)
 			
 			returnCount = self.readStorage.length
 			
@@ -2017,6 +2056,39 @@ public class Socket: SocketReader, SocketWriter {
 	///
 	public func write(from data: NSData) throws {
 		
+		// If there's no data in the NSData object, why bother? Fail silently...
+		if data.length == 0 {
+			return
+		}
+		
+		try write(from: data.bytes.assumingMemoryBound(to: UInt8.self), bufSize: data.length)
+	}
+	
+	///
+	/// Write data to the socket.
+	///
+	/// - Parameter data: The Data object containing the data to write.
+	///
+	public func write(from data: Data) throws {
+		
+		// If there's no data in the Data object, why bother? Fail silently...
+		if data.count == 0 {
+			return
+		}
+		
+		try data.withUnsafeBytes() { [unowned self] (buffer: UnsafePointer<UInt8>) throws in
+			
+			try self.write(from: buffer, bufSize: data.count)
+		}
+	}
+/*
+	///
+	/// Write data to the socket.
+	///
+	/// - Parameter data: The NSData object containing the data to write.
+	///
+	public func write(from data: NSData) throws {
+		
 		// The socket must've been created and must be connected...
 		if self.socketfd == Socket.SOCKET_INVALID_DESCRIPTOR {
 			
@@ -2074,7 +2146,7 @@ public class Socket: SocketReader, SocketWriter {
 			sent += s
 		}
 	}
-	
+*/
 	///
 	/// Write a string to the socket.
 	///
