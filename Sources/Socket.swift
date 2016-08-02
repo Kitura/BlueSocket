@@ -1877,6 +1877,51 @@ public class Socket: SocketReader, SocketWriter {
 	}
 	
 	///
+	/// Read data from the socket.
+	///
+	/// - Parameter data: The buffer to return the data in.
+	///
+	/// - Returns: The number of bytes returned in the buffer.
+	///
+	public func read(into data: inout Data) throws -> Int {
+		
+		// The socket must've been created and must be connected...
+		if self.socketfd == Socket.SOCKET_INVALID_DESCRIPTOR {
+			
+			throw Error(code: Socket.SOCKET_ERR_BAD_DESCRIPTOR, reason: nil)
+		}
+		
+		if !self.isConnected {
+			
+			throw Error(code: Socket.SOCKET_ERR_NOT_CONNECTED, reason: nil)
+		}
+		
+		// Read all available bytes...
+		let count = try self.readDataIntoStorage()
+		
+		// Check for disconnect...
+		if count == 0 {
+			
+			return count
+		}
+		
+		// Did we get data?
+		var returnCount: Int = 0
+		if count > 0 {
+			
+			// - Yes, move to caller's buffer...
+			data.append(UnsafePointer<UInt8>(self.readStorage.bytes), count: self.readStorage.length)
+			
+			returnCount = self.readStorage.length
+			
+			// - Reset the storage buffer...
+			self.readStorage.length = 0
+		}
+		
+		return returnCount
+	}
+	
+	///
 	/// Read data from a UDP socket.
 	///
 	/// - Parameters:
@@ -2017,62 +2062,29 @@ public class Socket: SocketReader, SocketWriter {
 	///
 	public func write(from data: NSData) throws {
 		
-		// The socket must've been created and must be connected...
-		if self.socketfd == Socket.SOCKET_INVALID_DESCRIPTOR {
-			
-			throw Error(code: Socket.SOCKET_ERR_BAD_DESCRIPTOR, reason: nil)
-		}
-		
-		if !self.isConnected {
-			
-			throw Error(code: Socket.SOCKET_ERR_NOT_CONNECTED, reason: nil)
-		}
-		
 		// If there's no data in the NSData object, why bother? Fail silently...
 		if data.length == 0 {
 			return
 		}
 		
-		var sent = 0
-		var sendFlags: Int32 = 0
-		#if os(Linux)
-			if self.isListening {
-				sendFlags = Int32(MSG_NOSIGNAL)
-			}
-		#endif
-		let buffer = data.bytes
-		while sent < data.length {
-			
-			var s = 0
-			if self.delegate != nil {
-				
-				do {
-
-					s = try self.delegate!.send(buffer: buffer.advanced(by: sent), bufSize: Int(data.length - sent))
-					
-				} catch let error {
-					
-					guard let err = error as? SSLError else {
-						
-						throw error
-					}
-					
-					throw Error(with: err)
-				}
-				
-			} else {
-				#if os(Linux)
-					s = Glibc.send(self.socketfd, buffer.advanced(by: sent), Int(data.length - sent), sendFlags)
-				#else
-					s = Darwin.send(self.socketfd, buffer.advanced(by: sent), Int(data.length - sent), sendFlags)
-				#endif
-			}
-			if s <= 0 {
-				
-				throw Error(code: Socket.SOCKET_ERR_WRITE_FAILED, reason: self.lastError())
-			}
-			sent += s
+                try write(from: data.bytes, bufSize: data.length)
+	}
+	
+	///
+	/// Write data to the socket.
+	///
+	/// - Parameter data: The Data object containing the data to write.
+	///
+	public func write(from data: Data) throws {
+		
+		// If there's no data in the Data object, why bother? Fail silently...
+		if data.count == 0 {
+			return
 		}
+		
+                try data.withUnsafeBytes() { [unowned self] (buffer: UnsafePointer<UInt8>) throws in
+                    try self.write(from: buffer, bufSize: data.count)
+                }
 	}
 	
 	///
