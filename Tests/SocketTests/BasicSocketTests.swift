@@ -21,9 +21,9 @@
 import XCTest
 @testable import Socket
 
-class SocketTests: XCTestCase {
+class BasicSocketTests: XCTestCase {
     
-	#if os(Linux)
+/*	#if os(Linux)
 		static var allTests : [(String, (SocketTests) -> () throws -> Void)] {
 
 			return [
@@ -31,7 +31,7 @@ class SocketTests: XCTestCase {
 			]
 		}
 	#endif
-	
+*/
 	override func setUp() {
         super.setUp()
         // Put setup code here. This method is called before the invocation of each test method in the class.
@@ -70,4 +70,8 @@ class SocketTests: XCTestCase {
             print("Error reported: \(socketError.description)")
         }
     }
+	
+	static var allTests = [
+		("testSocket", testSocket)
+	]
 }

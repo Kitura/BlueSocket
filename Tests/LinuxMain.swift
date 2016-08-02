@@ -17,8 +17,10 @@
 
 import XCTest
 
-@testable import SocketTestSuite
+import SocketTests
 
-XCTMain([
-	testCase(SocketTests.allTests)
-])
+var tests = [XCTestCaseEntry]()
+
+tests += BasicSocketTests.allTests()
+
+XCTMain(tests)

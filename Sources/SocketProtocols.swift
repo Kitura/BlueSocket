@@ -113,7 +113,7 @@ public protocol SSLServiceDelegate {
 	///
 	///	- Returns the number of bytes written. Zero indicates SSL shutdown, less than zero indicates error.
 	///
-	func send(buffer: UnsafePointer<Void>!, bufSize: Int) throws -> Int
+	func send(buffer: UnsafeRawPointer!, bufSize: Int) throws -> Int
 	
 	///
 	/// Low level reader
