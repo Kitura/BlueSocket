@@ -11,7 +11,7 @@
 		8C0F4C051C4E8630008B2B0A /* SocketProtocols.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C0F4C021C4E8630008B2B0A /* SocketProtocols.swift */; };
 		8C0F4C061C4E8630008B2B0A /* Socket.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C0F4C031C4E8630008B2B0A /* Socket.swift */; };
 		8C0F4C071C4E8630008B2B0A /* SocketUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C0F4C041C4E8630008B2B0A /* SocketUtils.swift */; };
-		8C3003E91CA46DF500E9AEC4 /* Socket.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8C0F4BF61C4E84CC008B2B0A /* Socket.framework */; };
+		8C5605D21D50D60400958292 /* Socket.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8C0F4BF61C4E84CC008B2B0A /* Socket.framework */; };
 		8CC36DF81C4EA1BE00BAA659 /* SocketProtocols.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C0F4C021C4E8630008B2B0A /* SocketProtocols.swift */; };
 		8CC36DF91C4EA1BE00BAA659 /* Socket.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C0F4C031C4E8630008B2B0A /* Socket.swift */; };
 		8CC36DFA1C4EA1BE00BAA659 /* SocketUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C0F4C041C4E8630008B2B0A /* SocketUtils.swift */; };
@@ -58,7 +58,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				8C3003E91CA46DF500E9AEC4 /* Socket.framework in Frameworks */,
+				8C5605D21D50D60400958292 /* Socket.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

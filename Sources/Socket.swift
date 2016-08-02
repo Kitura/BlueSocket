@@ -1804,7 +1804,6 @@ public class Socket: SocketReader, SocketWriter {
 	///
 	public func readString() throws -> String? {
 		
-		
 		guard let data = NSMutableData(capacity: 2000) else {
 			
 			throw Error(code: Socket.SOCKET_ERR_INTERNAL, reason: "Unable to create temporary NSMutableData...")
@@ -2067,7 +2066,7 @@ public class Socket: SocketReader, SocketWriter {
 			return
 		}
 		
-                try write(from: data.bytes, bufSize: data.length)
+		try write(from: data.bytes, bufSize: data.length)
 	}
 	
 	///
@@ -2082,9 +2081,10 @@ public class Socket: SocketReader, SocketWriter {
 			return
 		}
 		
-                try data.withUnsafeBytes() { [unowned self] (buffer: UnsafePointer<UInt8>) throws in
-                    try self.write(from: buffer, bufSize: data.count)
-                }
+		try data.withUnsafeBytes() { [unowned self] (buffer: UnsafePointer<UInt8>) throws in
+			
+			try self.write(from: buffer, bufSize: data.count)
+		}
 	}
 	
 	///
