@@ -95,7 +95,7 @@ When a listening socket detects an incoming connection request, control is retur
 
 ### Connecting a socket to a server.
 
-In addition to the `create(connectedUsing:)` factory method described above, **BlueSocket** supports two additional functions for connecting a `Socket` instance to a server. They are:
+In addition to the `create(connectedUsing:)` factory method described above, **BlueSocket** supports two additional instance functions for connecting a `Socket` instance to a server. They are:
 - `connect(to host: String, port: Int32)` - This API allows you to connect to a server based on the `hostname` and `port` you provide.
 - `connect(using signature: Signature)` - This API allows you specify the connection information by providing a `Socket.Signature` instance containing the information.  Refer to `Socket.Signature` in *Socket.swift* for more information.
 
@@ -125,26 +125,40 @@ In addition to reading from a socket, **BlueSocket** also supplies four methods 
 
 ### Complete Example
 
-The following example shows how to create a simple echo server.
+The following example shows how to create a relatively simple multi-threaded echo server using the new `GCD based` **Dispatch** API.  The Dispatch API was incorporated into the toolchain using the following sequence of commands where `<Path to>` is the path where you've installed the required toolchain. In this example, the `swift-DEVELOPMENT-SNAPSHOT-2016-08-04-a-ubuntu15.10` toolchain is being used.
+```
+$ git clone --recursive git@github.com:apple/swift-corelibs-libdispatch.git
+$ cd swift-corelibs-libdispatch
+$ sh ./autogen.sh
+$ ./configure --with-swift-toolchain=<Path to>/swift-DEVELOPMENT-SNAPSHOT-2016-08-04-a-ubuntu15.10/usr --prefix=<Path to>/swift-DEVELOPMENT-SNAPSHOT-2016-08-04-a-ubuntu15.10/usr
+$ make
+$ make install
+```
+What follows is the code for a simple exho server that once running, can be accessed via `telnet 127.0.0.1 1337`.
 ```swift
 #if os(macOS) || os(iOS) || os(tvOS) || os(watchOS)
 	import Darwin
-	import Foundation
-	import Socket
 #elseif os(Linux)
 	import Glibc
-	import Foundation
-	import Socket
 #endif
+
+import Foundation
+import Dispatch
+import Socket
 
 class EchoServer {
 	
 	static let QUIT: String = "QUIT"
+	static let SHUTDOWN: String = "SHUTDOWN"
+	static let BUFFER_SIZE = 4096
 	
 	let port: Int
 	
-	var keepRunning: Bool = true
 	var listenSocket: Socket? = nil
+	
+	var continueRunning = true
+	var connectedSockets = [Int32: Socket]()
+	let socketLockQueue: DispatchQueue? = DispatchQueue(label: "com.ibm.serverSwift.socketLockQueue")
 
 	init(port: Int) {
 		
@@ -153,87 +167,224 @@ class EchoServer {
 	
 	deinit {
 		
+		// Close all open sockets...
+		for socket in connectedSockets.values {
+			
+			socket.close()
+		}
+		
 		self.listenSocket?.close()
 	}
 	
 	func run() {
 		
-		do {
+		let queue: DispatchQueue? = DispatchQueue.global(qos: .userInteractive)
+		guard let pQueue = queue else {
 			
-			try self.listenSocket = Socket.create()
+			fatalError("Unable to access global interactive QOS queue")
+		}
+		
+		pQueue.async { [unowned self] in
 			
-			guard let socket = self.listenSocket else {
+			do {
 				
-				print("Unable to unwrap socket...")
-				return
+				// Create an IPV6 socket...
+				try self.listenSocket = Socket.create(family: .inet6)
+				
+				guard let socket = self.listenSocket else {
+					
+					print("Unable to unwrap socket...")
+					return
+				}
+				
+				try socket.listen(on: self.port, maxBacklogSize: 10)
+				
+				print("Listening on port: \(socket.listeningPort)")
+				
+				repeat {
+					
+					let newSocket = try socket.acceptClientConnection()
+					
+					print("Accepted connection from: \(newSocket.remoteHostname) on port \(newSocket.remotePort)")
+					print("Socket Signature: \(newSocket.signature?.description)")
+					
+					self.addNewConnection(socket: newSocket)
+					
+				} while self.continueRunning
+				
+			} catch let error {
+				
+				guard let socketError = error as? Socket.Error else {
+					
+					print("Unexpected error...")
+					return
+				}
+				
+				if self.continueRunning {
+					
+					print("Error reported:\n \(socketError.description)")
+					
+				}
+			}
+		}
+		
+		dispatchMain()
+		
+	}
+
+	func addNewConnection(socket: Socket) {
+		
+		// Make sure we've got a lock queue...
+		guard let lockq = self.socketLockQueue else {
+			
+			fatalError("Unable to access socket lock queue")
+		}
+		
+		// Add the new socket to the list of connected sockets...
+		lockq.sync { [unowned self, socket] in
+				
+			self.connectedSockets[socket.socketfd] = socket
+		}
+		
+		// Get the global concurrent queue...
+		let queue: DispatchQueue? = DispatchQueue.global(qos: .default)
+		guard let pQueue = queue else {
+			
+			fatalError("Unable to access global default QOS queue")
+		}
+		
+		// Create the run loop work item and dispatch to the default priority global queue...
+		pQueue.async { [unowned self, socket] in
+			
+			var shouldKeepRunning = true
+			
+			guard let readData = NSMutableData(capacity:EchoServer.BUFFER_SIZE) else {
+				
+				fatalError("Unable to create data buffer...")
 			}
 			
-			try socket.listen(on: self.port, maxBacklogSize: 10)
-			
-			print("Listening on port: \(self.port)")
-			
-			// Replace the listening socket with the newly accepted connection...
-			try socket.acceptConnection()
-			
-			print("Accepted connection from: \(socket.remoteHostname) on port \(socket.remotePort)")
-			
-			try socket.write(from: "Hello, type 'QUIT' to end session\n")
-			
-			var bytesRead = 0
-			repeat {
+			do {
 				
-				let readData = NSMutableData()
-				bytesRead = try socket.read(into: readData)
+				// Write the welcome string...
+				try socket.write(from: "Hello, type 'QUIT' to end session\nor 'SHUTDOWN' to stop server.\n")
 				
-				if bytesRead > 0 {
+				repeat {
 					
-					guard let response = String(data: readData as Data, encoding: String.Encoding.utf8) else {
+					let bytesRead = try socket.read(into: readData)
+					
+					if bytesRead > 0 {
 						
-						print("Error decoding response...")
-						readData.length = 0
+						
+						guard let response = NSString(bytes: readData.bytes, length: readData.length, encoding: String.Encoding.utf8.rawValue) else {
+							
+							print("Error decoding response...")
+							readData.length = 0
+							break
+						}
+						if response.hasPrefix(EchoServer.SHUTDOWN) {
+							
+							print("Shutdown requested by connection at \(socket.remoteHostname):\(socket.remotePort)")
+							
+							// Shut things down...
+							self.shutdownServer()
+							
+							return
+						}
+						print("Server received from connection at \(socket.remoteHostname):\(socket.remotePort): \(response) ")
+						let reply = "Server response: \n\(response)\n"
+						try socket.write(from: reply)
+						
+						if (response.uppercased.hasPrefix(EchoServer.QUIT) || response.uppercased.hasPrefix(EchoServer.SHUTDOWN)) &&
+							(!response.hasPrefix(EchoServer.QUIT) && !response.hasPrefix(EchoServer.SHUTDOWN)) {
+							
+							try socket.write(from: "If you want to QUIT or SHUTDOWN, please type the name in all caps. 😃\n")
+						}
+						
+						if response.hasPrefix(EchoServer.QUIT) || response.hasSuffix(EchoServer.QUIT) {
+							
+							shouldKeepRunning = false
+						}
+					}
+					
+					if bytesRead == 0 {
+						
+						shouldKeepRunning = false
 						break
 					}
 					
-					// If the user typed `QUIT`, we'll shutdown the server...
-					if response.hasPrefix(EchoServer.QUIT) {
-						
-						self.keepRunning = false
-					}
+					readData.length = 0
 					
-					print("Server received from connection at \(socket.remoteHostname):\(socket.remotePort): \(response) ")
+				} while shouldKeepRunning
+				
+				print("Socket: \(socket.remoteHostname):\(socket.remotePort) closed...")
+				socket.close()
+				
+				lockq.sync { [unowned self, socket] in
 					
-					// Echo back to the client what we receivied...
-					let reply = "Server response: \n\(response)\n"
-					try socket.write(from: reply)
+					self.connectedSockets[socket.socketfd] = nil
+				}
+				
+			} catch let error {
+				
+				guard let socketError = error as? Socket.Error else {
+					
+					print("Unexpected error by connection at \(socket.remoteHostname):\(socket.remotePort)...")
+					return
+				}
+				
+				if (self.continueRunning) {
+					
+					print("Error reported by connection at \(socket.remoteHostname):\(socket.remotePort):\n \(socketError.description)")
 					
 				}
 				
-				// No bytes read, the other side closed the connection...
-				if bytesRead == 0 {
-					
-					break
-				}
-				
-			} while self.keepRunning
+			}
+		}
+	}
+	
+	func shutdownServer() {
+		
+		print("\nShutdown in progress...")
+		self.continueRunning = false
+		
+		// Close all open sockets...
+		for socket in connectedSockets.values {
 			
 			socket.close()
+		}
 		
-		} catch let error {
-
-			// See if it's a socket error or something else...
-			guard let socketError = error as? Socket.Error else {
-
-				print("Unexpected error...")
-				return
-			}
-
-			print("Error reported: \(socketError.description)")
+		self.listenSocket?.close()
+		
+		DispatchQueue.main.sync {
+			exit(0)
 		}
 	}
 }
 
 let port = 1337
 let server = EchoServer(port: port)
-print("Connect using Terminal via 'telnet 127.0.0.1 \(port)'")
+print("Swift Echo Server Sample")
+print("Connect with ETEchoClient iOS app or use Terminal via 'telnet 127.0.0.1 \(port)'")
+
 server.run()
+```
+This server can be built by specifying the following `Package.swift` file.
+```swift
+import PackageDescription
+
+let package = Package(
+    name: "EchoServer",
+	dependencies: [
+		.Package(url: "https://github.com/IBM-Swift/BlueSocket.git", majorVersion: 0, minor: 8),
+		.Package(url: "https://github.com/IBM-Swift/BlueSSLService.git", majorVersion: 0, minor: 8),
+		],
+	exclude: ["EchoServer.xcodeproj", "README.md", "Sources/Info.plist"]
+```
+The following command sequence will build and run the echo server on Linux.  If running on macOS, omit the `-Xcc -fblocks` switch as it's not needed on macOS.
+```
+$ swift build -Xcc -fblocks
+$ .build/debug/EchoServer
+Swift Echo Server Sample
+Connect with ETEchoClient iOS app or use Terminal via 'telnet 127.0.0.1 1337'
+Listening on port: 1337
 ```
