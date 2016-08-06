@@ -1916,51 +1916,6 @@ public class Socket: SocketReader, SocketWriter {
 	}
 	
 	///
-	/// Read data from the socket.
-	///
-	/// - Parameter data: The buffer to return the data in.
-	///
-	/// - Returns: The number of bytes returned in the buffer.
-	///
-	public func read(into data: inout Data) throws -> Int {
-		
-		// The socket must've been created and must be connected...
-		if self.socketfd == Socket.SOCKET_INVALID_DESCRIPTOR {
-			
-			throw Error(code: Socket.SOCKET_ERR_BAD_DESCRIPTOR, reason: nil)
-		}
-		
-		if !self.isConnected {
-			
-			throw Error(code: Socket.SOCKET_ERR_NOT_CONNECTED, reason: nil)
-		}
-		
-		// Read all available bytes...
-		let count = try self.readDataIntoStorage()
-		
-		// Check for disconnect...
-		if count == 0 {
-			
-			return count
-		}
-		
-		// Did we get data?
-		var returnCount: Int = 0
-		if count > 0 {
-			
-			// - Yes, move to caller's buffer...
-			data.append(UnsafePointer<UInt8>(self.readStorage.bytes), count: self.readStorage.length)
-			
-			returnCount = self.readStorage.length
-			
-			// - Reset the storage buffer...
-			self.readStorage.length = 0
-		}
-		
-		return returnCount
-	}
-	
-	///
 	/// Read data from a UDP socket.
 	///
 	/// - Parameters:
