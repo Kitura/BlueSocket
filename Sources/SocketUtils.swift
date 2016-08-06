@@ -38,10 +38,11 @@ public extension sockaddr_storage {
 	public func asAddr() -> sockaddr {
 		
 		var temp = self
-		let addr = withUnsafePointer(&temp) {
-			return UnsafePointer<sockaddr>($0).pointee
+		let addr = withUnsafePointer(to: &temp) {
+			return UnsafeRawPointer($0)
 		}
-		return addr
+		return addr.assumingMemoryBound(to: sockaddr.self).pointee
+		
 	}
 	
 	///
@@ -52,10 +53,10 @@ public extension sockaddr_storage {
 	public func asIPV4() -> sockaddr_in {
 		
 		var temp = self
-		let addr = withUnsafePointer(&temp) {
-			return UnsafePointer<sockaddr_in>($0).pointee
+		let addr = withUnsafePointer(to: &temp) {
+			return UnsafeRawPointer($0)
 		}
-		return addr
+		return addr.assumingMemoryBound(to: sockaddr_in.self).pointee
 	}
 	
 	///
@@ -66,10 +67,10 @@ public extension sockaddr_storage {
 	public func asIPV6() -> sockaddr_in6 {
 		
 		var temp = self
-		let addr = withUnsafePointer(&temp) {
-			return UnsafePointer<sockaddr_in6>($0).pointee
+		let addr = withUnsafePointer(to: &temp) {
+			return UnsafeRawPointer($0)
 		}
-		return addr
+		return addr.assumingMemoryBound(to: sockaddr_in6.self).pointee
 	}
 }
 
@@ -85,10 +86,10 @@ public extension sockaddr_in {
 	public func asAddr() -> sockaddr {
 		
 		var temp = self
-		let addr = withUnsafePointer(&temp) {
-			return UnsafePointer<sockaddr>($0).pointee
+		let addr = withUnsafePointer(to: &temp) {
+			return UnsafeRawPointer($0)
 		}
-		return addr
+		return addr.assumingMemoryBound(to: sockaddr.self).pointee
 	}
 }
 
@@ -104,10 +105,10 @@ public extension sockaddr_in6 {
 	public func asAddr() -> sockaddr {
 		
 		var temp = self
-		let addr = withUnsafePointer(&temp) {
-			return UnsafePointer<sockaddr>($0).pointee
+		let addr = withUnsafePointer(to: &temp) {
+			return UnsafeRawPointer($0)
 		}
-		return addr
+		return addr.assumingMemoryBound(to: sockaddr.self).pointee
 	}
 }
 
