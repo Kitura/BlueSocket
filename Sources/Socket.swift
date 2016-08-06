@@ -2104,8 +2104,6 @@ public class Socket: SocketReader, SocketWriter {
 		// If there's no data in the NSData object, why bother? Fail silently...
 		if data.length == 0 {
 			return
-<<<<<<< HEAD
-=======
 		}
 		
 		try write(from: data.bytes.assumingMemoryBound(to: UInt8.self), bufSize: data.length)
