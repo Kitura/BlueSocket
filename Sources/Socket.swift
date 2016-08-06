@@ -282,10 +282,10 @@ public class Socket: SocketReader, SocketWriter {
 			
 			switch self {
 				
-			case .ipv4(let addr):
-				return sizeofValue(addr)
-			case .ipv6(let addr):
-				return sizeofValue(addr)
+			case .ipv4( _):
+				return MemoryLayout<(sockaddr_in)>.size
+			case .ipv6( _):
+				return MemoryLayout<(sockaddr_in6)>.size
 			}
 		}
 		
@@ -1026,7 +1026,7 @@ public class Socket: SocketReader, SocketWriter {
 				
 			case .inet:
 				var acceptAddr = sockaddr_in()
-				var addrSize = socklen_t(sizeofValue(acceptAddr))
+				var addrSize = socklen_t(MemoryLayout<sockaddr_in>.size)
 				
 				#if os(Linux)
 					let fd = withUnsafeMutablePointer(to: &acceptAddr) {
@@ -1050,7 +1050,7 @@ public class Socket: SocketReader, SocketWriter {
 				
 			case .inet6:
 				var acceptAddr = sockaddr_in6()
-				var addrSize = socklen_t(sizeofValue(acceptAddr))
+				var addrSize = socklen_t(MemoryLayout<sockaddr_in6>.size)
 				
 				#if os(Linux)
 					let fd = withUnsafeMutablePointer(to: &acceptAddr) {
@@ -1136,7 +1136,7 @@ public class Socket: SocketReader, SocketWriter {
 				
 			case .inet:
 				var acceptAddr = sockaddr_in()
-				var addrSize = socklen_t(sizeofValue(acceptAddr))
+				var addrSize = socklen_t(MemoryLayout<sockaddr_in>.size)
 				
 				#if os(Linux)
 					let fd = withUnsafeMutablePointer(to: &acceptAddr) {
@@ -1160,7 +1160,7 @@ public class Socket: SocketReader, SocketWriter {
 				
 			case .inet6:
 				var acceptAddr = sockaddr_in6()
-				var addrSize = socklen_t(sizeofValue(acceptAddr))
+				var addrSize = socklen_t(MemoryLayout<sockaddr_in6>.size)
 				
 				#if os(Linux)
 					let fd = withUnsafeMutablePointer(to: &acceptAddr) {
@@ -1410,13 +1410,13 @@ public class Socket: SocketReader, SocketWriter {
 		if info!.pointee.ai_family == Int32(AF_INET6) {
 			
 			var addr = sockaddr_in6()
-			memcpy(&addr, info!.pointee.ai_addr, Int(sizeofValue(addr)))
+			memcpy(&addr, info!.pointee.ai_addr, Int(MemoryLayout<sockaddr_in6>.size))
 			address = .ipv6(addr)
 			
 		} else if info!.pointee.ai_family == Int32(AF_INET) {
 			
 			var addr = sockaddr_in()
-			memcpy(&addr, info!.pointee.ai_addr, Int(sizeofValue(addr)))
+			memcpy(&addr, info!.pointee.ai_addr, Int(MemoryLayout<sockaddr_in>.size))
 			address = .ipv4(addr)
 			
 		} else {
@@ -1556,7 +1556,7 @@ public class Socket: SocketReader, SocketWriter {
 		// Set a flag so that this address can be re-used immediately after the connection
 		// closes.  (TCP normally imposes a delay before an address can be re-used.)
 		var on: Int32 = 1
-		if setsockopt(self.socketfd, SOL_SOCKET, SO_REUSEADDR, &on, socklen_t(sizeof(Int32.self))) < 0 {
+		if setsockopt(self.socketfd, SOL_SOCKET, SO_REUSEADDR, &on, socklen_t(MemoryLayout<Int32>.size)) < 0 {
 			
 			throw Error(code: Socket.SOCKET_ERR_SETSOCKOPT_FAILED, reason: self.lastError())
 		}
@@ -1565,7 +1565,7 @@ public class Socket: SocketReader, SocketWriter {
 			// Set the socket to ignore SIGPIPE to avoid dying on interrupted connections...
 			//	Note: Linux does not support the SO_NOSIGPIPE option. Instead, we use the
 			//		  MSG_NOSIGNAL flags passed to send.  See the writeData() functions below.
-			if setsockopt(self.socketfd, SOL_SOCKET, SO_NOSIGPIPE, &on, socklen_t(sizeof(Int32.self))) < 0 {
+			if setsockopt(self.socketfd, SOL_SOCKET, SO_NOSIGPIPE, &on, socklen_t(MemoryLayout<Int32>.size)) < 0 {
 				
 				throw Error(code: Socket.SOCKET_ERR_SETSOCKOPT_FAILED, reason: self.lastError())
 			}
@@ -1674,13 +1674,13 @@ public class Socket: SocketReader, SocketWriter {
 		if info!.pointee.ai_family == Int32(AF_INET6) {
 			
 			var addr = sockaddr_in6()
-			memcpy(&addr, info!.pointee.ai_addr, Int(sizeofValue(addr)))
+			memcpy(&addr, info!.pointee.ai_addr, Int(MemoryLayout<sockaddr_in6>.size))
 			address = .ipv6(addr)
 			
 		} else if info!.pointee.ai_family == Int32(AF_INET) {
 			
 			var addr = sockaddr_in()
-			memcpy(&addr, info!.pointee.ai_addr, Int(sizeofValue(addr)))
+			memcpy(&addr, info!.pointee.ai_addr, Int(MemoryLayout<sockaddr_in>.size))
 			address = .ipv4(addr)
 			
 		} else {

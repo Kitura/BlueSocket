@@ -16,7 +16,7 @@
 		8CC36DF91C4EA1BE00BAA659 /* Socket.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C0F4C031C4E8630008B2B0A /* Socket.swift */; };
 		8CC36DFA1C4EA1BE00BAA659 /* SocketUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C0F4C041C4E8630008B2B0A /* SocketUtils.swift */; };
 		8CC7217B1D4BCB1D00F5FD19 /* LICENSE in Resources */ = {isa = PBXBuildFile; fileRef = 8CC7217A1D4BCB1D00F5FD19 /* LICENSE */; };
-		8CF04E291D4FCE4A00C27814 /* BasicSocketTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CC721761D4BCA9400F5FD19 /* BasicSocketTests.swift */; };
+		8CF04E291D4FCE4A00C27814 /* SocketTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CC721761D4BCA9400F5FD19 /* SocketTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -30,7 +30,6 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		8C0039F11D4FE0F50064B65F /* XCTestManifests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = XCTestManifests.swift; path = Tests/SocketTests/XCTestManifests.swift; sourceTree = "<group>"; };
 		8C0F4BF61C4E84CC008B2B0A /* Socket.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Socket.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		8C0F4BF91C4E84CC008B2B0A /* Socket.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Socket.h; sourceTree = "<group>"; };
 		8C0F4BFB1C4E84CC008B2B0A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -41,7 +40,7 @@
 		8CA9B1631C98A00400E607FB /* SocketTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SocketTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		8CC36E021C4EA1BE00BAA659 /* Socket.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Socket.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		8CC36E041C4EA34700BAA659 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
-		8CC721761D4BCA9400F5FD19 /* BasicSocketTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = BasicSocketTests.swift; path = Tests/SocketTests/BasicSocketTests.swift; sourceTree = "<group>"; };
+		8CC721761D4BCA9400F5FD19 /* SocketTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = SocketTests.swift; path = Tests/SocketTests/SocketTests.swift; sourceTree = "<group>"; };
 		8CC721781D4BCAA600F5FD19 /* LinuxMain.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = LinuxMain.swift; path = Tests/LinuxMain.swift; sourceTree = "<group>"; };
 		8CC7217A1D4BCB1D00F5FD19 /* LICENSE */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
 		8CF04E231D4BD03D00C27814 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = Tests/SocketTests/Info.plist; sourceTree = "<group>"; };
@@ -119,8 +118,7 @@
 			isa = PBXGroup;
 			children = (
 				8CF04E231D4BD03D00C27814 /* Info.plist */,
-				8CC721761D4BCA9400F5FD19 /* BasicSocketTests.swift */,
-				8C0039F11D4FE0F50064B65F /* XCTestManifests.swift */,
+				8CC721761D4BCA9400F5FD19 /* SocketTests.swift */,
 			);
 			name = SocketTests;
 			sourceTree = "<group>";
@@ -289,7 +287,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				8CF04E291D4FCE4A00C27814 /* BasicSocketTests.swift in Sources */,
+				8CF04E291D4FCE4A00C27814 /* SocketTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

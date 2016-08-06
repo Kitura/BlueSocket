@@ -1,6 +1,6 @@
 //
 //  LinuxMain.swift
-//  Socket
+//  BlueSocket
 //
 // 	Licensed under the Apache License, Version 2.0 (the "License");
 // 	you may not use this file except in compliance with the License.
@@ -17,10 +17,8 @@
 
 import XCTest
 
-import SocketTests
+@testable import SocketTests
 
-var tests = [XCTestCaseEntry]()
-
-tests += BasicSocketTests.allTests()
-
-XCTMain(tests)
+XCTMain([
+	testCase(SocketTests.allTests),
+])
