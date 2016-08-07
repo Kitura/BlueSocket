@@ -376,7 +376,6 @@ let package = Package(
     name: "EchoServer",
 	dependencies: [
 		.Package(url: "https://github.com/IBM-Swift/BlueSocket.git", majorVersion: 0, minor: 8),
-		.Package(url: "https://github.com/IBM-Swift/BlueSSLService.git", majorVersion: 0, minor: 8),
 		],
 	exclude: ["EchoServer.xcodeproj", "README.md", "Sources/Info.plist"]
 ```
