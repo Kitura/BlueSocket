@@ -116,11 +116,6 @@ public protocol SSLServiceDelegate {
 	func onConnect(socket: Socket) throws
 	
 	///
-	/// Do connection verification
-	///
-	func verifyConnection() throws
-	
-	///
 	/// Low level writer
 	///
 	/// - Parameters:

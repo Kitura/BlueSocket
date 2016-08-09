@@ -1086,7 +1086,6 @@ public class Socket: SocketReader, SocketWriter {
 			
 			if self.delegate != nil {
 				try self.delegate?.onAccept(socket: newSocket)
-				try self.delegate?.verifyConnection()
 				newSocket.signature?.isSecure = true
 			}
 			
@@ -1210,7 +1209,6 @@ public class Socket: SocketReader, SocketWriter {
 			
 			if self.delegate != nil {
 				try self.delegate?.onAccept(socket: self)
-				try self.delegate?.verifyConnection()
 				self.signature?.isSecure = true
 			}
 			
@@ -1437,7 +1435,6 @@ public class Socket: SocketReader, SocketWriter {
 			
 			if self.delegate != nil {
 				try self.delegate?.onConnect(socket: self)
-				try self.delegate?.verifyConnection()
 				self.signature?.isSecure = true
 			}
 			
@@ -1527,7 +1524,6 @@ public class Socket: SocketReader, SocketWriter {
 			
 			if self.delegate != nil {
 				try self.delegate?.onConnect(socket: self)
-				try self.delegate?.verifyConnection()
 				self.signature?.isSecure = true
 			}
 			
@@ -2081,42 +2077,7 @@ public class Socket: SocketReader, SocketWriter {
 			try self.write(from: buffer, bufSize: data.count)
 		}
 	}
-/*
-	///
-	/// Write data to the socket.
-	///
-	/// - Parameter data: The NSData object containing the data to write.
-	///
-	public func write(from data: NSData) throws {
-		
-		// The socket must've been created and must be connected...
-		if self.socketfd == Socket.SOCKET_INVALID_DESCRIPTOR {
-			
-			throw Error(code: Socket.SOCKET_ERR_BAD_DESCRIPTOR, reason: nil)
->>>>>>> d1d9ea58fa7d854162a001b2149946e90bcf52d5
-		}
-		
-		try write(from: data.bytes, bufSize: data.length)
-	}
-	
-	///
-	/// Write data to the socket.
-	///
-	/// - Parameter data: The Data object containing the data to write.
-	///
-	public func write(from data: Data) throws {
-		
-		// If there's no data in the Data object, why bother? Fail silently...
-		if data.count == 0 {
-			return
-		}
-		
-		try data.withUnsafeBytes() { [unowned self] (buffer: UnsafePointer<UInt8>) throws in
-			
-			try self.write(from: buffer, bufSize: data.count)
-		}
-	}
-*/
+
 	///
 	/// Write a string to the socket.
 	///
