@@ -1,5 +1,6 @@
 ![](https://img.shields.io/badge/Swift-3.0-orange.svg?style=flat)
 ![](https://img.shields.io/badge/Snapshot-8/4-blue.svg?style=flat)
+![](https://img.shields.io/badge/Snapshot-8/7-blue.svg?style=flat)
 
 # BlueSocket
 
@@ -14,6 +15,7 @@ Socket framework for Swift using the Swift Package Manager. Works on macOS and L
 
 ### Swift
 * Swift Open Source `swift-DEVELOPMENT-SNAPSHOT-2016-08-04-a` toolchain (**Minimum REQUIRED for latest release**)
+* Swift Open Source `swift-DEVELOPMENT-SNAPSHOT-2016-08-07-a` toolchain (**Recommended**)
 
 ### macOS
 
