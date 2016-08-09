@@ -35,6 +35,15 @@ public protocol SocketReader {
 	func readString() throws -> String?
 	
 	///
+	/// Reads all available data into an Data object.
+	///
+	/// - Parameter data: Data object to contain read data.
+	///
+	/// - Returns: Integer representing the number of bytes read.
+	///
+	func read(into data: inout Data) throws -> Int
+	
+	///
 	/// Reads all available data into an NSMutableData object.
 	///
 	/// - Parameter data: NSMutableData object to contain read data.
@@ -50,6 +59,13 @@ public protocol SocketReader {
 /// Socket writer protocol
 ///
 public protocol SocketWriter {
+	
+	///
+	/// Writes data from Data object.
+	///
+	/// - Parameter data: Data object containing the data to be written.
+	///
+	func write(from data: Data) throws
 	
 	///
 	/// Writes data from NSData object.
