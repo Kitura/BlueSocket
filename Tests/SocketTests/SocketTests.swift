@@ -22,7 +22,11 @@ import XCTest
 @testable import Socket
 
 class SocketTests: XCTestCase {
-    
+	
+	let port: Int32 = 1337
+	let host: String = "127.0.0.1"
+	
+	
 	override func setUp() {
         super.setUp()
         // Put setup code here. This method is called before the invocation of each test method in the class.
@@ -32,46 +36,24 @@ class SocketTests: XCTestCase {
         // Put teardown code here. This method is called after the invocation of each test method in the class.
         super.tearDown()
     }
-    
-    func testSocket() {
-        do {
-            let port:Int32 = 1337
-            
-            let socket = try Socket.create()
-            XCTAssertNotNil(socket)
-            XCTAssertFalse(socket.isConnected)
-            XCTAssertTrue(socket.isBlocking)
-            
-            try socket.listen(on: Int(port), maxBacklogSize: 10)
-            XCTAssertTrue(socket.isListening)
-            XCTAssertEqual(socket.listeningPort, port)
-            
-            socket.close()
-            XCTAssertFalse(socket.isActive)
-            
-        } catch let error {
-            
-            // See if it's a socket error or something else...
-            guard let socketError = error as? Socket.Error else {
-                
-                print("Unexpected error...")
-				XCTFail()
-				return
-            }
-			
-            print("Error reported: \(socketError.description)")
-			XCTFail()
-        }
-    }
+	
+	func createHelper(family: Socket.ProtocolFamily = .inet) throws -> Socket {
+		
+		let socket = try Socket.create(family: family)
+		XCTAssertNotNil(socket)
+		XCTAssertFalse(socket.isConnected)
+		XCTAssertTrue(socket.isBlocking)
+		
+		return socket
+	}
 	
 	func testDefaultCreate() {
 		
 		do {
 			
 			// Create the socket...
-			let socket = try Socket.create()
-			XCTAssertNotNil(socket)
-	
+			let socket = try createHelper()
+			
 			// Get the Signature...
 			let sig = socket.signature
 			XCTAssertNotNil(sig)
@@ -104,8 +86,7 @@ class SocketTests: XCTestCase {
 		do {
 			
 			// Create the socket...
-			let socket = try Socket.create(family: .inet6)
-			XCTAssertNotNil(socket)
+			let socket = try createHelper(family: .inet6)
 			
 			// Get the Signature...
 			let sig = socket.signature
@@ -134,9 +115,175 @@ class SocketTests: XCTestCase {
 		}
 	}
 	
+	func testListen() {
+		
+		do {
+
+			// Create the socket..
+			let socket = try createHelper()
+			
+			// Listen on the port...
+			try socket.listen(on: Int(port), maxBacklogSize: 10)
+			XCTAssertTrue(socket.isListening)
+			XCTAssertEqual(socket.listeningPort, port)
+			
+			// Close the socket...
+			socket.close()
+			XCTAssertFalse(socket.isActive)
+			
+		} catch let error {
+			
+			// See if it's a socket error or something else...
+			guard let socketError = error as? Socket.Error else {
+				
+				print("Unexpected error...")
+				XCTFail()
+				return
+			}
+			
+			print("Error reported: \(socketError.description)")
+			XCTFail()
+		}
+	}
+	
+	func testConnect() {
+		
+		do {
+			
+			// Create the socket..
+			let socket = try createHelper()
+			
+			// Listen on the port...
+			try socket.listen(on: Int(port), maxBacklogSize: 10)
+			XCTAssertTrue(socket.isListening)
+			XCTAssertEqual(socket.listeningPort, port)
+			
+			// Create a signature...
+			let signature = try Socket.Signature(socketType: .stream, proto: .tcp, hostname: host, port: port)
+			XCTAssertNotNil(signature)
+			
+			// Create a connected socket using the signature...
+			let socket2 = try Socket.create(connectedUsing: signature!)
+			XCTAssertNotNil(socket2)
+			XCTAssertTrue(socket2.isConnected)
+			
+			// Close the socket...
+			socket.close()
+			XCTAssertFalse(socket.isActive)
+			socket2.close()
+			XCTAssertFalse(socket2.isActive)
+			
+		} catch let error {
+			
+			// See if it's a socket error or something else...
+			guard let socketError = error as? Socket.Error else {
+				
+				print("Unexpected error...")
+				XCTFail()
+				return
+			}
+			
+			print("Error reported: \(socketError.description)")
+			XCTFail()
+		}
+	}
+	
+	func testConnectTo() {
+		
+		do {
+			
+			// Create the socket..
+			let socket = try createHelper()
+			
+			// Listen on the port...
+			try socket.listen(on: Int(port), maxBacklogSize: 10)
+			XCTAssertTrue(socket.isListening)
+			XCTAssertEqual(socket.listeningPort, port)
+			
+			// Create a second socket...
+			let socket2 = try createHelper()
+			XCTAssertNotNil(socket2)
+			
+			// Now attempt to connect to the listening socket...
+			try socket2.connect(to: host, port: port)
+			XCTAssertTrue(socket2.isConnected)
+			
+			// Close the socket...
+			socket.close()
+			XCTAssertFalse(socket.isActive)
+			socket2.close()
+			XCTAssertFalse(socket2.isActive)
+			
+		} catch let error {
+			
+			// See if it's a socket error or something else...
+			guard let socketError = error as? Socket.Error else {
+				
+				print("Unexpected error...")
+				XCTFail()
+				return
+			}
+			
+			print("Error reported: \(socketError.description)")
+			XCTFail()
+		}
+	}
+	
+	func testHostnameAndPort() {
+		
+		do {
+			
+			// Create the socket..
+			let socket = try createHelper()
+			
+			// Listen on the port...
+			try socket.listen(on: Int(port), maxBacklogSize: 10)
+			XCTAssertTrue(socket.isListening)
+			XCTAssertEqual(socket.listeningPort, port)
+			
+			// Create a signature...
+			let signature = try Socket.Signature(socketType: .stream, proto: .tcp, hostname: host, port: port)
+			XCTAssertNotNil(signature)
+			
+			// Create a connected socket using the signature...
+			let socket2 = try Socket.create(connectedUsing: signature!)
+			XCTAssertNotNil(socket2)
+			XCTAssertTrue(socket2.isConnected)
+			
+			let address = socket2.signature?.address
+			XCTAssertNotNil(address)
+			
+			let (theHost, thePort) = Socket.hostnameAndPort(from: address!)!
+			XCTAssertEqual(host, theHost)
+			XCTAssertEqual(port, thePort)
+			
+			// Close the socket...
+			socket.close()
+			XCTAssertFalse(socket.isActive)
+			socket2.close()
+			XCTAssertFalse(socket2.isActive)
+			
+		} catch let error {
+			
+			// See if it's a socket error or something else...
+			guard let socketError = error as? Socket.Error else {
+				
+				print("Unexpected error...")
+				XCTFail()
+				return
+			}
+			
+			print("Error reported: \(socketError.description)")
+			XCTFail()
+		}
+	}
+	
 	static var allTests = [
-		("testSocket", testSocket),
 		("testDefaultCreate", testDefaultCreate),
 		("testCreateIPV6", testCreateIPV6),
+		("testListen", testListen),
+		("testConnect", testConnect),
+		("testConnectTo", testConnectTo),
+		("testHostnameAndPort", testHostnameAndPort),
 	]
 }
