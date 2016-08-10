@@ -45,7 +45,11 @@ To build Socket from the command line:
 
 ## Testing
 
-**Important Note:** Testing on both *macOS* and *Linux* requires a working **Dispatch** in the toolchain. **THIS ONLY APPLIES TO TESTING**.
+**Important Note:** 
+```
+Testing on both *macOS* and *Linux* requires a working **Dispatch** in the toolchain. 
+```
+**THIS ONLY APPLIES TO TESTING**.
 
 To run the supplied unit tests for **Socket** on *macOS* from the command line:
 
@@ -151,7 +155,7 @@ $ ./configure --with-swift-toolchain=<Path to>/swift-DEVELOPMENT-SNAPSHOT-2016-0
 $ make
 $ make install
 ```
-What follows is the code for a simple exho server that once running, can be accessed via `telnet 127.0.0.1 1337`.
+What follows is the code for a simple echo server that once running, can be accessed via `telnet 127.0.0.1 1337`.
 ```swift
 #if os(macOS) || os(iOS) || os(tvOS) || os(watchOS)
 	import Darwin
