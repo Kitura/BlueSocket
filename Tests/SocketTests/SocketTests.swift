@@ -278,6 +278,39 @@ class SocketTests: XCTestCase {
 		}
 	}
 	
+	func testBlocking() {
+		
+		do {
+			
+			// Create the socket...
+			let socket = try createHelper()
+
+			// Should be blocking...
+			XCTAssertTrue(socket.isBlocking)
+			
+			// Set to non-blocking...
+			try socket.setBlocking(mode: false)
+			XCTAssertFalse(socket.isBlocking)
+			
+			// Close the socket...
+			socket.close()
+			XCTAssertFalse(socket.isActive)
+			
+		} catch let error {
+			
+			// See if it's a socket error or something else...
+			guard let socketError = error as? Socket.Error else {
+				
+				print("Unexpected error...")
+				XCTFail()
+				return
+			}
+			
+			print("Error reported: \(socketError.description)")
+			XCTFail()
+		}
+	}
+	
 	static var allTests = [
 		("testDefaultCreate", testDefaultCreate),
 		("testCreateIPV6", testCreateIPV6),
@@ -285,5 +318,6 @@ class SocketTests: XCTestCase {
 		("testConnect", testConnect),
 		("testConnectTo", testConnectTo),
 		("testHostnameAndPort", testHostnameAndPort),
+		("testBlocking", testBlocking),
 	]
 }
