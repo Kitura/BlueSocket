@@ -47,7 +47,7 @@ To build Socket from the command line:
 
 **Important Note:** 
 ```
-Testing on both *macOS* and *Linux* requires a working **Dispatch** in the toolchain. 
+Testing on both macOS and Linux requires a working Dispatch in the toolchain. 
 ```
 **THIS ONLY APPLIES TO TESTING**.
 
