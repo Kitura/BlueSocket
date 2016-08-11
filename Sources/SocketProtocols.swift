@@ -65,21 +65,21 @@ public protocol SocketWriter {
 	///
 	/// - Parameter data: Data object containing the data to be written.
 	///
-	func write(from data: Data) throws
+	@discardableResult func write(from data: Data) throws -> Int
 	
 	///
 	/// Writes data from NSData object.
 	///
 	/// - Parameter data: NSData object containing the data to be written.
 	///
-	func write(from data: NSData) throws
+	@discardableResult func write(from data: NSData) throws -> Int
 	
 	///
 	/// Writes a string
 	///
 	/// - Parameter string: String data to be written.
 	///
-	func write(from string: String) throws
+	@discardableResult func write(from string: String) throws -> Int
 }
 
 // MARK: SSLServiceDelegate

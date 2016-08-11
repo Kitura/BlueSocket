@@ -1985,7 +1985,9 @@ public class Socket: SocketReader, SocketWriter {
 	///		- buffer: 	The buffer containing the data to write.
 	/// 	- bufSize: 	The size of the buffer.
 	///
-	public func write(from buffer: UnsafePointer<Void>, bufSize: Int) throws {
+	/// - Returns: Integer representing the number of bytes written.
+	///
+	@discardableResult public func write(from buffer: UnsafePointer<Void>, bufSize: Int) throws -> Int {
 		
 		// Make sure the buffer is valid...
 		if bufSize == 0 {
@@ -2039,10 +2041,18 @@ public class Socket: SocketReader, SocketWriter {
 			}
 			if s <= 0 {
 				
+				if errno == EAGAIN && !isBlocking {
+					
+					// We have written out as much as we can...
+					return sent
+				}
+				
 				throw Error(code: Socket.SOCKET_ERR_WRITE_FAILED, reason: self.lastError())
 			}
 			sent += s
 		}
+		
+		return sent
 	}
 	
 	///
@@ -2050,14 +2060,16 @@ public class Socket: SocketReader, SocketWriter {
 	///
 	/// - Parameter data: The NSData object containing the data to write.
 	///
-	public func write(from data: NSData) throws {
+	/// - Returns: Integer representing the number of bytes written.
+	///
+	@discardableResult public func write(from data: NSData) throws -> Int {
 		
 		// If there's no data in the NSData object, why bother? Fail silently...
 		if data.length == 0 {
-			return
+			return 0
 		}
 		
-		try write(from: data.bytes.assumingMemoryBound(to: UInt8.self), bufSize: data.length)
+		return try write(from: data.bytes.assumingMemoryBound(to: UInt8.self), bufSize: data.length)
 	}
 	
 	///
@@ -2065,16 +2077,18 @@ public class Socket: SocketReader, SocketWriter {
 	///
 	/// - Parameter data: The Data object containing the data to write.
 	///
-	public func write(from data: Data) throws {
+	/// - Returns: Integer representing the number of bytes written.
+	///
+	@discardableResult public func write(from data: Data) throws -> Int {
 		
 		// If there's no data in the Data object, why bother? Fail silently...
 		if data.count == 0 {
-			return
+			return 0
 		}
 		
-		try data.withUnsafeBytes() { [unowned self] (buffer: UnsafePointer<UInt8>) throws in
+		return try data.withUnsafeBytes() { [unowned self] (buffer: UnsafePointer<UInt8>) throws -> Int in
 			
-			try self.write(from: buffer, bufSize: data.count)
+			return try self.write(from: buffer, bufSize: data.count)
 		}
 	}
 
@@ -2083,12 +2097,14 @@ public class Socket: SocketReader, SocketWriter {
 	///
 	/// - Parameter string: The string to write.
 	///
-	public func write(from string: String) throws {
+	/// - Returns: Integer representing the number of bytes written.
+	///
+	@discardableResult public func write(from string: String) throws -> Int {
 		
-		try string.utf8CString.withUnsafeBufferPointer() {
+		return try string.utf8CString.withUnsafeBufferPointer() {
 			
 			// The count returned by nullTerminatedUTF8 includes the null terminator...
-			try self.write(from: $0.baseAddress!, bufSize: $0.count-1)
+			return try self.write(from: $0.baseAddress!, bufSize: $0.count-1)
 		}
 	}
 	
