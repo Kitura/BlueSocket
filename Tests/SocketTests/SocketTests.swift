@@ -36,13 +36,13 @@ class SocketTests: XCTestCase {
 	
 	
 	override func setUp() {
-        super.setUp()
-        // Put setup code here. This method is called before the invocation of each test method in the class.
+
+		super.setUp()
     }
     
     override func tearDown() {
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
-        super.tearDown()
+
+		super.tearDown()
     }
 	
 	func createHelper(family: Socket.ProtocolFamily = .inet) throws -> Socket {
@@ -60,10 +60,12 @@ class SocketTests: XCTestCase {
 		let queue: DispatchQueue? = DispatchQueue.global(qos: .userInteractive)
 		guard let pQueue = queue else {
 			
-			fatalError("Unable to access global interactive QOS queue")
+			print("Unable to access global interactive QOS queue")
+			XCTFail()
+			return
 		}
 		
-		pQueue.async {
+		pQueue.async { [unowned self] in
 			
 			do {
 				
@@ -74,11 +76,12 @@ class SocketTests: XCTestCase {
 				guard let socketError = error as? Socket.Error else {
 					
 					print("Unexpected error...")
+					XCTFail()
 					return
 				}
 				
 				print("Error reported:\n \(socketError.description)")
-					
+				XCTFail()
 			}
 		}
 	}
@@ -95,6 +98,7 @@ class SocketTests: XCTestCase {
 			guard let listener = listenSocket else {
 				
 				print("Unable to unwrap socket...")
+				XCTFail()
 				return
 			}
 			
@@ -120,6 +124,7 @@ class SocketTests: XCTestCase {
 						
 						print("Error decoding response...")
 						readData.count = 0
+						XCTFail()
 						break
 					}
 					
@@ -142,16 +147,19 @@ class SocketTests: XCTestCase {
 			} while keepRunning
 			
 			socket.close()
+			XCTAssertFalse(socket.isActive)
 			
 		} catch let error {
 			
 			guard let socketError = error as? Socket.Error else {
 				
 				print("Unexpected error...")
+				XCTFail()
 				return
 			}
 			
 			print("Error reported: \(socketError.description)")
+			XCTFail()
 		}
 	}
 	
@@ -419,6 +427,10 @@ class SocketTests: XCTestCase {
 			// Set to non-blocking...
 			try socket.setBlocking(mode: false)
 			XCTAssertFalse(socket.isBlocking)
+			
+			// Now back to blocking...
+			try socket.setBlocking(mode: true)
+			XCTAssertTrue(socket.isBlocking)
 			
 			// Close the socket...
 			socket.close()
