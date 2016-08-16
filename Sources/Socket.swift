@@ -1288,7 +1288,7 @@ public class Socket: SocketReader, SocketWriter {
 		// Tell the delegate to initialize as a client...
 		do {
 			
-			try self.delegate?.initialize(isServer: false)
+			try self.delegate?.initialize(asServer: false)
 			
 		} catch let error {
 			
@@ -1481,7 +1481,7 @@ public class Socket: SocketReader, SocketWriter {
 		// Tell the delegate to initialize as a client...
 		do {
 			
-			try self.delegate?.initialize(isServer: false)
+			try self.delegate?.initialize(asServer: false)
 			
 		} catch let error {
 			
@@ -1576,7 +1576,7 @@ public class Socket: SocketReader, SocketWriter {
 		// Tell the delegate to initialize as a server...
 		do {
 			
-			try self.delegate?.initialize(isServer: true)
+			try self.delegate?.initialize(asServer: true)
 			
 		} catch let error {
 			

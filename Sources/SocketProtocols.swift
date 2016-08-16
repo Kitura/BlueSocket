@@ -92,9 +92,9 @@ public protocol SSLServiceDelegate {
 	///
 	/// Initialize SSL Service
 	///
-	/// - Parameter isServer:	True for initializing a server, otherwise a client.
+	/// - Parameter asServer:	True for initializing a server, otherwise a client.
 	///
-	func initialize(isServer: Bool) throws
+	func initialize(asServer: Bool) throws
 	
 	///
 	/// Deinitialize SSL Service
