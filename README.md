@@ -142,14 +142,14 @@ In addition to reading from a socket, **BlueSocket** also supplies four methods 
 
 ### Complete Example
 
-The following example shows how to create a relatively simple multi-threaded echo server using the new `GCD based` **Dispatch** API.  The Dispatch API was incorporated into the toolchain using the following sequence of commands where `<Path to>` is the path where you've installed the required toolchain. In this example, the `swift-DEVELOPMENT-SNAPSHOT-2016-08-04-a-ubuntu15.10` toolchain is being used. **Important note: clang-3.9 is REQUIRED to successfully build libdispatch.**
+The following example shows how to create a relatively simple multi-threaded echo server using the new `GCD based` **Dispatch** API.  The Dispatch API was incorporated into the toolchain using the following sequence of commands where `<Path to>` is the path where you've installed the required toolchain. In this example, the `swift-DEVELOPMENT-SNAPSHOT-2016-08-15-a-ubuntu15.10` toolchain is being used. **Important note: clang-3.9 is REQUIRED to successfully build libdispatch.**
 ```
 $ git clone --recursive git@github.com:apple/swift-corelibs-libdispatch.git
 $ cd swift-corelibs-libdispatch
 $ export CC=/usr/bin/clang-3.9
 $ export CXX=/usr/bin/clang-3.9
 $ sh ./autogen.sh
-$ ./configure --with-swift-toolchain=<Path to>/swift-DEVELOPMENT-SNAPSHOT-2016-08-04-a-ubuntu15.10/usr --prefix=<Path to>/swift-DEVELOPMENT-SNAPSHOT-2016-08-04-a-ubuntu15.10/usr
+$ ./configure --with-swift-toolchain=<Path to>/swift-DEVELOPMENT-SNAPSHOT-2016-08-15-a-ubuntu15.10/usr --prefix=<Path to>/swift-DEVELOPMENT-SNAPSHOT-2016-08-15-a-ubuntu15.10/usr
 $ make
 $ make install
 ```
@@ -394,7 +394,7 @@ import PackageDescription
 let package = Package(
     name: "EchoServer",
 	dependencies: [
-		.Package(url: "https://github.com/IBM-Swift/BlueSocket.git", majorVersion: 0, minor: 8),
+		.Package(url: "https://github.com/IBM-Swift/BlueSocket.git", majorVersion: 0, minor: 9),
 		],
 	exclude: ["EchoServer.xcodeproj", "README.md", "Sources/Info.plist"]
 ```
@@ -403,6 +403,6 @@ The following command sequence will build and run the echo server on Linux.  If 
 $ swift build -Xcc -fblocks
 $ .build/debug/EchoServer
 Swift Echo Server Sample
-Connect with ETEchoClient iOS app or use Terminal via 'telnet 127.0.0.1 1337'
+Connect with EchoClient iOS app or use Terminal via 'telnet 127.0.0.1 1337'
 Listening on port: 1337
 ```
