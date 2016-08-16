@@ -135,7 +135,7 @@ public protocol SSLServiceDelegate {
 	///
 	///	- Returns the number of bytes read. Zero indicates SSL shutdown, less than zero indicates error.
 	///
-	func recv(buffer: UnsafeMutablePointer<Void>!, bufSize: Int) throws -> Int
+	func recv(buffer: UnsafeMutableRawPointer, bufSize: Int) throws -> Int
 	
 }
 

@@ -1987,7 +1987,7 @@ public class Socket: SocketReader, SocketWriter {
 	///
 	/// - Returns: Integer representing the number of bytes written.
 	///
-	@discardableResult public func write(from buffer: UnsafePointer<Void>, bufSize: Int) throws -> Int {
+	@discardableResult public func write(from buffer: UnsafeRawPointer, bufSize: Int) throws -> Int {
 		
 		// Make sure the buffer is valid...
 		if bufSize == 0 {
@@ -2116,7 +2116,7 @@ public class Socket: SocketReader, SocketWriter {
 	/// 	- bufSize: 	The size of the buffer.
 	///		- address: 	Address to write data to.
 	///
-	public func write(from buffer: UnsafePointer<Void>, bufSize: Int, to addresss: Address) throws {
+	public func write(from buffer: UnsafeRawPointer, bufSize: Int, to addresss: Address) throws {
 		
 		// Make sure the buffer is valid...
 		if bufSize == 0 {

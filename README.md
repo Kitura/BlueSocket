@@ -2,8 +2,7 @@
 ![Linux](https://img.shields.io/badge/os-linux-green.svg?style=flat)
 ![Apache 2](https://img.shields.io/badge/license-Apache2-blue.svg?style=flat)
 ![](https://img.shields.io/badge/Swift-3.0-orange.svg?style=flat)
-![](https://img.shields.io/badge/Snapshot-8/4-blue.svg?style=flat)
-![](https://img.shields.io/badge/Snapshot-8/7-blue.svg?style=flat)
+![](https://img.shields.io/badge/Snapshot-8/15-blue.svg?style=flat)
 
 # BlueSocket
 
@@ -17,13 +16,12 @@ Socket framework for Swift using the Swift Package Manager. Works on macOS and L
 ## Prerequisites
 
 ### Swift
-* Swift Open Source `swift-DEVELOPMENT-SNAPSHOT-2016-08-04-a` toolchain (**Minimum REQUIRED for latest release**)
-* Swift Open Source `swift-DEVELOPMENT-SNAPSHOT-2016-08-07-a` toolchain (**Recommended**)
+* Swift Open Source `swift-DEVELOPMENT-SNAPSHOT-2016-08-15-a` toolchain (**Minimum REQUIRED for latest release**)
 
 ### macOS
 
 * macOS 10.11.6 (*El Capitan*) or higher
-* Xcode Version 8.0 beta 5 (8S193k) or higher using the above toolchain (*Recommended*)
+* Xcode Version 8.0 beta 6 (8S201h) or higher using the above toolchain (*Recommended*)
 
 ### Linux
 
