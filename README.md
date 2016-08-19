@@ -2,7 +2,7 @@
 ![Linux](https://img.shields.io/badge/os-linux-green.svg?style=flat)
 ![Apache 2](https://img.shields.io/badge/license-Apache2-blue.svg?style=flat)
 ![](https://img.shields.io/badge/Swift-3.0-orange.svg?style=flat)
-![](https://img.shields.io/badge/Snapshot-8/15-blue.svg?style=flat)
+![](https://img.shields.io/badge/Snapshot-8/18-blue.svg?style=flat)
 
 # BlueSocket
 
@@ -16,7 +16,7 @@ Socket framework for Swift using the Swift Package Manager. Works on macOS and L
 ## Prerequisites
 
 ### Swift
-* Swift Open Source `swift-DEVELOPMENT-SNAPSHOT-2016-08-15-a` toolchain (**Minimum REQUIRED for latest release**)
+* Swift Open Source `swift-DEVELOPMENT-SNAPSHOT-2016-08-18-a` toolchain (**Minimum REQUIRED for latest release**)
 
 ### macOS
 
@@ -142,14 +142,14 @@ In addition to reading from a socket, **BlueSocket** also supplies four methods 
 
 ### Complete Example
 
-The following example shows how to create a relatively simple multi-threaded echo server using the new `GCD based` **Dispatch** API.  The Dispatch API was incorporated into the toolchain using the following sequence of commands where `<Path to>` is the path where you've installed the required toolchain. In this example, the `swift-DEVELOPMENT-SNAPSHOT-2016-08-15-a-ubuntu15.10` toolchain is being used. **Important note: clang-3.9 is REQUIRED to successfully build libdispatch.**
+The following example shows how to create a relatively simple multi-threaded echo server using the new `GCD based` **Dispatch** API.  The Dispatch API was incorporated into the toolchain using the following sequence of commands where `<Path to>` is the path where you've installed the required toolchain. In this example, the `swift-DEVELOPMENT-SNAPSHOT-2016-08-18-a-ubuntu15.10` toolchain is being used. **Important note: clang-3.9 is REQUIRED to successfully build libdispatch.**
 ```
 $ git clone --recursive git@github.com:apple/swift-corelibs-libdispatch.git
 $ cd swift-corelibs-libdispatch
 $ export CC=/usr/bin/clang-3.9
 $ export CXX=/usr/bin/clang-3.9
 $ sh ./autogen.sh
-$ ./configure --with-swift-toolchain=<Path to>/swift-DEVELOPMENT-SNAPSHOT-2016-08-15-a-ubuntu15.10/usr --prefix=<Path to>/swift-DEVELOPMENT-SNAPSHOT-2016-08-15-a-ubuntu15.10/usr
+$ ./configure --with-swift-toolchain=<Path to>/swift-DEVELOPMENT-SNAPSHOT-2016-08-18-a-ubuntu15.10/usr --prefix=<Path to>/swift-DEVELOPMENT-SNAPSHOT-2016-08-18-a-ubuntu15.10/usr
 $ make
 $ make install
 ```

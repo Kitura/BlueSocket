@@ -1812,13 +1812,8 @@ public class Socket: SocketReader, SocketWriter {
 				
 				throw Error(code: Socket.SOCKET_ERR_INTERNAL, reason: "Unable to convert data to NSString.")
 		}
-
-		#if os(Linux)
-			return str.bridge()
-		#else
-			return str as String
-		#endif
 		
+		return String(describing: str)
 	}
 	
 	
