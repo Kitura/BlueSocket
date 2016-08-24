@@ -3,6 +3,7 @@
 ![Apache 2](https://img.shields.io/badge/license-Apache2-blue.svg?style=flat)
 ![](https://img.shields.io/badge/Swift-3.0-orange.svg?style=flat)
 ![](https://img.shields.io/badge/Snapshot-8/18-blue.svg?style=flat)
+![](https://img.shields.io/badge/Snapshot-8/23-blue.svg?style=flat)
 
 # BlueSocket
 
@@ -17,16 +18,17 @@ Socket framework for Swift using the Swift Package Manager. Works on macOS and L
 
 ### Swift
 * Swift Open Source `swift-DEVELOPMENT-SNAPSHOT-2016-08-18-a` toolchain (**Minimum REQUIRED for latest release**)
+* Swift Open Source `swift-DEVELOPMENT-SNAPSHOT-2016-08-23-a` toolchain (**Recommended**)
 
 ### macOS
 
 * macOS 10.11.6 (*El Capitan*) or higher
-* Xcode Version 8.0 beta 6 (8S201h) or higher using the above toolchain (*Recommended*)
+* Xcode Version 8.0 beta 6 (8S201h) or higher using one of the above toolchains (*Recommended*)
 
 ### Linux
 
 * Ubuntu 15.10 (or 14.04 but only tested on 15.10)
-* The Swift Open Source toolchain listed above
+* One of the Swift Open Source toolchain listed above
 
 ### Add-ons
 
@@ -142,7 +144,7 @@ In addition to reading from a socket, **BlueSocket** also supplies four methods 
 
 ### Complete Example
 
-The following example shows how to create a relatively simple multi-threaded echo server using the new `GCD based` **Dispatch** API.  The Dispatch API was incorporated into the toolchain using the following sequence of commands where `<Path to>` is the path where you've installed the required toolchain. In this example, the `swift-DEVELOPMENT-SNAPSHOT-2016-08-18-a-ubuntu15.10` toolchain is being used. **Important note: clang-3.9 is REQUIRED to successfully build libdispatch.**
+The following example shows how to create a relatively simple multi-threaded echo server using the new `GCD based` **Dispatch** API.  The Dispatch API was incorporated into the toolchain using the following sequence of commands where `<Path to>` is the path where you've installed the required toolchain. In this example, the `swift-DEVELOPMENT-SNAPSHOT-2016-08-18-a-ubuntu15.10` toolchain is being used. **Important note: clang-3.9 is REQUIRED to successfully build libdispatch.**  *This is only required if using the 8/18 toolchain, Dispatch is built-in to the 8/23 toolchain.*
 ```
 $ git clone --recursive git@github.com:apple/swift-corelibs-libdispatch.git
 $ cd swift-corelibs-libdispatch
@@ -398,7 +400,7 @@ let package = Package(
 		],
 	exclude: ["EchoServer.xcodeproj", "README.md", "Sources/Info.plist"]
 ```
-The following command sequence will build and run the echo server on Linux.  If running on macOS, omit the `-Xcc -fblocks` switch as it's not needed on macOS.
+The following command sequence will build and run the echo server on Linux.  If running on macOS or with the 8/23 toolchain, omit the `-Xcc -fblocks` switch as it's not needed on macOS.
 ```
 $ swift build -Xcc -fblocks
 $ .build/debug/EchoServer
