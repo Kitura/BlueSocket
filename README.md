@@ -5,6 +5,7 @@
 ![](https://img.shields.io/badge/Snapshot-8/18-blue.svg?style=flat)
 ![](https://img.shields.io/badge/Snapshot-8/23-blue.svg?style=flat)
 ![](https://img.shields.io/badge/Snapshot-8/24-blue.svg?style=flat)
+![](https://img.shields.io/badge/Snapshot-8/26-blue.svg?style=flat)
 
 # BlueSocket
 
@@ -20,7 +21,8 @@ Socket framework for Swift using the Swift Package Manager. Works on macOS and L
 ### Swift
 * Swift Open Source `swift-DEVELOPMENT-SNAPSHOT-2016-08-18-a` toolchain (**Minimum REQUIRED for latest release**)
 * Swift Open Source `swift-DEVELOPMENT-SNAPSHOT-2016-08-23-a` toolchain
-* Swift Open Source `swift-DEVELOPMENT-SNAPSHOT-2016-08-24-a` toolchain (**Recommended**)
+* Swift Open Source `swift-DEVELOPMENT-SNAPSHOT-2016-08-24-a` toolchain
+* Swift Open Source `swift-DEVELOPMENT-SNAPSHOT-2016-08-26-a` toolchain (**Recommended**)
 
 ### macOS
 
@@ -146,7 +148,7 @@ In addition to reading from a socket, **BlueSocket** also supplies four methods 
 
 ### Complete Example
 
-The following example shows how to create a relatively simple multi-threaded echo server using the new `GCD based` **Dispatch** API.  The Dispatch API was incorporated into the toolchain using the following sequence of commands where `<Path to>` is the path where you've installed the required toolchain. In this example, the `swift-DEVELOPMENT-SNAPSHOT-2016-08-18-a-ubuntu15.10` toolchain is being used. **Important note: clang-3.9 is REQUIRED to successfully build libdispatch.**  *This is only required if using the 8/18 toolchain, Dispatch is built-in to the 8/23 toolchain.*
+The following example shows how to create a relatively simple multi-threaded echo server using the new `GCD based` **Dispatch** API.  The Dispatch API was incorporated into the toolchain using the following sequence of commands where `<Path to>` is the path where you've installed the required toolchain. In this example, the `swift-DEVELOPMENT-SNAPSHOT-2016-08-18-a-ubuntu15.10` toolchain is being used. **Important note: clang-3.8 or clang-3.9 (recommended) is REQUIRED to successfully build libdispatch.**  *This is only required if using the 8/18 toolchain, Dispatch is built-in to the subsequent toolchains.*
 ```
 $ git clone --recursive git@github.com:apple/swift-corelibs-libdispatch.git
 $ cd swift-corelibs-libdispatch

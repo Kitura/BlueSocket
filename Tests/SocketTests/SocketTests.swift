@@ -1,5 +1,5 @@
 //
-//  BasicSocketTests.swift
+//  SocketTests.swift
 //  BlueSocket
 //
 //  Created by Bill Abt on 3/15/16.
@@ -23,7 +23,7 @@ import Foundation
 import Dispatch
 
 #if os(Linux)
-import Glibc
+	import Glibc
 #endif
 
 @testable import Socket
