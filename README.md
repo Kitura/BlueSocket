@@ -6,6 +6,7 @@
 ![](https://img.shields.io/badge/Snapshot-8/23-blue.svg?style=flat)
 ![](https://img.shields.io/badge/Snapshot-8/24-blue.svg?style=flat)
 ![](https://img.shields.io/badge/Snapshot-8/26-blue.svg?style=flat)
+![](https://img.shields.io/badge/Snapshot-8/29-blue.svg?style=flat)
 
 # BlueSocket
 
@@ -22,7 +23,8 @@ Socket framework for Swift using the Swift Package Manager. Works on macOS and L
 * Swift Open Source `swift-DEVELOPMENT-SNAPSHOT-2016-08-18-a` toolchain (**Minimum REQUIRED for latest release**)
 * Swift Open Source `swift-DEVELOPMENT-SNAPSHOT-2016-08-23-a` toolchain
 * Swift Open Source `swift-DEVELOPMENT-SNAPSHOT-2016-08-24-a` toolchain
-* Swift Open Source `swift-DEVELOPMENT-SNAPSHOT-2016-08-26-a` toolchain (**Recommended**)
+* Swift Open Source `swift-DEVELOPMENT-SNAPSHOT-2016-08-26-a` toolchain
+* Swift Open Source `swift-DEVELOPMENT-SNAPSHOT-2016-08-29-a` toolchain (**Recommended**)
 
 ### macOS
 
