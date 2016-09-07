@@ -1706,6 +1706,7 @@ public class Socket: SocketReader, SocketWriter {
 		#endif
 		
 		self.isListening = true
+		self.signature?.isSecure = self.delegate != nil ? true : false
 	}
 	
 	// MARK: -- Read
