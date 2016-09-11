@@ -50,20 +50,13 @@ Testing on both macOS and Linux requires a working Dispatch in the toolchain.
 ```
 **THIS ONLY APPLIES TO TESTING**.
 
-To run the supplied unit tests for **Socket** on *macOS* from the command line:
+To run the supplied unit tests for **Socket** from the command line:
 
 ```
 % cd <path-to-clone>
 % swift build
 % swift test
 
-```
-To run the supplied unit tests for **Socket** on *Linux* from the command line:
-
-```
-% cd <path-to-clone>
-% swift build
-% swift test -Xcc -fblocks
 ```
 
 ## Using BlueSocket
@@ -99,9 +92,6 @@ The first parameter `port`, is the port to be used to listen on. The second para
 The following example creates a default `Socket` instance and then *immediately* starts listening on port `1337`.  *Note: Exception handling omitted for brevity, see the complete example below for an example of exception handling.*
 ```swift
 var socket = try Socket.create()
-guard let socket = socket else {
-  fatalError("Could not create socket.")
-}
 try socket.listen(on: 1337)
 ```
 
@@ -133,6 +123,10 @@ In addition to reading from a socket, **BlueSocket** also supplies four methods 
 - `write(from string: String)` - This function writes the data contained in the `String` provided to the socket.
 - `write(from buffer: UnsafePointer<Void>, bufSize: Int)` - This function writes the data contained within the buffer of the specified size by providing an *unsafe* pointer to that buffer and an integer the denotes the size of that buffer.
 
+### IMPORTANT NOTE about NSData and NSMutableData
+
+The read and write APIs above that use either `NSData` or `NSMutableData` will *probably* be **deprecated** in the not so distant future.
+
 ### Miscellaneous Utility Functions
 
 - `hostnameAndPort(from address: Address)` - This *class function* provides a means to extract the hostname and port from a given `Socket.Address`. On successful completion, a tuple containing the `hostname` and `port` are returned.
@@ -143,7 +137,7 @@ In addition to reading from a socket, **BlueSocket** also supplies four methods 
 
 ### Complete Example
 
-The following example shows how to create a relatively simple multi-threaded echo server using the new `GCD based` **Dispatch** API.  The Dispatch API was incorporated into the toolchain using the following sequence of commands where `<Path to>` is the path where you've installed the required toolchain. In this example, the `swift-DEVELOPMENT-SNAPSHOT-2016-08-18-a-ubuntu15.10` toolchain is being used. **Important note: clang-3.8 or clang-3.9 (recommended) is REQUIRED to successfully build libdispatch.**  *This is only required if using the 8/18 toolchain, Dispatch is built-in to the subsequent toolchains.*
+The following example shows how to create a relatively simple multi-threaded echo server using the new `GCD based` **Dispatch** API.  The Dispatch API was incorporated into the toolchain using the following sequence of commands where `<Path to>` is the path where you've installed the required toolchain. In this example, the `swift-DEVELOPMENT-SNAPSHOT-2016-08-18-a-ubuntu15.10` toolchain is being used. **Important note: clang-3.8 or clang-3.9 (recommended) is REQUIRED to successfully build libdispatch.**  *This is only required if using the 8/18 toolchain, Dispatch is built-in to the subsequently released toolchains.*
 ```
 $ git clone --recursive git@github.com:apple/swift-corelibs-libdispatch.git
 $ cd swift-corelibs-libdispatch
@@ -384,7 +378,7 @@ class EchoServer {
 let port = 1337
 let server = EchoServer(port: port)
 print("Swift Echo Server Sample")
-print("Connect with ETEchoClient iOS app or use Terminal via 'telnet 127.0.0.1 \(port)'")
+print("Connect with a command line window by entering 'telnet 127.0.0.1 \(port)'")
 
 server.run()
 ```
@@ -395,15 +389,15 @@ import PackageDescription
 let package = Package(
     name: "EchoServer",
 	dependencies: [
-		.Package(url: "https://github.com/IBM-Swift/BlueSocket.git", majorVersion: 0, minor: 9),
+		.Package(url: "https://github.com/IBM-Swift/BlueSocket.git", majorVersion: 0, minor: 10),
 		],
 	exclude: ["EchoServer.xcodeproj", "README.md", "Sources/Info.plist"]
 ```
-The following command sequence will build and run the echo server on Linux.  If running on macOS or with the 8/23 toolchain, omit the `-Xcc -fblocks` switch as it's not needed on macOS.
+The following command sequence will build and run the echo server on Linux.  If running on macOS or with any toolchain **NEWER* than the 8/18 toolchain, you can omit the `-Xcc -fblocks` switch as it's no longer needed.
 ```
 $ swift build -Xcc -fblocks
 $ .build/debug/EchoServer
 Swift Echo Server Sample
-Connect with EchoClient iOS app or use Terminal via 'telnet 127.0.0.1 1337'
+Connect with a command line window by entering 'telnet 127.0.0.1 1337'
 Listening on port: 1337
 ```
