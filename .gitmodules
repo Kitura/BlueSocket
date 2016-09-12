@@ -1,0 +1,3 @@
+[submodule "Package-Builder"]
+	path = Package-Builder
+	url = https://github.com/IBM-Swift/Package-Builder.git
