@@ -1,0 +1,32 @@
+# Travis CI build file for Kitura sample app.
+# Kitura runs on OS X and Linux (Ubuntu).
+# See the following URLs for further details on Travis CI
+# https://docs.travis-ci.com/user/customizing-the-build/
+# https://docs.travis-ci.com/user/docker/
+# https://docs.travis-ci.com/user/multi-os/
+
+# whitelist (branches that should be built)
+branches:
+  only:
+    - master
+    - develop
+    - /^issue.*$/
+
+notifications:
+  slack:
+    secure: aCn+pjvmGk7F2NLno916F9dVB6O8q620JQnOzHbb4rdqfKtt8EqmKUvx/ScoIcKOD8mguBi6p1A5ra/cgE/7jnHPKPA8sM9s15HIf2X4679EeoUX9owid/MhjhjZ+2vWF4SO82OBgYDy/ku1ntII7aTlOshSjdKPJLO2zLT9IyaBA7FNX+Qkm3sFQN6xVLr849j4ryNzS5Dx6iTmul4oTlf5ypTMYAsUPneK3f9SMDk4O6ucLf6a1tpOrHlTd4EhLLbYtyBtlymN6XtmLcdqkCvpHe0X1zV5E8jmDyL4IFCO+viDyGANe/soKqyc8Ihq4eVvTA1Yu4JuAH3/o5tK59MoE+px89qCLMEWNP4dfRBNmFGocUE+BZngFX3WpROsQ0ejQLxN8m5WS9vieO3sVYOPSpldMm2NK2bnvGBn5d/U2m7Dxy7g034sowNrITVVoR2ujRgpTQ5awDAbkIIJsbiindRu+eKjRuAgwAqsLa5XvrXYeHTwsB8aaY7FlIGfsUVnvtdn2DV527RLUM8qQcssVaIsCzgiC0REFN4KP2qmsTj6aDpS/rwUi1n6/rnHr6IeFP/T8iOM3MWH2nsRvdMcbIhTAv9yM5LYGC8J08cX0lUEbXmbe9ihmOIX3iKK0WuhGu01PrFtSoYV3+YqhbzhT93ei126HmkEe+AoPro=
+
+matrix:
+  include:
+    - os: linux
+      dist: trusty
+      sudo: required
+    - os: osx
+      osx_image: xcode8
+      sudo: required
+
+before_install:
+  - git submodule update --init --remote --merge --recursive
+
+script:
+  - ./Package-Builder/build-package.sh $TRAVIS_BRANCH $TRAVIS_BUILD_DIR
