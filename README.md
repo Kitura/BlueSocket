@@ -115,6 +115,7 @@ In addition to the `create(connectedUsing:)` factory method described above, **B
 - `read(into data: NSMutableData)` - This function reads all the data available on a socket and returns it in the `NSMutableData` object that was passed.
 - `readString()` - This function reads all the data available on a socket and returns it as an `String`. A `nil` is returned if no data is available for reading.
 - `read(into buffer: UnsafeMutablePointer<CChar>, bufSize: Int)` - This function allows you to read data into a buffer of a specified size by providing an *unsafe* pointer to that buffer and an integer the denotes the size of that buffer.  This API (in addition to other types of exceptions) will throw a `Socket.SOCKET_ERR_RECV_BUFFER_TOO_SMALL` if the buffer provided is too small. You will need to call again with proper buffer size (see `Error.bufferSizeNeeded`in *Socket.swift* for more information).
+- **Note:** All of the read APIs above except `readString()` can return zero (0). This can indicate that the remote connection was closed or it could indicate that the socket would block (assuming you've turned off blocking).  To differentiate between the two, the property `remoteConnectionClosed` can be checked. If `true`, the socket remote partner has closed the connection and this `Socket` instance should be closed.
 
 ### Writing data to a Socket.
 

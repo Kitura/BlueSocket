@@ -606,6 +606,12 @@ public class Socket: SocketReader, SocketWriter {
 	public internal(set) var isListening: Bool = false
 	
 	///
+	/// True if this socket's remote connection has closed. (Readonly)
+	///		**Note:** This is only valid after a Socket is connected.
+	///
+	public internal(set) var remoteConnectionClosed: Bool = false
+	
+	///
 	/// True if the socket is listening or connected.
 	///
 	public var isActive: Bool {
@@ -1768,6 +1774,7 @@ public class Socket: SocketReader, SocketWriter {
 		// Check for disconnect...
 		if count == 0 {
 			
+			self.remoteConnectionClosed = true
 			return count
 		}
 		
@@ -1844,6 +1851,7 @@ public class Socket: SocketReader, SocketWriter {
 		// Check for disconnect...
 		if count == 0 {
 			
+			self.remoteConnectionClosed = true
 			return count
 		}
 		
@@ -1888,6 +1896,7 @@ public class Socket: SocketReader, SocketWriter {
 		// Check for disconnect...
 		if count == 0 {
 			
+			self.remoteConnectionClosed = true
 			return count
 		}
 		
