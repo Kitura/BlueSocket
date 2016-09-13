@@ -30,9 +30,9 @@ Socket framework for Swift using the Swift Package Manager. Works on macOS and L
 * Ubuntu 15.10 (or 14.04 but only tested on 15.10)
 * One of the Swift Open Source toolchain listed above
 
-### Add-ons
+### Add-ins
 
-* [BlueSSLService](https://github.com/IBM-Swift/BlueSSLService.git) can be used to add **SSL** support.
+* [BlueSSLService](https://github.com/IBM-Swift/BlueSSLService.git) can be used to add **SSL/TLS** support.
 
 ## Build
 
