@@ -1774,7 +1774,6 @@ public class Socket: SocketReader, SocketWriter {
 		// Check for disconnect...
 		if count == 0 {
 			
-			self.remoteConnectionClosed = true
 			return count
 		}
 		
@@ -1851,7 +1850,6 @@ public class Socket: SocketReader, SocketWriter {
 		// Check for disconnect...
 		if count == 0 {
 			
-			self.remoteConnectionClosed = true
 			return count
 		}
 		
@@ -1896,7 +1894,6 @@ public class Socket: SocketReader, SocketWriter {
 		// Check for disconnect...
 		if count == 0 {
 			
-			self.remoteConnectionClosed = true
 			return count
 		}
 		
@@ -2302,6 +2299,12 @@ public class Socket: SocketReader, SocketWriter {
 				
 				// - Something went wrong...
 				throw Error(code: Socket.SOCKET_ERR_RECV_FAILED, reason: self.lastError())
+			}
+			
+			if count == 0 {
+				
+				self.remoteConnectionClosed = true
+				return 0
 			}
 			
 			if count > 0 {
