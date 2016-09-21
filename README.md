@@ -2,7 +2,7 @@
 ![Linux](https://img.shields.io/badge/os-linux-green.svg?style=flat)
 ![Apache 2](https://img.shields.io/badge/license-Apache2-blue.svg?style=flat)
 ![](https://img.shields.io/badge/Swift-3.0-orange.svg?style=flat)
-![](https://img.shields.io/badge/Snapshot-9/19-blue.svg?style=flat)
+![](https://img.shields.io/badge/Snapshot-9/20-blue.svg?style=flat)
 [![Build Status - Master](https://travis-ci.org/IBM-Swift/Kitura.svg?branch=master)](https://travis-ci.org/IBM-Swift/BlueSocket)
 
 # BlueSocket
@@ -18,7 +18,7 @@ Socket framework for Swift using the Swift Package Manager. Works on macOS and L
 
 ### Swift
 * Swift Open Source `swift-3.0-RELEASE` toolchain (**Minimum REQUIRED for latest release**)
-* Swift Open Source `swift-DEVELOPMENT-SNAPSHOT-2016-09-19-a` toolchain (**Recommended**)
+* Swift Open Source `swift-DEVELOPMENT-SNAPSHOT-2016-09-20-a` toolchain (**Recommended**)
 
 ### macOS
 
