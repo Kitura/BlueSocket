@@ -40,7 +40,7 @@ public class Socket: SocketReader, SocketWriter {
 	public static let SOCKET_MINIMUM_READ_BUFFER_SIZE		= 1024
 	public static let SOCKET_DEFAULT_READ_BUFFER_SIZE		= 4096
 	public static let SOCKET_DEFAULT_MAX_BACKLOG			= 50
-	#if os(macOS)
+	#if os(macOS) || os(iOS) || os(tvOS) || os(watchOS)
 	public static let SOCKET_MAX_DARWIN_BACKLOG				= 128
 	#endif
 	
