@@ -144,7 +144,7 @@ public protocol SSLServiceDelegate {
 ///
 /// SSL Service Error
 ///
-public enum SSLError: Error, CustomStringConvertible {
+public enum SSLError: Swift.Error, CustomStringConvertible {
 	
 	/// Success
 	case success
