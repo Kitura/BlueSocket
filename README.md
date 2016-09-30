@@ -395,7 +395,7 @@ let package = Package(
 		],
 	exclude: ["EchoServer.xcodeproj", "README.md", "Sources/Info.plist"]
 ```
-The following command sequence will build and run the echo server on Linux.  If running on macOS or with any toolchain **NEWER* than the 8/18 toolchain, you can omit the `-Xcc -fblocks` switch as it's no longer needed.
+The following command sequence will build and run the echo server on Linux.  If running on macOS or with any toolchain **NEWER** than the 8/18 toolchain, you can omit the `-Xcc -fblocks` switch as it's no longer needed.
 ```
 $ swift build -Xcc -fblocks
 $ .build/debug/EchoServer
