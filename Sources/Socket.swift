@@ -83,6 +83,12 @@ public class Socket: SocketReader, SocketWriter {
 	public static let SOCKET_ERR_WRONG_PROTOCOL				= -9974
 	public static let SOCKET_ERR_NOT_ACTIVE					= -9973
 	
+
+	///
+	/// Flag to indicate the endian-ness of the host
+	///
+	public static internal(set) var isLittleEndian: Bool = Int(littleEndian: 42) == 42
+
 	// MARK: Enums
 	
 	// MARK: -- ProtocolFamily
@@ -755,16 +761,24 @@ public class Socket: SocketReader, SocketWriter {
 			bufLen = Int(INET_ADDRSTRLEN)
 			buf = [CChar](repeating: 0, count: bufLen)
 			inet_ntop(Int32(addr.sa_family), &addr_in.sin_addr, &buf, socklen_t(bufLen))
-			port = Int32(UInt16(addr_in.sin_port).byteSwapped)
-			
+			if isLittleEndian {
+				port = Int32(UInt16(addr_in.sin_port).byteSwapped)
+			} else {
+				port = Int32(UInt16(addr_in.sin_port))
+			}
+
 		case .ipv6(let address_in):
 			var addr_in = address_in
 			let addr = addr_in.asAddr()
 			bufLen = Int(INET6_ADDRSTRLEN)
 			buf = [CChar](repeating: 0, count: bufLen)
 			inet_ntop(Int32(addr.sa_family), &addr_in.sin6_addr, &buf, socklen_t(bufLen))
-			port = Int32(UInt16(addr_in.sin6_port).byteSwapped)
-			
+			if isLittleEndian {
+				port = Int32(UInt16(addr_in.sin6_port).byteSwapped)
+			} else {
+				port = Int32(UInt16(addr_in.sin6_port))
+			}
+
 		}
 		
 		if let s = String(validatingUTF8: buf) {
