@@ -87,7 +87,7 @@ public class Socket: SocketReader, SocketWriter {
 	///
 	/// Flag to indicate the endian-ness of the host
 	///
-	public static internal(set) var isLittleEndian: Bool = Int(littleEndian: 42) == 42
+	public static let isLittleEndian: Bool 					= Int(littleEndian: 42) == 42
 
 	// MARK: Enums
 	
