@@ -1,32 +1,20 @@
-# Travis CI build file for Kitura sample app.
-# Kitura runs on OS X and Linux (Ubuntu).
-# See the following URLs for further details on Travis CI
-# https://docs.travis-ci.com/user/customizing-the-build/
-# https://docs.travis-ci.com/user/docker/
-# https://docs.travis-ci.com/user/multi-os/
-
-# whitelist (branches that should be built)
 branches:
   only:
-    - master
-    - develop
-    - /^issue.*$/
-
+  - master
+  - develop
+  - /^issue.*$/
 notifications:
   slack:
-    secure: aCn+pjvmGk7F2NLno916F9dVB6O8q620JQnOzHbb4rdqfKtt8EqmKUvx/ScoIcKOD8mguBi6p1A5ra/cgE/7jnHPKPA8sM9s15HIf2X4679EeoUX9owid/MhjhjZ+2vWF4SO82OBgYDy/ku1ntII7aTlOshSjdKPJLO2zLT9IyaBA7FNX+Qkm3sFQN6xVLr849j4ryNzS5Dx6iTmul4oTlf5ypTMYAsUPneK3f9SMDk4O6ucLf6a1tpOrHlTd4EhLLbYtyBtlymN6XtmLcdqkCvpHe0X1zV5E8jmDyL4IFCO+viDyGANe/soKqyc8Ihq4eVvTA1Yu4JuAH3/o5tK59MoE+px89qCLMEWNP4dfRBNmFGocUE+BZngFX3WpROsQ0ejQLxN8m5WS9vieO3sVYOPSpldMm2NK2bnvGBn5d/U2m7Dxy7g034sowNrITVVoR2ujRgpTQ5awDAbkIIJsbiindRu+eKjRuAgwAqsLa5XvrXYeHTwsB8aaY7FlIGfsUVnvtdn2DV527RLUM8qQcssVaIsCzgiC0REFN4KP2qmsTj6aDpS/rwUi1n6/rnHr6IeFP/T8iOM3MWH2nsRvdMcbIhTAv9yM5LYGC8J08cX0lUEbXmbe9ihmOIX3iKK0WuhGu01PrFtSoYV3+YqhbzhT93ei126HmkEe+AoPro=
-
+    secure: R3MheuyTrMGQW4ftGdWwwh9f+sqLAN65ywot0N6TxkZOr0QcXajRyG9Ukp7L/4zN42Z8LFH9wn4swrtHa/1zdhrKmbGWiH/EwyAwah7THMTQ1Fh2fi/ka2QSUEs9sVYu2ZrQw2u29QfS78x7z+btXidF2JIDpuCIpK++wCgMoqDQtmF6hJyBXTp/CAB5JPmg3ZsJ+yyK+DlsBH3PILz3bFT8HEiDUt+pBbcdIo2CZxVDnyQWu+4KatHgk4i9mFDNxssZ9D5V4tq1G0nxCG+FIP4IqvGdGGmV76YFV4sSuljf8DZA0ekQr0/CZyl/3+OoIZdWE/VMlC9HUQdFQTj+D1Mrl5mPpQBfQz9SWf5/CHl3u9zMsDRvm8+/EWd2HqZWg9q8toNWwfCCSjPvxvh6ghtVhu7fiEMY4jq1MzkowQPooeqntPKTM8GeqD4273aDIJLXeM3gWToNauCHawYdL+TXkckTj6spODmxRb621eHe2qe6D+UQ6gjZvL0QBzso7Whm4HD08mxebx8OJ4ZT17cWv8YVvdoF2mwVa7puPpi+Vr5W7Eemfq2i+RJMY9vn4Pc+lrS9s8k5GBoiQ2lLtLq1AnFdUcXQqgbiGxqZhVYNFjneVgPX8ruZnLAfGdLTMO++PSyJTeXiJVIN3aHjxhAneP5qdhU9hg+NcA3fg+0=
 matrix:
   include:
-    - os: linux
-      dist: trusty
-      sudo: required
-    - os: osx
-      osx_image: xcode8
-      sudo: required
-
+  - os: linux
+    dist: trusty
+    sudo: required
+  - os: osx
+    osx_image: xcode8
+    sudo: required
 before_install:
-  - git submodule update --init --remote --merge --recursive
-
+- git submodule update --init --remote --merge --recursive
 script:
-  - ./Package-Builder/build-package.sh $TRAVIS_BRANCH $TRAVIS_BUILD_DIR
+- ./Package-Builder/build-package.sh $TRAVIS_BRANCH $TRAVIS_BUILD_DIR
