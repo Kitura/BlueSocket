@@ -243,7 +243,7 @@ class EchoServer {
 
             var shouldKeepRunning = true
 
-            var readData = Data(capacity: EcroServer.bufferSize)
+            var readData = Data(capacity: EchoServer.bufferSize)
 
             do {
                 // Write the welcome string...
