@@ -12,7 +12,7 @@ Socket framework for Swift using the Swift Package Manager. Works on macOS and L
 
 ## Contents
 
-* Socket: Generic low level socket framework. Pure Swift. 
+* Socket: Generic low level socket framework. Pure Swift.
 
 ## Prerequisites
 
@@ -45,9 +45,9 @@ To build Socket from the command line:
 
 ## Testing
 
-**Important Note:** 
+**Important Note:**
 ```
-Testing on both macOS and Linux requires a working Dispatch in the toolchain. 
+Testing on both macOS and Linux requires a working Dispatch in the toolchain.
 ```
 **THIS ONLY APPLIES TO TESTING**.
 
@@ -152,229 +152,183 @@ $ make install
 ```
 What follows is the code for a simple echo server that once running, can be accessed via `telnet 127.0.0.1 1337`.
 ```swift
-#if os(macOS) || os(iOS) || os(tvOS) || os(watchOS)
-	import Darwin
-#elseif os(Linux)
-	import Glibc
-#endif
 
 import Foundation
-import Dispatch
 import Socket
+import Dispatch
 
 class EchoServer {
-	
-	static let QUIT: String = "QUIT"
-	static let SHUTDOWN: String = "SHUTDOWN"
-	static let BUFFER_SIZE = 4096
-	
-	let port: Int
-	
-	var listenSocket: Socket? = nil
-	
-	var continueRunning = true
-	var connectedSockets = [Int32: Socket]()
-	let socketLockQueue: DispatchQueue? = DispatchQueue(label: "com.ibm.serverSwift.socketLockQueue")
 
-	init(port: Int) {
-		
-		self.port = port
-	}
-	
-	deinit {
-		
-		// Close all open sockets...
-		for socket in connectedSockets.values {
-			
-			socket.close()
-		}
-		
-		self.listenSocket?.close()
-	}
-	
-	func run() {
-		
-		let queue: DispatchQueue? = DispatchQueue.global(qos: .userInteractive)
-		guard let pQueue = queue else {
-			
-			fatalError("Unable to access global interactive QOS queue")
-		}
-		
-		pQueue.async { [unowned self] in
-			
-			do {
-				
-				// Create an IPV6 socket...
-				try self.listenSocket = Socket.create(family: .inet6)
-				
-				guard let socket = self.listenSocket else {
-					
-					print("Unable to unwrap socket...")
-					return
-				}
-				
-				try socket.listen(on: self.port, maxBacklogSize: 10)
-				
-				print("Listening on port: \(socket.listeningPort)")
-				
-				repeat {
-					
-					let newSocket = try socket.acceptClientConnection()
-					
-					print("Accepted connection from: \(newSocket.remoteHostname) on port \(newSocket.remotePort)")
-					print("Socket Signature: \(newSocket.signature?.description)")
-					
-					self.addNewConnection(socket: newSocket)
-					
-				} while self.continueRunning
-				
-			} catch let error {
-				
-				guard let socketError = error as? Socket.Error else {
-					
-					print("Unexpected error...")
-					return
-				}
-				
-				if self.continueRunning {
-					
-					print("Error reported:\n \(socketError.description)")
-					
-				}
-			}
-		}
-		
-		dispatchMain()
-		
-	}
+    static let quitCommand: String = "QUIT"
+    static let shutdownCommand: String = "SHUTDOWN"
+    static let bufferSize = 4096
 
-	func addNewConnection(socket: Socket) {
-		
-		// Make sure we've got a lock queue...
-		guard let lockq = self.socketLockQueue else {
-			
-			fatalError("Unable to access socket lock queue")
-		}
-		
-		// Add the new socket to the list of connected sockets...
-		lockq.sync { [unowned self, socket] in
-				
-			self.connectedSockets[socket.socketfd] = socket
-		}
-		
-		// Get the global concurrent queue...
-		let queue: DispatchQueue? = DispatchQueue.global(qos: .default)
-		guard let pQueue = queue else {
-			
-			fatalError("Unable to access global default QOS queue")
-		}
-		
-		// Create the run loop work item and dispatch to the default priority global queue...
-		pQueue.async { [unowned self, socket] in
-			
-			var shouldKeepRunning = true
-			
-			guard let readData = NSMutableData(capacity:EchoServer.BUFFER_SIZE) else {
-				
-				fatalError("Unable to create data buffer...")
-			}
-			
-			do {
-				
-				// Write the welcome string...
-				try socket.write(from: "Hello, type 'QUIT' to end session\nor 'SHUTDOWN' to stop server.\n")
-				
-				repeat {
-					
-					let bytesRead = try socket.read(into: readData)
-					
-					if bytesRead > 0 {
-						
-						
-						guard let response = NSString(bytes: readData.bytes, length: readData.length, encoding: String.Encoding.utf8.rawValue) else {
-							
-							print("Error decoding response...")
-							readData.length = 0
-							break
-						}
-						if response.hasPrefix(EchoServer.SHUTDOWN) {
-							
-							print("Shutdown requested by connection at \(socket.remoteHostname):\(socket.remotePort)")
-							
-							// Shut things down...
-							self.shutdownServer()
-							
-							return
-						}
-						print("Server received from connection at \(socket.remoteHostname):\(socket.remotePort): \(response) ")
-						let reply = "Server response: \n\(response)\n"
-						try socket.write(from: reply)
-						
-						if (response.uppercased.hasPrefix(EchoServer.QUIT) || response.uppercased.hasPrefix(EchoServer.SHUTDOWN)) &&
-							(!response.hasPrefix(EchoServer.QUIT) && !response.hasPrefix(EchoServer.SHUTDOWN)) {
-							
-							try socket.write(from: "If you want to QUIT or SHUTDOWN, please type the name in all caps. 😃\n")
-						}
-						
-						if response.hasPrefix(EchoServer.QUIT) || response.hasSuffix(EchoServer.QUIT) {
-							
-							shouldKeepRunning = false
-						}
-					}
-					
-					if bytesRead == 0 {
-						
-						shouldKeepRunning = false
-						break
-					}
-					
-					readData.length = 0
-					
-				} while shouldKeepRunning
-				
-				print("Socket: \(socket.remoteHostname):\(socket.remotePort) closed...")
-				socket.close()
-				
-				lockq.sync { [unowned self, socket] in
-					
-					self.connectedSockets[socket.socketfd] = nil
-				}
-				
-			} catch let error {
-				
-				guard let socketError = error as? Socket.Error else {
-					
-					print("Unexpected error by connection at \(socket.remoteHostname):\(socket.remotePort)...")
-					return
-				}
-				
-				if (self.continueRunning) {
-					
-					print("Error reported by connection at \(socket.remoteHostname):\(socket.remotePort):\n \(socketError.description)")
-					
-				}
-				
-			}
-		}
-	}
-	
-	func shutdownServer() {
-		
-		print("\nShutdown in progress...")
-		self.continueRunning = false
-		
-		// Close all open sockets...
-		for socket in connectedSockets.values {
-			
-			socket.close()
-		}
-		
-		self.listenSocket?.close()
-		
-		DispatchQueue.main.sync {
-			exit(0)
-		}
-	}
+    let port: Int
+    var listenSocket: Socket? = nil
+    var continueRunning = true
+    var connectedSockets = [Int32: Socket]()
+    let socketLockQueue = DispatchQueue(label: "com.ibm.serverSwift.socketLockQueue")
+
+    init(port: Int) {
+        self.port = port
+    }
+
+    deinit {
+        // Close all open sockets...
+        for socket in connectedSockets.values {
+            socket.close()
+        }
+        self.listenSocket?.close()
+    }
+
+    func run() {
+
+        let queue = DispatchQueue.global(qos: .userInteractive)
+
+        queue.async { [unowned self] in
+
+            do {
+                // Create an IPV6 socket...
+                try self.listenSocket = Socket.create(family: .inet6)
+
+                guard let socket = self.listenSocket else {
+
+                    print("Unable to unwrap socket...")
+                    return
+                }
+
+                try socket.listen(on: self.port)
+
+                print("Listening on port: \(socket.listeningPort)")
+
+                repeat {
+                    let newSocket = try socket.acceptClientConnection()
+
+                    print("Accepted connection from: \(newSocket.remoteHostname) on port \(newSocket.remotePort)")
+                    print("Socket Signature: \(newSocket.signature?.description)")
+
+                    self.addNewConnection(socket: newSocket)
+
+                } while self.continueRunning
+
+            }
+            catch let error {
+                guard let socketError = error as? Socket.Error else {
+                    print("Unexpected error...")
+                    return
+                }
+
+                if self.continueRunning {
+
+                    print("Error reported:\n \(socketError.description)")
+
+                }
+            }
+        }
+        dispatchMain()
+    }
+
+    func addNewConnection(socket: Socket) {
+
+        // Add the new socket to the list of connected sockets...
+        socketLockQueue.sync { [unowned self, socket] in
+            self.connectedSockets[socket.socketfd] = socket
+        }
+
+        // Get the global concurrent queue...
+        let queue = DispatchQueue.global(qos: .default)
+
+        // Create the run loop work item and dispatch to the default priority global queue...
+        queue.async { [unowned self, socket] in
+
+            var shouldKeepRunning = true
+
+            var readData = Data(capacity: EchoServer.bufferSize)
+
+            do {
+                // Write the welcome string...
+                try socket.write(from: "Hello, type 'QUIT' to end session\nor 'SHUTDOWN' to stop server.\n")
+
+                repeat {
+                    let bytesRead = try socket.read(into: &readData)
+
+                    if bytesRead > 0 {
+                        guard let response = String(data: readData, encoding: .utf8) else {
+
+                            print("Error decoding response...")
+                            readData.count = 0
+                            break
+                        }
+                        if response.hasPrefix(EchoServer.shutdownCommand) {
+
+                            print("Shutdown requested by connection at \(socket.remoteHostname):\(socket.remotePort)")
+
+                            // Shut things down...
+                            self.shutdownServer()
+
+                            return
+                        }
+                        print("Server received from connection at \(socket.remoteHostname):\(socket.remotePort): \(response) ")
+                        let reply = "Server response: \n\(response)\n"
+                        try socket.write(from: reply)
+
+                        if (response.uppercased().hasPrefix(EchoServer.quitCommand) || response.uppercased().hasPrefix(EchoServer.shutdownCommand)) &&
+                            (!response.hasPrefix(EchoServer.quitCommand) && !response.hasPrefix(EchoServer.shutdownCommand)) {
+
+                            try socket.write(from: "If you want to QUIT or SHUTDOWN, please type the name in all caps. 😃\n")
+                        }
+
+                        if response.hasPrefix(EchoServer.quitCommand) || response.hasSuffix(EchoServer.quitCommand) {
+
+                            shouldKeepRunning = false
+                        }
+                    }
+
+                    if bytesRead == 0 {
+
+                        shouldKeepRunning = false
+                        break
+                    }
+
+                    readData.count = 0
+
+                } while shouldKeepRunning
+
+                print("Socket: \(socket.remoteHostname):\(socket.remotePort) closed...")
+                socket.close()
+
+                self.socketLockQueue.sync { [unowned self, socket] in
+                    self.connectedSockets[socket.socketfd] = nil
+                }
+
+            }
+            catch let error {
+                guard let socketError = error as? Socket.Error else {
+                    print("Unexpected error by connection at \(socket.remoteHostname):\(socket.remotePort)...")
+                    return
+                }
+                if self.continueRunning {
+                    print("Error reported by connection at \(socket.remoteHostname):\(socket.remotePort):\n \(socketError.description)")
+                }
+            }
+        }
+    }
+
+    func shutdownServer() {
+        print("\nShutdown in progress...")
+        continueRunning = false
+
+        // Close all open sockets...
+        for socket in connectedSockets.values {
+            socket.close()
+        }
+
+        listenSocket?.close()
+
+        DispatchQueue.main.sync {
+            exit(0)
+        }
+    }
 }
 
 let port = 1337
