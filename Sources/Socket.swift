@@ -359,7 +359,7 @@ public class Socket: SocketReader, SocketWriter {
 		///
 		public var description: String {
 			
-			return "Signature: family: \(protocolFamily), type: \(socketType), protocol: \(proto), address: \(address), hostname: \(hostname), port: \(port), secure: \(isSecure)"
+			return "Signature: family: \(protocolFamily), type: \(socketType), protocol: \(proto), address: \(address as Socket.Address?), hostname: \(hostname as String?), port: \(port), secure: \(isSecure)"
 		}
 		
 		// MARK: -- Public Functions
