@@ -64,24 +64,25 @@ public class Socket: SocketReader, SocketWriter {
 	public static let SOCKET_ERR_SETSOCKOPT_FAILED			= -9993
 	public static let SOCKET_ERR_BIND_FAILED				= -9992
 	public static let SOCKET_ERR_INVALID_HOSTNAME			= -9991
-	public static let SOCKET_ERR_GETADDRINFO_FAILED			= -9990
-	public static let SOCKET_ERR_CONNECT_FAILED				= -9989
-	public static let SOCKET_ERR_MISSING_CONNECTION_DATA	= -9988
-	public static let SOCKET_ERR_SELECT_FAILED				= -9987
-	public static let SOCKET_ERR_LISTEN_FAILED				= -9986
-	public static let SOCKET_ERR_INVALID_BUFFER				= -9985
-	public static let SOCKET_ERR_INVALID_BUFFER_SIZE		= -9984
-	public static let SOCKET_ERR_RECV_FAILED				= -9983
-	public static let SOCKET_ERR_RECV_BUFFER_TOO_SMALL		= -9982
-	public static let SOCKET_ERR_WRITE_FAILED				= -9981
-	public static let SOCKET_ERR_GET_FCNTL_FAILED			= -9980
-	public static let SOCKET_ERR_SET_FCNTL_FAILED			= -9979
-	public static let SOCKET_ERR_NOT_IMPLEMENTED			= -9978
-	public static let SOCKET_ERR_NOT_SUPPORTED_YET			= -9977
-	public static let SOCKET_ERR_BAD_SIGNATURE_PARAMETERS	= -9976
-	public static let SOCKET_ERR_INTERNAL					= -9975
-	public static let SOCKET_ERR_WRONG_PROTOCOL				= -9974
-	public static let SOCKET_ERR_NOT_ACTIVE					= -9973
+	public static let SOCKET_ERR_INVALID_PORT				= -9990
+	public static let SOCKET_ERR_GETADDRINFO_FAILED			= -9989
+	public static let SOCKET_ERR_CONNECT_FAILED				= -9988
+	public static let SOCKET_ERR_MISSING_CONNECTION_DATA	= -9987
+	public static let SOCKET_ERR_SELECT_FAILED				= -9986
+	public static let SOCKET_ERR_LISTEN_FAILED				= -9985
+	public static let SOCKET_ERR_INVALID_BUFFER				= -9984
+	public static let SOCKET_ERR_INVALID_BUFFER_SIZE		= -9983
+	public static let SOCKET_ERR_RECV_FAILED				= -9982
+	public static let SOCKET_ERR_RECV_BUFFER_TOO_SMALL		= -9981
+	public static let SOCKET_ERR_WRITE_FAILED				= -9980
+	public static let SOCKET_ERR_GET_FCNTL_FAILED			= -9979
+	public static let SOCKET_ERR_SET_FCNTL_FAILED			= -9978
+	public static let SOCKET_ERR_NOT_IMPLEMENTED			= -9977
+	public static let SOCKET_ERR_NOT_SUPPORTED_YET			= -9976
+	public static let SOCKET_ERR_BAD_SIGNATURE_PARAMETERS	= -9975
+	public static let SOCKET_ERR_INTERNAL					= -9974
+	public static let SOCKET_ERR_WRONG_PROTOCOL				= -9973
+	public static let SOCKET_ERR_NOT_ACTIVE					= -9972
 	
 
 	///
@@ -1303,6 +1304,11 @@ public class Socket: SocketReader, SocketWriter {
 		if host.utf8.count == 0 {
 			
 			throw Error(code: Socket.SOCKET_ERR_INVALID_HOSTNAME, reason: nil)
+		}
+		
+		if port == 0 {
+			
+			throw Error(code: Socket.SOCKET_ERR_INVALID_PORT, reason: "Connect to port cannot be zero (0).")
 		}
 		
 		// Tell the delegate to initialize as a client...
