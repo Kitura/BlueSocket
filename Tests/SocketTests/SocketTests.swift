@@ -282,6 +282,38 @@ class SocketTests: XCTestCase {
 		}
 	}
 	
+	func testListenPort0() {
+		
+		do {
+			
+			// Create the socket..
+			let socket = try createHelper()
+			
+			// Listen on the port...
+			try socket.listen(on: Int(0), maxBacklogSize: 10)
+			XCTAssertTrue(socket.isListening)
+			XCTAssertGreaterThan(socket.listeningPort, 0)
+			print("Listening port: \(socket.listeningPort)")
+			
+			// Close the socket...
+			socket.close()
+			XCTAssertFalse(socket.isActive)
+			
+		} catch let error {
+			
+			// See if it's a socket error or something else...
+			guard let socketError = error as? Socket.Error else {
+				
+				print("Unexpected error...")
+				XCTFail()
+				return
+			}
+			
+			print("Error reported: \(socketError.description)")
+			XCTFail()
+		}
+	}
+	
 	func testConnect() {
 		
 		do {
@@ -343,6 +375,50 @@ class SocketTests: XCTestCase {
 			// Now attempt to connect to the listening socket...
 			try socket2.connect(to: host, port: port)
 			XCTAssertTrue(socket2.isConnected)
+			
+			// Close the socket...
+			socket.close()
+			XCTAssertFalse(socket.isActive)
+			socket2.close()
+			XCTAssertFalse(socket2.isActive)
+			
+		} catch let error {
+			
+			// See if it's a socket error or something else...
+			guard let socketError = error as? Socket.Error else {
+				
+				print("Unexpected error...")
+				XCTFail()
+				return
+			}
+			
+			print("Error reported: \(socketError.description)")
+			XCTFail()
+		}
+	}
+	
+	func testConnectPort0() {
+		
+		do {
+			
+			// Create the socket..
+			let socket = try createHelper()
+			
+			// Listen on the port...
+			try socket.listen(on: Int(0), maxBacklogSize: 10)
+			XCTAssertTrue(socket.isListening)
+			XCTAssertGreaterThan(socket.listeningPort, 0)
+			print("Listener signature: \(socket.signature?.description as String?)")
+			
+			// Create a signature...
+			let signature = try Socket.Signature(socketType: .stream, proto: .tcp, hostname: socket.remoteHostname, port: socket.remotePort)
+			XCTAssertNotNil(signature)
+			
+			// Create a connected socket using the signature...
+			let socket2 = try Socket.create(connectedUsing: signature!)
+			XCTAssertNotNil(socket2)
+			XCTAssertTrue(socket2.isConnected)
+			print("Connect signature: \(socket2.signature?.description as String?)")
 			
 			// Close the socket...
 			socket.close()
@@ -558,8 +634,10 @@ class SocketTests: XCTestCase {
 		("testDefaultCreate", testDefaultCreate),
 		("testCreateIPV6", testCreateIPV6),
 		("testListen", testListen),
+		("testListenPort0", testListenPort0),
 		("testConnect", testConnect),
 		("testConnectTo", testConnectTo),
+		("testConnectPort0", testConnectPort0),
 		("testHostnameAndPort", testHostnameAndPort),
 		("testBlocking", testBlocking),
 		("testIsReadableWritable", testIsReadableWritable),

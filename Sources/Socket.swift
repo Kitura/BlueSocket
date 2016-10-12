@@ -1687,21 +1687,56 @@ public class Socket: SocketReader, SocketWriter {
 		
 		// Save the address info...
 		var address: Address
-		if info!.pointee.ai_family == Int32(AF_INET6) {
-			
-			var addr = sockaddr_in6()
-			memcpy(&addr, info!.pointee.ai_addr, Int(MemoryLayout<sockaddr_in6>.size))
-			address = .ipv6(addr)
-			
-		} else if info!.pointee.ai_family == Int32(AF_INET) {
-			
-			var addr = sockaddr_in()
-			memcpy(&addr, info!.pointee.ai_addr, Int(MemoryLayout<sockaddr_in>.size))
-			address = .ipv4(addr)
-			
+		
+		// If the port was set to zero, we need to retrieve the port that assigned by the OS...
+		if port == 0 {
+		
+			let addr = sockaddr_storage()
+			var length = socklen_t(MemoryLayout<sockaddr_storage>.size)
+			var addrPtr = addr.asAddr()
+			if getsockname(self.socketfd, &addrPtr, &length) == 0 {
+				
+				if addrPtr.sa_family == sa_family_t(AF_INET6) {
+					
+					var addr = sockaddr_in6()
+					memcpy(&addr, &addrPtr, Int(MemoryLayout<sockaddr_in6>.size))
+					address = .ipv6(addr)
+					
+				} else if addrPtr.sa_family == sa_family_t(AF_INET) {
+					
+					var addr = sockaddr_in()
+					memcpy(&addr, &addrPtr, Int(MemoryLayout<sockaddr_in>.size))
+					address = .ipv4(addr)
+					
+				} else {
+					
+					throw Error(code: Socket.SOCKET_ERR_WRONG_PROTOCOL, reason: "Unable to determine listening socket protocol family.")
+				}
+				
+			} else {
+				
+				throw Error(code: Socket.SOCKET_ERR_BIND_FAILED, reason: "Unable to determine listening socket address after bind.")
+			}
+		
 		} else {
+		
+			if info!.pointee.ai_family == Int32(AF_INET6) {
 			
-			throw Error(code: Socket.SOCKET_ERR_WRONG_PROTOCOL, reason: "Unable to determine listening socket protocol family.")
+				var addr = sockaddr_in6()
+				memcpy(&addr, info!.pointee.ai_addr, Int(MemoryLayout<sockaddr_in6>.size))
+				address = .ipv6(addr)
+		
+			} else if info!.pointee.ai_family == Int32(AF_INET) {
+		
+				var addr = sockaddr_in()
+				memcpy(&addr, info!.pointee.ai_addr, Int(MemoryLayout<sockaddr_in>.size))
+				address = .ipv4(addr)
+		
+			} else {
+			
+				throw Error(code: Socket.SOCKET_ERR_WRONG_PROTOCOL, reason: "Unable to determine listening socket protocol family.")
+			}
+			
 		}
 		
 		self.signature?.address = address
