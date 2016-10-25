@@ -1,0 +1,26 @@
+included:
+    - Sources
+    - Tests
+disabled_rules:
+    - trailing_newline
+    - force_cast
+    - function_body_length
+    - variable_name
+    - line_length
+    - trailing_whitespace
+    - type_name
+    - type_body_length
+    - todo
+    - file_length
+    - leading_whitespace
+    - mark
+    - function_parameter_count
+    - cyclomatic_complexity
+custom_rules:
+  double_space:
+    include: "*.swift"
+    name: "Double space" 
+    regex: "([a-z,A-Z] \s+)" 
+    message: "Double space between keywords" 
+    match_kinds: keyword 
+    severity: warning 
