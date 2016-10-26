@@ -29,7 +29,7 @@ import Foundation
 // MARK: Socket
 
 ///
-/// Low level BSD sockets wrapper.
+/// **Socket:** Low level BSD sockets wrapper.
 ///
 public class Socket: SocketReader, SocketWriter {
 	
@@ -316,6 +316,9 @@ public class Socket: SocketReader, SocketWriter {
 	
 	// MARK: -- Signature
 	
+	///
+	/// Socket signature: contains the characteristics of the socket.
+	///
 	public struct Signature: CustomStringConvertible {
 		
 		// MARK: -- Public Properties
@@ -461,6 +464,9 @@ public class Socket: SocketReader, SocketWriter {
 	
 	// MARK: -- Error
 	
+	///
+	/// `Socket` specific error structure.
+	///
 	public struct Error: Swift.Error, CustomStringConvertible {
 		
 		// MARK: -- Public Properties
@@ -748,7 +754,6 @@ public class Socket: SocketReader, SocketWriter {
 	/// - Returns: Optional Tuple containing the hostname and port.
 	///
 	public class func hostnameAndPort(from address: Address) -> (hostname: String, port: Int32)? {
-		
 		
 		var port: Int32 = 0
 		var bufLen: Int = 0
