@@ -347,7 +347,8 @@ let package = Package(
 	dependencies: [
 		.Package(url: "https://github.com/IBM-Swift/BlueSocket.git", majorVersion: 0, minor: 10),
 		],
-	exclude: ["EchoServer.xcodeproj", "README.md", "Sources/Info.plist"]
+	exclude: ["EchoServer.xcodeproj"]
+)
 ```
 The following command sequence will build and run the echo server on Linux.  If running on macOS or with any toolchain **NEWER** than the 8/18 toolchain, you can omit the `-Xcc -fblocks` switch as it's no longer needed.
 ```
