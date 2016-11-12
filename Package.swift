@@ -19,8 +19,16 @@
 
 import PackageDescription
 
-let package = Package(
-	name: "Socket",
-	targets: [Target(name: "Socket")],
-	exclude: ["BlueSocket.xcodeproj", "BlueSocket.xcworkspace", "README.md", "Sources/Info.plist", "Sources/Socket.h"]
-)
+#if os(Linux) || os(macOS) || os(iOS) || os(tvOS) || os(watchOS)
+	
+	let package = Package(
+		name: "Socket",
+		targets: [Target(name: "Socket")],
+		exclude: ["BlueSocket.xcodeproj", "BlueSocket.xcworkspace", "README.md", "Sources/Info.plist", "Sources/Socket.h"]
+	)
+
+#else
+	
+	fatalError("Unsupported OS")
+	
+#endif
