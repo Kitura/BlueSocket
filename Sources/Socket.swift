@@ -2259,11 +2259,13 @@ public class Socket: SocketReader, SocketWriter {
 	///
 	/// Determines if this socket can be read from or written to.
 	///
-	/// - Parameter waitForever:	True to wait forever, false to check and return.  Default: false.
+	/// - Parameters:
+ 	///		- waitForever:	True to wait forever, false to check and return.  Default: false.
+	///		- timeout:		Timeout (in msec) before returning.  A timeout value of 0 will return immediately.
 	///
 	/// - Returns: Tuple containing two boolean values, one for readable and one for writable.
 	///
-	public func isReadableOrWritable(waitForever: Bool = false) throws -> (readable: Bool, writable: Bool) {
+	public func isReadableOrWritable(waitForever: Bool = false, timeout: UInt = 0) throws -> (readable: Bool, writable: Bool) {
 		
 		// The socket must've been created and must be connected...
 		if self.socketfd == Socket.SOCKET_INVALID_DESCRIPTOR {
@@ -2294,11 +2296,32 @@ public class Socket: SocketReader, SocketWriter {
 		
 		} else {
 		
-			// Create a timeout of zero (i.e. don't wait)...
-			var timeout = timeval()
+			// Default timeout of zero (i.e. don't wait)...
+			var timer = timeval()
+			
+			// But honor callers desires...
+			if timeout > 0 {
+				
+				// First get seconds...
+				let secs = Int(Double(timeout / 1000))
+				timer.tv_sec = secs
+				
+				// Now get the leftover millisecs...
+				let msecs = Int32(Double(timeout % 1000))
+				
+				// Note: timeval expects microseconds, convert now...
+				let uSecs = msecs * 1000
+				
+				// Now the leftover microseconds...
+				#if os(Linux)
+					timer.tv_usec = Int(uSecs)
+				#else
+					timer.tv_usec = Int32(uSecs)
+				#endif
+			}
 			
 			// See if there's data on the socket...
-			count = select(self.socketfd + 1, &readfds, &writefds, nil, &timeout)
+			count = select(self.socketfd + 1, &readfds, &writefds, nil, &timer)
 		}
 		
 		// A count of less than zero indicates select failed...
