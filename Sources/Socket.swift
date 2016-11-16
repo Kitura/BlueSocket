@@ -2080,19 +2080,44 @@ public class Socket: SocketReader, SocketWriter {
 			var s = 0
 			if self.delegate != nil {
 				
-				do {
+				repeat {
 					
-					s = try self.delegate!.send(buffer: buffer.advanced(by: sent), bufSize: Int(bufSize - sent))
+					do {
 					
-				} catch let error {
-					
-					guard let err = error as? SSLError else {
+						s = try self.delegate!.send(buffer: buffer.advanced(by: sent), bufSize: Int(bufSize - sent))
 						
-						throw error
+						break
+					
+					} catch let error {
+					
+						guard let err = error as? SSLError else {
+						
+							throw error
+						}
+						
+						switch err {
+	
+						case .success:
+							break
+							
+						case .retryNeeded:
+							do {
+								
+								try wait(forRead: false)
+								
+							} catch let waitError {
+								
+								throw waitError
+							}
+							continue
+							
+						default:
+							throw Error(with: err)
+						}
+					
 					}
 					
-					throw Error(with: err)
-				}
+				} while true
 				
 			} else {
 				#if os(Linux)
@@ -2234,9 +2259,11 @@ public class Socket: SocketReader, SocketWriter {
 	///
 	/// Determines if this socket can be read from or written to.
 	///
+	/// - Parameter waitForever:	True to wait forever, false to check and return.  Default: false.
+	///
 	/// - Returns: Tuple containing two boolean values, one for readable and one for writable.
 	///
-	public func isReadableOrWritable() throws -> (readable: Bool, writable: Bool) {
+	public func isReadableOrWritable(waitForever: Bool = false) throws -> (readable: Bool, writable: Bool) {
 		
 		// The socket must've been created and must be connected...
 		if self.socketfd == Socket.SOCKET_INVALID_DESCRIPTOR {
@@ -2258,11 +2285,21 @@ public class Socket: SocketReader, SocketWriter {
 		FD.ZERO(set: &writefds)
 		FD.SET(fd: self.socketfd, set: &writefds)
 		
-		// Create a timeout of zero (i.e. don't wait)...
-		var timeout = timeval()
+		// Do the wait...
+		var count: Int32 = 0
+		if waitForever {
+			
+			// Wait forever for data...
+			count = select(self.socketfd + 1, &readfds, &writefds, nil, nil)
 		
-		// See if there's data on the socket...
-		let count = select(self.socketfd + 1, &readfds, &writefds, nil, &timeout)
+		} else {
+		
+			// Create a timeout of zero (i.e. don't wait)...
+			var timeout = timeval()
+			
+			// See if there's data on the socket...
+			count = select(self.socketfd + 1, &readfds, &writefds, nil, &timeout)
+		}
 		
 		// A count of less than zero indicates select failed...
 		if count < 0 {
@@ -2325,19 +2362,44 @@ public class Socket: SocketReader, SocketWriter {
 			
 			if self.delegate != nil {
 				
-				do {
+				repeat {
+					
+					do {
 
-					count = try self.delegate!.recv(buffer: self.readBuffer, bufSize: self.readBufferSize)
-					
-				} catch let error {
-					
-					guard let err = error as? SSLError else {
+						count = try self.delegate!.recv(buffer: self.readBuffer, bufSize: self.readBufferSize)
 						
-						throw error
+						break
+					
+					} catch let error {
+						
+						guard let err = error as? SSLError else {
+							
+							throw error
+						}
+						
+						switch err {
+							
+						case .success:
+							break
+							
+						case .retryNeeded:
+							do {
+								
+								try wait(forRead: true)
+								
+							} catch let waitError {
+								
+								throw waitError
+							}
+							continue
+							
+						default:
+							throw Error(with: err)
+						}
+						
 					}
 					
-					throw Error(with: err)
-				}
+				} while true
 				
 			} else {
 				#if os(Linux)
@@ -2380,6 +2442,37 @@ public class Socket: SocketReader, SocketWriter {
 		} while count > 0
 		
 		return self.readStorage.length
+	}
+	
+	///
+	/// Private method to wait for this instance to be either readable or writable.
+	///
+	///	- Parameter forRead:	True to wait for socket to be readable, false waits for it to be writable.
+	///
+	private func wait(forRead: Bool) throws {
+		
+		repeat {
+			
+			let result = try self.isReadableOrWritable(waitForever: true)
+				
+			if forRead {
+					
+				if result.readable {
+					return
+				} else {
+					continue
+				}
+				
+			} else {
+				
+				if result.writable {
+					return
+				} else {
+					continue
+				}
+			}
+			
+		} while true
 	}
 	
 	///
