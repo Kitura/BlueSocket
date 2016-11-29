@@ -109,7 +109,7 @@ When a listening socket detects an incoming connection request, control is retur
 
 ### Connecting a socket to a server.
 
-In addition to the `create(connectedUsing:)` factory method described above, **BlueSocket** supports two additional instance functions for connecting a `Socket` instance to a server. They are:
+In addition to the `create(connectedUsing:)` factory method described above, **BlueSocket** supports three additional instance functions for connecting a `Socket` instance to a server. They are:
 - `connect(to host: String, port: Int32)` - This API allows you to connect to a server based on the `hostname` and `port` you provide.
 - `connect(to path: String)` - This API can only be used with the `.unix` protocol family. It allows you to connect to a server based on the `path` you provide.
 - `connect(using signature: Signature)` - This API allows you specify the connection information by providing a `Socket.Signature` instance containing the information.  Refer to `Socket.Signature` in *Socket.swift* for more information.
