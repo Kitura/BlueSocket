@@ -2439,6 +2439,12 @@ public class Socket: SocketReader, SocketWriter {
 					return sent
 				}
 				
+				// - Handle a connection reset by peer (ECONNRESET) and throw a different exception...
+				if errno == ECONNRESET {
+					
+					throw Error(code: Socket.SOCKET_ERR_CONNECTION_RESET, reason: self.lastError())
+				}
+				
 				throw Error(code: Socket.SOCKET_ERR_WRITE_FAILED, reason: self.lastError())
 			}
 			sent += s
