@@ -83,6 +83,7 @@ public class Socket: SocketReader, SocketWriter {
 	public static let SOCKET_ERR_INTERNAL					= -9974
 	public static let SOCKET_ERR_WRONG_PROTOCOL				= -9973
 	public static let SOCKET_ERR_NOT_ACTIVE					= -9972
+	public static let SOCKET_ERR_CONNECTION_RESET			= -9971
 	
 
 	///
@@ -100,6 +101,7 @@ public class Socket: SocketReader, SocketWriter {
 	/// **Note:** Only the following are supported at this time:
 	///			inet = AF_INET (IPV4)
 	///			inet6 = AF_INET6 (IPV6)
+	///			unix = AF_UNIX
 	///
 	public enum ProtocolFamily {
 		
@@ -108,6 +110,9 @@ public class Socket: SocketReader, SocketWriter {
 		
 		/// AF_INET6 (IPV6)
 		case inet6
+		
+		/// AF_UNIX
+		case unix
 		
 		///
 		/// Return the value for a particular case
@@ -121,6 +126,9 @@ public class Socket: SocketReader, SocketWriter {
 				
 			case .inet6:
 				return Int32(AF_INET6)
+				
+			case .unix:
+				return Int32(AF_UNIX)
 			}
 		}
 		///
@@ -138,6 +146,8 @@ public class Socket: SocketReader, SocketWriter {
 				return .inet
 			case Int32(AF_INET6):
 				return .inet6
+			case Int32(AF_UNIX):
+				return .unix
 			default:
 				return nil
 			}
@@ -225,6 +235,7 @@ public class Socket: SocketReader, SocketWriter {
 	/// **Note:** Only the following are supported at this time:
 	///			tcp = IPPROTO_TCP
 	///			udp = IPPROTO_UDP
+	///			unix = Unix Domain Socket (raw value = 0)
 	///
 	public enum SocketProtocol: Int32 {
 		
@@ -233,6 +244,9 @@ public class Socket: SocketReader, SocketWriter {
 		
 		/// IPPROTO_UDP
 		case udp
+		
+		/// Unix Domain
+		case unix
 		
 		///
 		/// Return the value for a particular case
@@ -245,6 +259,8 @@ public class Socket: SocketReader, SocketWriter {
 				return Int32(IPPROTO_TCP)
 			case .udp:
 				return Int32(IPPROTO_UDP)
+			case .unix:
+				return Int32(0)
 			}
 		}
 		
@@ -263,6 +279,8 @@ public class Socket: SocketReader, SocketWriter {
 				return .tcp
 			case Int32(IPPROTO_UDP):
 				return .udp
+			case Int32(0):
+				return .unix
 			default:
 				return nil
 			}
@@ -282,6 +300,9 @@ public class Socket: SocketReader, SocketWriter {
 		/// sockaddr_in6
 		case ipv6(sockaddr_in6)
 		
+		/// sockaddr_un
+		case unix(sockaddr_un)
+		
 		///
 		/// Size of address
 		///
@@ -293,6 +314,8 @@ public class Socket: SocketReader, SocketWriter {
 				return MemoryLayout<(sockaddr_in)>.size
 			case .ipv6( _):
 				return MemoryLayout<(sockaddr_in6)>.size
+			case .unix( _):
+				return MemoryLayout<(sockaddr_un)>.size
 			}
 		}
 		
@@ -307,6 +330,9 @@ public class Socket: SocketReader, SocketWriter {
 				return addr.asAddr()
 				
 			case .ipv6(let addr):
+				return addr.asAddr()
+
+			case .unix(let addr):
 				return addr.asAddr()
 			}
 		}
@@ -349,6 +375,10 @@ public class Socket: SocketReader, SocketWriter {
 		public internal(set) var port: Int32 = Socket.SOCKET_INVALID_PORT
 		
 		///
+		/// Path for .unix type sockets
+		public internal(set) var path: String? = nil
+		
+		///
 		/// Address info for socket.
 		///
 		public internal(set) var address: Address? = nil
@@ -363,7 +393,7 @@ public class Socket: SocketReader, SocketWriter {
 		///
 		public var description: String {
 			
-			return "Signature: family: \(protocolFamily), type: \(socketType), protocol: \(proto), address: \(address as Socket.Address?), hostname: \(hostname as String?), port: \(port), secure: \(isSecure)"
+			return "Signature: family: \(protocolFamily), type: \(socketType), protocol: \(proto), address: \(address as Socket.Address?), hostname: \(hostname as String?), port: \(port), path: \(path), secure: \(isSecure)"
 		}
 		
 		// MARK: -- Public Functions
@@ -424,6 +454,64 @@ public class Socket: SocketReader, SocketWriter {
 			
 			self.hostname = hostname
 			self.port = port
+		}
+		
+		///
+		/// Create a socket signature
+		///
+		///	- Parameters:
+		///		- socketType:		The type of socket to create.
+		///		- proto:			The protocool to use for the socket.
+		/// 	- path:				Pathname for this signature.
+		///
+		/// - Returns: New Signature instance
+		///
+		public init?(socketType: SocketType, proto: SocketProtocol, path: String?) throws {
+			
+			// Make sure we have what we need...
+			guard let _ = path else {
+					
+				throw Error(code: Socket.SOCKET_ERR_BAD_SIGNATURE_PARAMETERS, reason: "Missing pathname.")
+			}
+			
+			// Default to Unix socket protocol family...
+			self.protocolFamily = .unix
+			
+			self.socketType = socketType
+			self.proto = proto
+			
+			self.path = path
+
+			if path!.utf8.count == 0 {
+				
+				throw Error(code: Socket.SOCKET_ERR_BAD_SIGNATURE_PARAMETERS, reason: "Specified path contains zero (0) bytes.")
+			}
+
+			// Create the address...
+			var remoteAddr = sockaddr_un()
+			remoteAddr.sun_family = sa_family_t(AF_UNIX)
+			
+			let lengthOfPath = path!.utf8.count
+			
+			// Validate the length...
+			guard lengthOfPath < MemoryLayout.size(ofValue: remoteAddr.sun_path) else {
+				
+				throw Error(code: Socket.SOCKET_ERR_BAD_SIGNATURE_PARAMETERS, reason: "Pathname supplied is too long.")
+			}
+			
+			_ = withUnsafeMutablePointer(to: &remoteAddr.sun_path.0) { ptr in
+				
+				path!.withCString {
+					strncpy(ptr, $0, lengthOfPath)
+				}
+			}
+			
+			#if !os(Linux)
+			    remoteAddr.sun_len = UInt8(MemoryLayout<UInt8>.size + MemoryLayout<sa_family_t>.size + path!.utf8.count + 1)
+			#endif
+			
+			self.address = .unix(remoteAddr)
+			print("Socket Signature:\(self)")
 		}
 		
 		///
@@ -669,6 +757,21 @@ public class Socket: SocketReader, SocketWriter {
 	}
 	
 	///
+	/// The path this socket is connected to. (Readonly)
+	///
+	public var remotePath: String? {
+		
+		guard let sig = signature,
+			let path = sig.path else {
+			return nil
+		}
+		
+		return path
+	}
+	
+	
+	
+	///
 	/// The file descriptor representing this socket. (Readonly)
 	///
 	public internal(set) var socketfd: Int32 = SOCKET_INVALID_DESCRIPTOR
@@ -785,6 +888,8 @@ public class Socket: SocketReader, SocketWriter {
 				port = Int32(UInt16(addr_in.sin6_port))
 			}
 
+		default:
+			return nil
 		}
 		
 		if let s = String(validatingUTF8: buf) {
@@ -922,7 +1027,7 @@ public class Socket: SocketReader, SocketWriter {
 	/// - Parameters:
 	///		- family:	The family of the socket to create.
 	///		- type:		The type of socket to create.
-	///		- proto:	The protocool to use for the socket.
+	///		- proto:	The protocol to use for the socket.
 	///
 	/// - Returns: New Socket instance
 	///
@@ -931,11 +1036,17 @@ public class Socket: SocketReader, SocketWriter {
 		// Initialize the read buffer...
 		self.readBuffer.initialize(to: 0)
 		
+		// If the family is .unix, set the protocol to .unix as well...
+		var sockProto = proto
+		if family == .unix {
+			sockProto = .unix
+		}
+		
 		// Create the socket...
 		#if os(Linux)
-			self.socketfd = Glibc.socket(family.value, type.value, proto.value)
+			self.socketfd = Glibc.socket(family.value, type.value, sockProto.value)
 		#else
-			self.socketfd = Darwin.socket(family.value, type.value, proto.value)
+			self.socketfd = Darwin.socket(family.value, type.value, sockProto.value)
 		#endif
 		
 		// If error, throw an appropriate exception...
@@ -949,7 +1060,7 @@ public class Socket: SocketReader, SocketWriter {
 		try self.signature = Signature(
 			protocolFamily: family.value,
 			socketType: type.value,
-			proto: proto.value,
+			proto: sockProto.value,
 			address: nil)
 	}
 	
@@ -982,7 +1093,7 @@ public class Socket: SocketReader, SocketWriter {
 	///
 	/// - Returns: New Socket instance
 	///
-	private init(fd: Int32, remoteAddress: Address) throws {
+	private init(fd: Int32, remoteAddress: Address, path: String? = nil) throws {
 		
 		self.isConnected = true
 		self.isListening = false
@@ -997,20 +1108,26 @@ public class Socket: SocketReader, SocketWriter {
 			let type = SOCK_STREAM
 		#endif
 		
-		if let (hostname, port) = Socket.hostnameAndPort(from: remoteAddress) {
-			try self.signature = Signature(
-				protocolFamily: Int32(remoteAddress.addr.sa_family),
-				socketType: type,
-				proto: Int32(IPPROTO_TCP),
-				address: remoteAddress,
-				hostname: hostname,
-				port: port)
+		if path != nil {
+			
+			try self.signature = Signature(socketType: .stream, proto: .unix, path: path)
+			
 		} else {
-			try self.signature = Signature(
-				protocolFamily: Int32(remoteAddress.addr.sa_family),
-				socketType: type,
-				proto: Int32(IPPROTO_TCP),
-				address: remoteAddress)
+			if let (hostname, port) = Socket.hostnameAndPort(from: remoteAddress) {
+				try self.signature = Signature(
+					protocolFamily: Int32(remoteAddress.addr.sa_family),
+					socketType: type,
+					proto: Int32(IPPROTO_TCP),
+					address: remoteAddress,
+					hostname: hostname,
+					port: port)
+			} else {
+				try self.signature = Signature(
+					protocolFamily: Int32(remoteAddress.addr.sa_family),
+					socketType: type,
+					proto: Int32(IPPROTO_TCP),
+					address: remoteAddress)
+			}
 		}
 	}
 	
@@ -1097,6 +1214,31 @@ public class Socket: SocketReader, SocketWriter {
 				}
 				socketfd2 = fd
 				address = .ipv6(acceptAddr)
+				
+			case .unix:
+				var acceptAddr = sockaddr_un()
+				var addrSize = socklen_t(MemoryLayout<sockaddr_un>.size)
+				
+				#if os(Linux)
+					let fd = withUnsafeMutablePointer(to: &acceptAddr) {
+						Glibc.accept(self.socketfd, UnsafeMutableRawPointer($0).assumingMemoryBound(to: sockaddr.self), &addrSize)
+					}
+				#else
+					let fd = withUnsafeMutablePointer(to: &acceptAddr) {
+						Darwin.accept(self.socketfd, UnsafeMutableRawPointer($0).assumingMemoryBound(to: sockaddr.self), &addrSize)
+					}
+				#endif
+				if fd < 0 {
+					
+					if errno == EINTR {
+						continue
+					}
+					
+					throw Error(code: Socket.SOCKET_ERR_ACCEPT_FAILED, reason: self.lastError())
+				}
+				socketfd2 = fd
+				address = .unix(acceptAddr)
+				
 			}
 			
 			keepRunning = false
@@ -1105,7 +1247,7 @@ public class Socket: SocketReader, SocketWriter {
 		
 		// Create the new socket...
 		//	Note: The current socket continues to listen.
-		let newSocket = try Socket(fd: socketfd2, remoteAddress: address!)
+		let newSocket = try Socket(fd: socketfd2, remoteAddress: address!, path: self.signature?.path)
 		
 		// Let the delegate do post accept handling and verification...
 		do {
@@ -1206,6 +1348,31 @@ public class Socket: SocketReader, SocketWriter {
 				}
 				socketfd2 = fd
 				address = .ipv6(acceptAddr)
+
+			case .unix:
+				var acceptAddr = sockaddr_un()
+				var addrSize = socklen_t(MemoryLayout<sockaddr_un>.size)
+				
+				#if os(Linux)
+					let fd = withUnsafeMutablePointer(to: &acceptAddr) {
+						Glibc.accept(self.socketfd, UnsafeMutableRawPointer($0).assumingMemoryBound(to: sockaddr.self), &addrSize)
+					}
+				#else
+					let fd = withUnsafeMutablePointer(to: &acceptAddr) {
+						Darwin.accept(self.socketfd, UnsafeMutableRawPointer($0).assumingMemoryBound(to: sockaddr.self), &addrSize)
+					}
+				#endif
+				if fd < 0 {
+					
+					if errno == EINTR {
+						continue
+					}
+					
+					throw Error(code: Socket.SOCKET_ERR_ACCEPT_FAILED, reason: self.lastError())
+				}
+				socketfd2 = fd
+				address = .unix(acceptAddr)
+				
 			}
 			
 			keepRunning = false
@@ -1278,6 +1445,7 @@ public class Socket: SocketReader, SocketWriter {
 		if let _ = self.signature {
 			self.signature!.hostname = Socket.NO_HOSTNAME
 			self.signature!.port = Socket.SOCKET_INVALID_PORT
+			self.signature!.path = nil
 			self.signature!.isSecure = false
 		}
 		self.isConnected = false
@@ -1481,14 +1649,72 @@ public class Socket: SocketReader, SocketWriter {
 	}
 	
 	///
-	/// Connect to the address or hostname/port pointed to by the signature passed.
+	/// Connects to the named host on the specified port.
+	///
+	/// - Parameters path:	Path to connect to.
+	///
+	public func connect(to path: String) throws {
+		
+		// Make sure this is a UNIX socket...
+		guard let sig = self.signature, sig.protocolFamily == .unix else {
+			
+			throw Error(code: Socket.SOCKET_ERR_WRONG_PROTOCOL, reason: nil)
+		}
+		
+		// The socket must've been created and must not be connected...
+		if self.socketfd == Socket.SOCKET_INVALID_DESCRIPTOR {
+			
+			throw Error(code: Socket.SOCKET_ERR_BAD_DESCRIPTOR, reason: nil)
+		}
+		
+		if self.isConnected {
+			
+			throw Error(code: Socket.SOCKET_ERR_ALREADY_CONNECTED, reason: nil)
+		}
+		
+		// Create the signature...
+		self.signature = try Signature(socketType: .stream, proto: .unix, path: path)
+		guard let signature = self.signature else {
+			
+			throw Error(code: Socket.SOCKET_ERR_MISSING_CONNECTION_DATA, reason: "Unable to access connection data.")
+		}
+		
+		// Now, do the connection using the supplied address...
+		var remoteAddr = signature.address!.addr
+		
+		#if os(Linux)
+			let rc = withUnsafeMutablePointer(to: &remoteAddr) {
+				Glibc.connect(self.socketfd, UnsafeMutablePointer($0), socklen_t(signature.address!.size))
+			}
+		#else
+			let rc = withUnsafeMutablePointer(to: &remoteAddr) {
+				Darwin.connect(self.socketfd, UnsafeMutablePointer($0), socklen_t(signature.address!.size))
+			}
+		#endif
+		if rc < 0 {
+			
+			throw Error(code: Socket.SOCKET_ERR_CONNECT_FAILED, reason: self.lastError())
+		}
+		
+		self.isConnected = true
+	}
+
+	///
+	/// Connect to the address or hostname/port or path pointed to by the signature passed.
 	///
 	/// - Parameter signature:	Signature containing the address hostname/port to connect to.
 	///
 	public func connect(using signature: Signature) throws {
 		
 		// Ensure we've got a proper address...
-		if signature.hostname == nil || signature.port == Socket.SOCKET_INVALID_PORT {
+		//	Handle the Unix style socket first...
+		if let path = signature.path {
+			
+			try self.connect(to: path)
+			return
+		}
+		
+		if signature.hostname == nil || signature.port == Socket.SOCKET_INVALID_PORT  {
 			
 			guard let _ = signature.address else {
 				
@@ -1773,6 +1999,85 @@ public class Socket: SocketReader, SocketWriter {
 		
 		self.isListening = true
 		self.signature?.isSecure = self.delegate != nil ? true : false
+	}
+	
+	///
+	/// Listen on a path, limiting the maximum number of pending connections.
+	///
+	/// - Parameters:
+	///		- path: 				The path to listen on.
+	/// 	- maxBacklogSize: 		The maximum size of the queue containing pending connections. Default is *Socket.SOCKET_DEFAULT_MAX_BACKLOG*.
+	///
+	public func listen(on path: String, maxBacklogSize: Int = Socket.SOCKET_DEFAULT_MAX_BACKLOG) throws {
+
+		// Make sure this is a UNIX socket...
+		guard let sockSig = self.signature, sockSig.protocolFamily == .unix else {
+			
+			throw Error(code: Socket.SOCKET_ERR_WRONG_PROTOCOL, reason: nil)
+		}
+		
+		// Set a flag so that this address can be re-used immediately after the connection
+		// closes.  (TCP normally imposes a delay before an address can be re-used.)
+		var on: Int32 = 1
+		if setsockopt(self.socketfd, SOL_SOCKET, SO_REUSEADDR, &on, socklen_t(MemoryLayout<Int32>.size)) < 0 {
+			
+			throw Error(code: Socket.SOCKET_ERR_SETSOCKOPT_FAILED, reason: self.lastError())
+		}
+		
+		#if !os(Linux)
+			// Set the socket to ignore SIGPIPE to avoid dying on interrupted connections...
+			//	Note: Linux does not support the SO_NOSIGPIPE option. Instead, we use the
+			//		  MSG_NOSIGNAL flags passed to send.  See the writeData() functions below.
+			if setsockopt(self.socketfd, SOL_SOCKET, SO_NOSIGPIPE, &on, socklen_t(MemoryLayout<Int32>.size)) < 0 {
+				
+				throw Error(code: Socket.SOCKET_ERR_SETSOCKOPT_FAILED, reason: self.lastError())
+			}
+		#endif
+
+		// Create the signature...
+		let sig = try Signature(socketType: .stream, proto: .unix, path: path)
+		guard let signature = sig else {
+			
+			throw Error(code:Socket.SOCKET_ERR_BAD_SIGNATURE_PARAMETERS, reason: nil)
+		}
+		
+		// Ensure the path doesn't exist...
+		#if os(Linux)
+			_ = Glibc.unlink(path)
+		#else
+			_ = Darwin.unlink(path)
+		#endif
+		
+		// Try to bind the socket to the address...
+		var localAddr = signature.address!.addr
+		#if os(Linux)
+			let rc = Glibc.bind(self.socketfd, &localAddr, socklen_t(signature.address!.size))
+		#else
+			let rc = Darwin.bind(self.socketfd, &localAddr, socklen_t(signature.address!.size))
+		#endif
+		
+		if rc < 0 {
+			
+			throw Error(code: Socket.SOCKET_ERR_LISTEN_FAILED, reason: self.lastError())
+		}
+
+		// Now listen for connections...
+		#if os(Linux)
+			if Glibc.listen(self.socketfd, Int32(maxBacklogSize)) < 0 {
+				
+				throw Error(code: Socket.SOCKET_ERR_LISTEN_FAILED, reason: self.lastError())
+			}
+		#else
+			if Darwin.listen(self.socketfd, Int32(maxBacklogSize)) < 0 {
+				
+				throw Error(code: Socket.SOCKET_ERR_LISTEN_FAILED, reason: self.lastError())
+			}
+		#endif
+		
+		self.isListening = true
+		self.signature?.path = path
+		self.signature?.isSecure = false
+		self.signature?.address = signature.address
 	}
 	
 	// MARK: -- Read
@@ -2440,6 +2745,12 @@ public class Socket: SocketReader, SocketWriter {
 				if errno == EAGAIN || errno == EWOULDBLOCK {
 					
 					return 0
+				}
+				
+				// - Handle a connection reset by peer (ECONNRESET) and throw a different exception...
+				if errno == ECONNRESET {
+					
+					throw Error(code: Socket.SOCKET_ERR_CONNECTION_RESET, reason: self.lastError())
 				}
 				
 				// - Something went wrong...

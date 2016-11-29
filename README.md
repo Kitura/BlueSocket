@@ -90,6 +90,8 @@ To close the socket of an open instance, the following function is provided:
 To use **BlueSocket** to listen for an connection on a socket the following API is provided:
 - `listen(on port: Int, maxBacklogSize: Int = Socket.SOCKET_DEFAULT_MAX_BACKLOG)`
 The first parameter `port`, is the port to be used to listen on. The second parameter, `maxBacklogSize` allows you to set the size of the queue holding pending connections. The function will determine the appropriate socket configuration based on the `port` specified.  For convenience on macOS, the constant `Socket.SOCKET_MAX_DARWIN_BACKLOG` can be set to use the maximum allowed backlog size.  The default value for all platforms is `Socket.SOCKET_DEFAULT_MAX_BACKLOG`, currently set to *50*. For server use, it may be necessary to increase this value.
+- `listen(on path: String, maxBacklogSize: Int = Socket.SOCKET_DEFAULT_MAX_BACKLOG)`
+This API can only be used with the `.unix` protocol family. The first parameter `path`, is the path to be used to listen on. The second parameter, `maxBacklogSize` allows you to set the size of the queue holding pending connections. The function will determine the appropriate socket configuration based on the `port` specified.  For convenience on macOS, the constant `Socket.SOCKET_MAX_DARWIN_BACKLOG` can be set to use the maximum allowed backlog size.  The default value for all platforms is `Socket.SOCKET_DEFAULT_MAX_BACKLOG`, currently set to *50*. For server use, it may be necessary to increase this value.
 
 #### Example:
 
@@ -109,6 +111,7 @@ When a listening socket detects an incoming connection request, control is retur
 
 In addition to the `create(connectedUsing:)` factory method described above, **BlueSocket** supports two additional instance functions for connecting a `Socket` instance to a server. They are:
 - `connect(to host: String, port: Int32)` - This API allows you to connect to a server based on the `hostname` and `port` you provide.
+- `connect(to path: String)` - This API can only be used with the `.unix` protocol family. It allows you to connect to a server based on the `path` you provide.
 - `connect(using signature: Signature)` - This API allows you specify the connection information by providing a `Socket.Signature` instance containing the information.  Refer to `Socket.Signature` in *Socket.swift* for more information.
 
 ### Reading data from a socket.

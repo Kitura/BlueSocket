@@ -33,6 +33,7 @@ class SocketTests: XCTestCase {
 	let QUIT: String = "QUIT"
 	let port: Int32 = 1337
 	let host: String = "127.0.0.1"
+	let path: String = "/tmp/server"
 	
 	
 	override func setUp() {
@@ -55,7 +56,7 @@ class SocketTests: XCTestCase {
 		return socket
 	}
 	
-	func launchServerHelper() {
+	func launchServerHelper(family: Socket.ProtocolFamily = .inet) {
 		
 		let queue: DispatchQueue? = DispatchQueue.global(qos: .userInteractive)
 		guard let pQueue = queue else {
@@ -69,7 +70,7 @@ class SocketTests: XCTestCase {
 			
 			do {
 				
-				try self.serverHelper()
+				try self.serverHelper(family: family)
 				
 			} catch let error {
 				
@@ -86,14 +87,14 @@ class SocketTests: XCTestCase {
 		}
 	}
 	
-	func serverHelper() throws {
+	func serverHelper(family: Socket.ProtocolFamily = .inet) throws {
 		
 		var keepRunning: Bool = true
 		var listenSocket: Socket? = nil
 		
 		do {
 			
-			try listenSocket = Socket.create()
+			try listenSocket = Socket.create(family: family)
 			
 			guard let listener = listenSocket else {
 				
@@ -102,14 +103,30 @@ class SocketTests: XCTestCase {
 				return
 			}
 			
-			try listener.listen(on: Int(port), maxBacklogSize: 10)
+			var socket: Socket
 			
-			print("Listening on port: \(port)")
+			if family == .inet {
 			
-			let socket = try listener.acceptClientConnection()
-			
-			print("Accepted connection from: \(socket.remoteHostname) on port \(socket.remotePort), Secure? \(socket.signature!.isSecure)")
-			
+				try listener.listen(on: Int(port), maxBacklogSize: 10)
+
+				print("Listening on port: \(port)")
+				
+				socket = try listener.acceptClientConnection()
+				
+				print("Accepted connection from: \(socket.remoteHostname) on port \(socket.remotePort), Secure? \(socket.signature!.isSecure)")
+				
+			} else {
+				
+				try listener.listen(on: path, maxBacklogSize: 10)
+
+				print("Listening on path: \(path)")
+				
+				socket = try listener.acceptClientConnection()
+				
+				print("Accepted connection from: \(socket.remotePath!), Secure? \(socket.signature!.isSecure)")
+				
+			}
+		
 			try socket.write(from: "Hello, type 'QUIT' to end session\n")
 			
 			var bytesRead = 0
@@ -132,8 +149,11 @@ class SocketTests: XCTestCase {
 						
 						keepRunning = false
 					}
-					
-					print("Server received from connection at \(socket.remoteHostname):\(socket.remotePort): \(response) ")
+					if family == .inet {
+						print("Server received from connection at \(socket.remoteHostname):\(socket.remotePort): \(response) ")
+					} else {
+						print("Server received from connection at \(socket.remotePath!): \(response) ")
+					}
 					let reply = "Server response: \n\(response)\n"
 					try socket.write(from: reply)
 					
@@ -251,6 +271,40 @@ class SocketTests: XCTestCase {
 		}
 	}
 	
+	func testCreateUnix() {
+		
+		do {
+			
+			// Create the socket...
+			let socket = try createHelper(family: .unix)
+			
+			// Get the Signature...
+			let sig = socket.signature
+			XCTAssertNotNil(sig)
+			
+			// Check to ensure the family, type and protocol are correct...
+			XCTAssertEqual(sig!.protocolFamily, Socket.ProtocolFamily.unix)
+			XCTAssertEqual(sig!.socketType, Socket.SocketType.stream)
+			XCTAssertEqual(sig!.proto, Socket.SocketProtocol.unix)
+			
+			socket.close()
+			XCTAssertFalse(socket.isActive)
+			
+		} catch let error {
+			
+			// See if it's a socket error or something else...
+			guard let socketError = error as? Socket.Error else {
+				
+				print("Unexpected error...")
+				XCTFail()
+				return
+			}
+			
+			print("Error reported: \(socketError.description)")
+			XCTFail()
+		}
+	}
+	
 	func testListen() {
 		
 		do {
@@ -294,6 +348,37 @@ class SocketTests: XCTestCase {
 			XCTAssertTrue(socket.isListening)
 			XCTAssertGreaterThan(socket.listeningPort, 0)
 			print("Listening port: \(socket.listeningPort)")
+			
+			// Close the socket...
+			socket.close()
+			XCTAssertFalse(socket.isActive)
+			
+		} catch let error {
+			
+			// See if it's a socket error or something else...
+			guard let socketError = error as? Socket.Error else {
+				
+				print("Unexpected error...")
+				XCTFail()
+				return
+			}
+			
+			print("Error reported: \(socketError.description)")
+			XCTFail()
+		}
+	}
+	
+	func testListenUnix() {
+		
+		do {
+			
+			// Create the socket..
+			let socket = try createHelper(family: .unix)
+			
+			// Listen on the port...
+			try socket.listen(on: path, maxBacklogSize: 10)
+			XCTAssertTrue(socket.isListening)
+			XCTAssertEqual(socket.remotePath, path)
 			
 			// Close the socket...
 			socket.close()
@@ -374,6 +459,46 @@ class SocketTests: XCTestCase {
 			
 			// Now attempt to connect to the listening socket...
 			try socket2.connect(to: host, port: port)
+			XCTAssertTrue(socket2.isConnected)
+			
+			// Close the socket...
+			socket.close()
+			XCTAssertFalse(socket.isActive)
+			socket2.close()
+			XCTAssertFalse(socket2.isActive)
+			
+		} catch let error {
+			
+			// See if it's a socket error or something else...
+			guard let socketError = error as? Socket.Error else {
+				
+				print("Unexpected error...")
+				XCTFail()
+				return
+			}
+			
+			print("Error reported: \(socketError.description)")
+			XCTFail()
+		}
+	}
+	
+	func testConnectToPath() {
+		
+		do {
+			
+			// Create the socket..
+			let socket = try createHelper(family: .unix)
+			
+			// Listen on the port...
+			try socket.listen(on: path, maxBacklogSize: 10)
+			XCTAssertTrue(socket.isListening)
+			
+			// Create a second socket...
+			let socket2 = try createHelper(family: .unix)
+			XCTAssertNotNil(socket2)
+			
+			// Now attempt to connect to the listening socket...
+			try socket2.connect(to: path)
 			XCTAssertTrue(socket2.isConnected)
 			
 			// Close the socket...
@@ -630,17 +755,89 @@ class SocketTests: XCTestCase {
 		
 	}
 	
+	func testReadWriteUnix() {
+		
+		let bufSize = 4096
+		var data = Data()
+		
+		do {
+			
+			// Launch the server helper...
+			launchServerHelper(family: .unix)
+			
+			#if os(Linux)
+				// On Linux need to wait for the server to come up...
+				_ = Glibc.sleep(2)
+				
+			#endif
+			
+			// Create the signature...
+			let signature = try Socket.Signature(socketType: .stream, proto: .unix, path: path)!
+			
+			// Create the socket...
+			let socket = try createHelper(family: .unix)
+			
+			// Defer cleanup...
+			defer {
+				// Close the socket...
+				socket.close()
+				XCTAssertFalse(socket.isActive)
+			}
+			
+			// Connect to the server helper...
+			try socket.connect(using: signature)
+			if !socket.isConnected {
+				
+				fatalError("Failed to connect to the server...")
+			}
+			
+			print("\nConnected to path: \(path)")
+			print("\tSocket signature: \(socket.signature!.description)\n")
+			
+			try readAndPrint(socket: socket, data: &data)
+			
+			let hello = "Hello from client..."
+			try socket.write(from: hello)
+			
+			print("Wrote '\(hello)' to socket...")
+			
+			try readAndPrint(socket: socket, data: &data)
+			
+			try socket.write(from: "QUIT")
+			
+			print("Sent quit to server...")
+			
+		} catch let error {
+			
+			// See if it's a socket error or something else...
+			guard let socketError = error as? Socket.Error else {
+				
+				print("Unexpected error...")
+				XCTFail()
+				return
+			}
+			
+			print("Error reported: \(socketError.description)")
+			XCTFail()
+		}
+		
+	}
+	
 	static var allTests = [
 		("testDefaultCreate", testDefaultCreate),
 		("testCreateIPV6", testCreateIPV6),
+		("testCreateUnix", testCreateUnix),
 		("testListen", testListen),
 		("testListenPort0", testListenPort0),
+		("testListenUnix", testListenUnix),
 		("testConnect", testConnect),
 		("testConnectTo", testConnectTo),
+		("testConnectToPath", testConnectToPath),
 		("testConnectPort0", testConnectPort0),
 		("testHostnameAndPort", testHostnameAndPort),
 		("testBlocking", testBlocking),
 		("testIsReadableWritable", testIsReadableWritable),
 		("testReadWrite", testReadWrite),
+		("testReadWriteUnix", testReadWriteUnix),
 	]
 }

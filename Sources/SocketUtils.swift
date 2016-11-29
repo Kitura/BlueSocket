@@ -72,6 +72,20 @@ public extension sockaddr_storage {
 		}
 		return addr.assumingMemoryBound(to: sockaddr_in6.self).pointee
 	}
+
+	///
+	/// Cast to sockaddr_un
+	///
+	/// - Returns: sockaddr_un
+	///
+	public func asUnix() -> sockaddr_un {
+		
+		var temp = self
+		let addr = withUnsafePointer(to: &temp) {
+			return UnsafeRawPointer($0)
+		}
+		return addr.assumingMemoryBound(to: sockaddr_un.self).pointee
+	}
 }
 
 // MARK: sockaddr_in Extension
@@ -96,6 +110,25 @@ public extension sockaddr_in {
 // MARK: sockaddr_in6 Extension
 
 public extension sockaddr_in6 {
+	
+	///
+	/// Cast to sockaddr
+	///
+	/// - Returns: sockaddr
+	///
+	public func asAddr() -> sockaddr {
+		
+		var temp = self
+		let addr = withUnsafePointer(to: &temp) {
+			return UnsafeRawPointer($0)
+		}
+		return addr.assumingMemoryBound(to: sockaddr.self).pointee
+	}
+}
+
+// MARK: sockaddr_un Extension
+
+public extension sockaddr_un {
 	
 	///
 	/// Cast to sockaddr
