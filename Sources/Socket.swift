@@ -87,7 +87,7 @@ public class Socket: SocketReader, SocketWriter {
 	
 
 	///
-	/// Flag to indicate the endian-ness of the host
+	/// Flag to indicate the endian-ness of the host. (Readonly)
 	///
 	public static let isLittleEndian: Bool 					= Int(littleEndian: 42) == 42
 
@@ -115,7 +115,7 @@ public class Socket: SocketReader, SocketWriter {
 		case unix
 		
 		///
-		/// Return the value for a particular case
+		/// Return the value for a particular case. (Readonly)
 		///
 		var value: Int32 {
 			
@@ -173,7 +173,7 @@ public class Socket: SocketReader, SocketWriter {
 		case datagram
 		
 		///
-		/// Return the value for a particular case
+		/// Return the value for a particular case. (Readonly)
 		///
 		var value: Int32 {
 			
@@ -249,7 +249,7 @@ public class Socket: SocketReader, SocketWriter {
 		case unix
 		
 		///
-		/// Return the value for a particular case
+		/// Return the value for a particular case. (Readonly)
 		///
 		var value: Int32 {
 			
@@ -304,7 +304,7 @@ public class Socket: SocketReader, SocketWriter {
 		case unix(sockaddr_un)
 		
 		///
-		/// Size of address
+		/// Size of address. (Readonly)
 		///
 		public var size: Int {
 			
@@ -320,7 +320,7 @@ public class Socket: SocketReader, SocketWriter {
 		}
 		
 		///
-		/// Cast as sockaddr.
+		/// Cast as sockaddr. (Readonly)
 		///
 		public var addr: sockaddr {
 			
@@ -355,36 +355,36 @@ public class Socket: SocketReader, SocketWriter {
 		public internal(set) var protocolFamily: ProtocolFamily
 		
 		///
-		/// Socket Type
+		/// Socket Type. (Readonly)
 		///
 		public internal(set) var socketType: SocketType
 		
 		///
-		/// Socket Protocol
+		/// Socket Protocol. (Readonly)
 		///
 		public internal(set) var proto: SocketProtocol
 		
 		///
-		/// Host name for connection
+		/// Host name for connection. (Readonly)
 		///
 		public internal(set) var hostname: String? = Socket.NO_HOSTNAME
 		
 		///
-		/// Port for connection
+		/// Port for connection. (Readonly)
 		///
 		public internal(set) var port: Int32 = Socket.SOCKET_INVALID_PORT
 		
 		///
-		/// Path for .unix type sockets
+		/// Path for .unix type sockets. (Readonly)
 		public internal(set) var path: String? = nil
 		
 		///
-		/// Address info for socket.
+		/// Address info for socket. (Readonly)
 		///
 		public internal(set) var address: Address? = nil
 		
 		///
-		/// Flag to indicate whether `Socket` is secure or not.
+		/// Flag to indicate whether `Socket` is secure or not. (Readonly)
 		///
 		public internal(set) var isSecure: Bool = false
 		
@@ -565,17 +565,17 @@ public class Socket: SocketReader, SocketWriter {
 		public let domain: String = SOCKET_ERR_DOMAIN
 		
 		///
-		/// The error code: **see constants above for possible errors**
+		/// The error code: **see constants above for possible errors** (Readonly)
 		///
 		public internal(set) var errorCode: Int32
 		
 		///
-		/// The reason for the error **(if available)**
+		/// The reason for the error **(if available)** (Readonly)
 		///
 		public internal(set) var errorReason: String?
 		
 		///
-		/// Returns a string description of the error.
+		/// Returns a string description of the error. (Readonly)
 		///
 		public var description: String {
 			
@@ -584,7 +584,7 @@ public class Socket: SocketReader, SocketWriter {
 		}
 		
 		///
-		/// The buffer size needed to complete the read.
+		/// The buffer size needed to complete the read. (Readonly)
 		///
 		public internal(set) var bufferSizeNeeded: Int32
 		
@@ -651,6 +651,17 @@ public class Socket: SocketReader, SocketWriter {
 	// MARK: -- Public
 	
 	///
+	/// The file descriptor representing this socket. (Readonly)
+	///
+	public internal(set) var socketfd: Int32 = SOCKET_INVALID_DESCRIPTOR
+	
+	///
+	/// The signature for the socket. (Readonly)
+	/// 	**Note:** See Signature above.
+	///
+	public internal(set) var signature: Signature? = nil
+	
+	///
 	/// The delegate that provides the SSL implementation.
 	///
 	public var delegate: SSLServiceDelegate?
@@ -713,7 +724,7 @@ public class Socket: SocketReader, SocketWriter {
 	public internal(set) var remoteConnectionClosed: Bool = false
 	
 	///
-	/// True if the socket is listening or connected.
+	/// True if the socket is listening or connected. (Readonly)
 	///
 	public var isActive: Bool {
 		
@@ -721,7 +732,26 @@ public class Socket: SocketReader, SocketWriter {
 	}
 	
 	///
-	/// Listening port (-1 if not listening)
+	/// True if this a server, false otherwise. (Readonly)
+	///
+	public var isServer: Bool {
+		
+		return isListening
+	}
+	
+	///
+	/// True if this socket is secure, false otherwise. (Readonly)
+	///
+	public var isSecure: Bool {
+		
+		guard let sig = signature else {
+			return false
+		}
+		return sig.isSecure
+	}
+	
+	///
+	/// Listening port (-1 if not listening). (Readonly)
 	///
 	public var listeningPort: Int32 {
 		
@@ -757,7 +787,7 @@ public class Socket: SocketReader, SocketWriter {
 	}
 	
 	///
-	/// The path this socket is connected to. (Readonly)
+	/// The path this socket is connected to or listening on. (Readonly)
 	///
 	public var remotePath: String? {
 		
@@ -767,27 +797,6 @@ public class Socket: SocketReader, SocketWriter {
 		}
 		
 		return path
-	}
-	
-	
-	
-	///
-	/// The file descriptor representing this socket. (Readonly)
-	///
-	public internal(set) var socketfd: Int32 = SOCKET_INVALID_DESCRIPTOR
-	
-	///
-	/// The signature for the socket.
-	/// 	**Note:** See Signature above.
-	///
-	public internal(set) var signature: Signature? = nil
-	
-	///
-	/// True if this a server, false otherwise.
-	///
-	public var isServer: Bool {
-		
-		return isListening
 	}
 	
 	
