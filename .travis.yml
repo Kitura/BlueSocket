@@ -15,6 +15,6 @@ matrix:
     osx_image: xcode8
     sudo: required
 before_install:
-- git submodule update --init --remote --merge --recursive
+- git clone https://github.com/IBM-Swift/Package-Builder.git
 script:
 - ./Package-Builder/build-package.sh $TRAVIS_BUILD_DIR
