@@ -81,7 +81,7 @@ class SocketTests: XCTestCase {
 					return
 				}
 				
-				print("Error reported:\n \(socketError.description)")
+				print("launchServerHelper Error reported:\n \(socketError.description)")
 				XCTFail()
 			}
 		}
@@ -178,7 +178,10 @@ class SocketTests: XCTestCase {
 				return
 			}
 			
-			print("Error reported: \(socketError.description)")
+			if socketError.errorCode == Int32(Socket.SOCKET_ERR_WRITE_FAILED) {
+				return
+			}
+			print("serverHelper Error reported: \(socketError.description)")
 			XCTFail()
 		}
 	}
@@ -232,7 +235,7 @@ class SocketTests: XCTestCase {
 				return
             }
             
-            print("Error reported: \(socketError.description)")
+            print("testDefaultCreate Error reported: \(socketError.description)")
 			XCTFail()
         }
 	}
@@ -266,7 +269,7 @@ class SocketTests: XCTestCase {
 				return
 			}
 			
-			print("Error reported: \(socketError.description)")
+			print("testCreateIPV6 Error reported: \(socketError.description)")
 			XCTFail()
 		}
 	}
@@ -300,7 +303,7 @@ class SocketTests: XCTestCase {
 				return
 			}
 			
-			print("Error reported: \(socketError.description)")
+			print("testCreateUnix Error reported: \(socketError.description)")
 			XCTFail()
 		}
 	}
@@ -331,7 +334,7 @@ class SocketTests: XCTestCase {
 				return
 			}
 			
-			print("Error reported: \(socketError.description)")
+			print("testListen Error reported: \(socketError.description)")
 			XCTFail()
 		}
 	}
@@ -363,7 +366,7 @@ class SocketTests: XCTestCase {
 				return
 			}
 			
-			print("Error reported: \(socketError.description)")
+			print("testListenPort0 Error reported: \(socketError.description)")
 			XCTFail()
 		}
 	}
@@ -394,7 +397,7 @@ class SocketTests: XCTestCase {
 				return
 			}
 			
-			print("Error reported: \(socketError.description)")
+			print("testListenUnix Error reported: \(socketError.description)")
 			XCTFail()
 		}
 	}
@@ -436,7 +439,7 @@ class SocketTests: XCTestCase {
 				return
 			}
 			
-			print("Error reported: \(socketError.description)")
+			print("testConnect Error reported: \(socketError.description)")
 			XCTFail()
 		}
 	}
@@ -477,7 +480,7 @@ class SocketTests: XCTestCase {
 				return
 			}
 			
-			print("Error reported: \(socketError.description)")
+			print("testConnectTo Error reported: \(socketError.description)")
 			XCTFail()
 		}
 	}
@@ -517,7 +520,7 @@ class SocketTests: XCTestCase {
 				return
 			}
 			
-			print("Error reported: \(socketError.description)")
+			print("testConnectToPath Error reported: \(socketError.description)")
 			XCTFail()
 		}
 	}
@@ -561,7 +564,7 @@ class SocketTests: XCTestCase {
 				return
 			}
 			
-			print("Error reported: \(socketError.description)")
+			print("testConnectPort0 Error reported: \(socketError.description)")
 			XCTFail()
 		}
 	}
@@ -610,7 +613,7 @@ class SocketTests: XCTestCase {
 				return
 			}
 			
-			print("Error reported: \(socketError.description)")
+			print("testHostnameAndPort Error reported: \(socketError.description)")
 			XCTFail()
 		}
 	}
@@ -647,7 +650,7 @@ class SocketTests: XCTestCase {
 				return
 			}
 			
-			print("Error reported: \(socketError.description)")
+			print("testBlocking Error reported: \(socketError.description)")
 			XCTFail()
 		}
 	}
@@ -679,7 +682,7 @@ class SocketTests: XCTestCase {
 				return
 			}
 			
-			print("Error reported: \(socketError.description)")
+			print("testIsReadableWritable Error reported: \(socketError.description)")
 			XCTAssertEqual(socketError.errorCode, Int32(Socket.SOCKET_ERR_NOT_CONNECTED))
 		}
 	}
@@ -697,10 +700,11 @@ class SocketTests: XCTestCase {
 			// Launch the server helper...
 			launchServerHelper()
 			
+			// Need to wait for the server to come up...
 			#if os(Linux)
-				// On Linux need to wait for the server to come up...
 				_ = Glibc.sleep(2)
-				
+			#else
+				_ = Darwin.sleep(2)
 			#endif
 			
 			// Create the signature...
@@ -749,9 +753,16 @@ class SocketTests: XCTestCase {
 				return
 			}
 			
-			print("Error reported: \(socketError.description)")
+			print("testReadWrite Error reported: \(socketError.description)")
 			XCTFail()
 		}
+		
+		// Need to wait for the server to go down before continuing...
+		#if os(Linux)
+			_ = Glibc.sleep(1)
+		#else
+			_ = Darwin.sleep(1)
+		#endif
 		
 	}
 	
@@ -765,10 +776,11 @@ class SocketTests: XCTestCase {
 			// Launch the server helper...
 			launchServerHelper(family: .unix)
 			
+			// Need to wait for the server to come up...
 			#if os(Linux)
-				// On Linux need to wait for the server to come up...
 				_ = Glibc.sleep(2)
-				
+			#else
+				_ = Darwin.sleep(2)
 			#endif
 			
 			// Create the signature...
@@ -817,9 +829,16 @@ class SocketTests: XCTestCase {
 				return
 			}
 			
-			print("Error reported: \(socketError.description)")
+			print("testReadWriteUnix Error reported: \(socketError.description)")
 			XCTFail()
 		}
+		
+		// Need to wait for the server to go down before continuing...
+		#if os(Linux)
+			_ = Glibc.sleep(1)
+		#else
+			_ = Darwin.sleep(1)
+		#endif
 		
 	}
 	
