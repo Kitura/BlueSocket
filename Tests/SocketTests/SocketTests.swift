@@ -743,6 +743,13 @@ class SocketTests: XCTestCase {
 			
 			print("Sent quit to server...")
 			
+			// Need to wait for the server to go down before continuing...
+			#if os(Linux)
+				_ = Glibc.sleep(1)
+			#else
+				_ = Darwin.sleep(1)
+			#endif
+			
 		} catch let error {
 			
 			// See if it's a socket error or something else...
@@ -756,13 +763,6 @@ class SocketTests: XCTestCase {
 			print("testReadWrite Error reported: \(socketError.description)")
 			XCTFail()
 		}
-		
-		// Need to wait for the server to go down before continuing...
-		#if os(Linux)
-			_ = Glibc.sleep(1)
-		#else
-			_ = Darwin.sleep(1)
-		#endif
 		
 	}
 	
@@ -819,6 +819,13 @@ class SocketTests: XCTestCase {
 			
 			print("Sent quit to server...")
 			
+			// Need to wait for the server to go down before continuing...
+			#if os(Linux)
+				_ = Glibc.sleep(1)
+			#else
+				_ = Darwin.sleep(1)
+			#endif
+			
 		} catch let error {
 			
 			// See if it's a socket error or something else...
@@ -832,13 +839,6 @@ class SocketTests: XCTestCase {
 			print("testReadWriteUnix Error reported: \(socketError.description)")
 			XCTFail()
 		}
-		
-		// Need to wait for the server to go down before continuing...
-		#if os(Linux)
-			_ = Glibc.sleep(1)
-		#else
-			_ = Darwin.sleep(1)
-		#endif
 		
 	}
 	
