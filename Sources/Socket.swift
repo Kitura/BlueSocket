@@ -423,6 +423,20 @@ public class Socket: SocketReader, SocketWriter {
 					throw Error(code: Socket.SOCKET_ERR_BAD_SIGNATURE_PARAMETERS, reason: "Bad family, type or protocol passed.")
 			}
 			
+			// Validate the parameters...
+			if type == .stream {
+				guard (pro == .tcp || pro == .unix) else {
+					
+					throw Error(code: Socket.SOCKET_ERR_BAD_SIGNATURE_PARAMETERS, reason: "Stream socket must use either .tcp or .unix for the protocol.")
+				}
+			}
+			if type == .datagram {
+				guard pro == .udp else {
+					
+					throw Error(code: Socket.SOCKET_ERR_BAD_SIGNATURE_PARAMETERS, reason: "Datagram socket must use .udp for the protocol.")
+				}
+			}
+			
 			self.protocolFamily = family
 			self.socketType = type
 			self.proto = pro
@@ -454,6 +468,20 @@ public class Socket: SocketReader, SocketWriter {
 			// Default to IPV4 socket protocol family...
 			self.protocolFamily = .inet
 			
+			// Validate the parameters...
+			if socketType == .stream {
+				guard (proto == .tcp || proto == .unix) else {
+					
+					throw Error(code: Socket.SOCKET_ERR_BAD_SIGNATURE_PARAMETERS, reason: "Stream socket must use either .tcp or .unix for the protocol.")
+				}
+			}
+			if socketType == .datagram {
+				guard proto == .udp else {
+					
+					throw Error(code: Socket.SOCKET_ERR_BAD_SIGNATURE_PARAMETERS, reason: "Datagram socket must use .udp for the protocol.")
+				}
+			}
+			
 			self.socketType = socketType
 			self.proto = proto
 			
@@ -484,6 +512,20 @@ public class Socket: SocketReader, SocketWriter {
 			
 			self.socketType = socketType
 			self.proto = proto
+			
+			// Validate the parameters...
+			if socketType == .stream {
+				guard (proto == .tcp || proto == .unix) else {
+					
+					throw Error(code: Socket.SOCKET_ERR_BAD_SIGNATURE_PARAMETERS, reason: "Stream socket must use either .tcp or .unix for the protocol.")
+				}
+			}
+			if socketType == .datagram {
+				guard proto == .udp else {
+					
+					throw Error(code: Socket.SOCKET_ERR_BAD_SIGNATURE_PARAMETERS, reason: "Datagram socket must use .udp for the protocol.")
+				}
+			}
 			
 			self.path = path
 
@@ -546,6 +588,20 @@ public class Socket: SocketReader, SocketWriter {
 			self.protocolFamily = family
 			self.socketType = type
 			self.proto = pro
+			
+			// Validate the parameters...
+			if type == .stream {
+				guard (pro == .tcp || pro == .unix) else {
+				
+					throw Error(code: Socket.SOCKET_ERR_BAD_SIGNATURE_PARAMETERS, reason: "Stream socket must use either .tcp or .unix for the protocol.")
+				}
+			}
+			if type == .datagram {
+				guard pro == .udp else {
+				
+					throw Error(code: Socket.SOCKET_ERR_BAD_SIGNATURE_PARAMETERS, reason: "Datagram socket must use .udp for the protocol.")
+				}
+			}
 			
 			self.address = address
 			
@@ -818,6 +874,20 @@ public class Socket: SocketReader, SocketWriter {
 	/// - Returns: New Socket instance
 	///
 	public class func create(family: ProtocolFamily = .inet, type: SocketType = .stream, proto: SocketProtocol = .tcp) throws -> Socket {
+		
+		// Validate the parameters...
+		if type == .stream {
+			guard (proto == .tcp || proto == .unix) else {
+				
+				throw Error(code: Socket.SOCKET_ERR_BAD_SIGNATURE_PARAMETERS, reason: "Stream socket must use either .tcp or .unix for the protocol.")
+			}
+		}
+		if type == .datagram {
+			guard proto == .udp else {
+				
+				throw Error(code: Socket.SOCKET_ERR_BAD_SIGNATURE_PARAMETERS, reason: "Datagram socket must use .udp for the protocol.")
+			}
+		}
 		
 		if type == .datagram || proto == .udp {
 			
