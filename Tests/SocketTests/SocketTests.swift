@@ -487,6 +487,43 @@ class SocketTests: XCTestCase {
 		}
 	}
 	
+	func testListenPort0UDP() {
+		
+		if !testingUDP {
+			return
+		}
+		
+		do {
+			
+			// Create the socket..
+			let socket = try createUDPHelper()
+			
+			// Listen on the port...
+			var data = Data()
+			_ = try socket.listen(forMessage: &data, on: Int(0))
+			XCTAssertTrue(socket.isListening)
+			XCTAssertGreaterThan(socket.listeningPort, 0)
+			print("Listening port: \(socket.listeningPort)")
+			
+			// Close the socket...
+			socket.close()
+			XCTAssertFalse(socket.isActive)
+			
+		} catch let error {
+			
+			// See if it's a socket error or something else...
+			guard let socketError = error as? Socket.Error else {
+				
+				print("Unexpected error...")
+				XCTFail()
+				return
+			}
+			
+			print("testListenPort0 Error reported: \(socketError.description)")
+			XCTFail()
+		}
+	}
+	
 	func testConnect() {
 		
 		do {
@@ -935,6 +972,8 @@ class SocketTests: XCTestCase {
 		("testListen", testListen),
 		("testListenPort0", testListenPort0),
 		("testListenUnix", testListenUnix),
+		("testListenUDP", testListenUDP),
+		("testListenPort0UDP", testListenPort0UDP),
 		("testConnect", testConnect),
 		("testConnectTo", testConnectTo),
 		("testConnectToPath", testConnectToPath),
