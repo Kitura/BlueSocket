@@ -1808,6 +1808,8 @@ public class Socket: SocketReader, SocketWriter {
 	
 	// MARK: -- Listen
 	
+	// MARK: --- TCP
+	
 	///
 	/// Listen on a port, limiting the maximum number of pending connections.
 	///
@@ -1841,19 +1843,23 @@ public class Socket: SocketReader, SocketWriter {
 			throw Error(code: Socket.SOCKET_ERR_INTERNAL, reason: "Socket signature not found.")
 		}
 		
-		// Tell the delegate to initialize as a server...
-		do {
+		// No SSL over UDP...
+		if sig.socketType != .datagram && sig.proto != .udp {
+
+			// Tell the delegate to initialize as a server...
+			do {
 			
-			try self.delegate?.initialize(asServer: true)
+				try self.delegate?.initialize(asServer: true)
 			
-		} catch let error {
+			} catch let error {
 			
-			guard let sslError = error as? SSLError else {
+				guard let sslError = error as? SSLError else {
 				
-				throw error
-			}
+					throw error
+				}
 			
-			throw Error(with: sslError)
+				throw Error(with: sslError)
+			}
 		}
 		
 		// Create the hints for our search...
@@ -1993,6 +1999,14 @@ public class Socket: SocketReader, SocketWriter {
 			self.signature?.port = Int32(port)
 		}
 		
+		self.signature?.isBound = true
+		self.signature?.address = address
+
+		// We don't actually listen for connections with a UDP socket, so we skip the next steps...
+		if sig.socketType == .datagram && sig.proto == .udp {
+			return
+		}
+		
 		// Now listen for connections...
 		#if os(Linux)
 			if Glibc.listen(self.socketfd, Int32(maxBacklogSize)) < 0 {
@@ -2007,10 +2021,10 @@ public class Socket: SocketReader, SocketWriter {
 		#endif
 		
 		self.isListening = true
-		self.signature?.address = address
-		self.signature?.isBound = true
 		self.signature?.isSecure = self.delegate != nil ? true : false
 	}
+	
+	// MARK: --- UNIX
 	
 	///
 	/// Listen on a path, limiting the maximum number of pending connections.
@@ -2090,6 +2104,129 @@ public class Socket: SocketReader, SocketWriter {
 		self.signature?.isBound = true
 		self.signature?.isSecure = false
 		self.signature?.address = signature.address
+	}
+	
+	// MARK: --- UDP
+	
+	///
+	/// Listen for a message on a UDP socket.
+	///
+	/// - Parameters:
+	///		- buffer: 			The buffer to return the data in.
+	/// 	- bufSize: 			The size of the buffer.
+	///		- port:				Port to listen on.
+	/// 	- maxBacklogSize: 	The maximum size of the queue containing pending connections. Default is *Socket.SOCKET_DEFAULT_MAX_BACKLOG*.
+	///
+	///	- Returns:				Tuple containing the number of bytes read and the `Address` of the client who sent the data.
+	///
+	public func listen(forMessage buffer: UnsafeMutablePointer<CChar>, bufSize: Int, on port: Int, maxBacklogSize: Int = Socket.SOCKET_DEFAULT_MAX_BACKLOG) throws -> (bytesRead: Int32, address: Address?) {
+		
+		// Make sure the buffer is valid...
+		if bufSize == 0 {
+			
+			throw Error(code: Socket.SOCKET_ERR_INVALID_BUFFER, reason: nil)
+		}
+		
+		// The socket must've been created...
+		if self.socketfd == Socket.SOCKET_INVALID_DESCRIPTOR {
+			
+			throw Error(code: Socket.SOCKET_ERR_BAD_DESCRIPTOR, reason: nil)
+		}
+		
+		// The socket must've been created for UDP...
+		guard let sig = self.signature,
+			sig.socketType == .datagram && sig.proto == .udp else {
+				
+				throw Error(code: Socket.SOCKET_ERR_WRONG_PROTOCOL, reason: "This is not a UDP socket.")
+		}
+		
+		// Set up the socket for listening for a message...
+		try self.listen(on: port, maxBacklogSize: maxBacklogSize)
+		
+		// If we're not bound, something went wrong...
+		guard sig.isBound == true else {
+			
+			throw Error(code: Socket.SOCKET_ERR_LISTEN_FAILED, reason: "")
+		}
+		
+		
+		return (0, nil)
+	}
+	
+	///
+	/// Listen for a message on a UDP socket.
+	///
+	/// - Parameters:
+	///		- data:				Data buffer to receive the data read.
+	///		- port:				Port to listen on.
+	/// 	- maxBacklogSize: 	The maximum size of the queue containing pending connections. Default is *Socket.SOCKET_DEFAULT_MAX_BACKLOG*.
+	///
+	///	- Returns:				Tuple containing the number of bytes read and the `Address` of the client who sent the data.
+	///
+	public func listen(forMessage data: NSMutableData, on port: Int, maxBacklogSize: Int = Socket.SOCKET_DEFAULT_MAX_BACKLOG) throws -> (bytesRead: Int32, address: Address?) {
+		
+		// The socket must've been created...
+		if self.socketfd == Socket.SOCKET_INVALID_DESCRIPTOR {
+			
+			throw Error(code: Socket.SOCKET_ERR_BAD_DESCRIPTOR, reason: nil)
+		}
+		
+		// The socket must've been created for UDP...
+		guard let sig = self.signature,
+			sig.socketType == .datagram && sig.proto == .udp else {
+				
+				throw Error(code: Socket.SOCKET_ERR_WRONG_PROTOCOL, reason: "This is not a UDP socket.")
+		}
+		
+		// Set up the socket for listening for a message...
+		try self.listen(on: port, maxBacklogSize: maxBacklogSize)
+		
+		// If we're not bound, something went wrong...
+		guard sig.isBound == true else {
+			
+			throw Error(code: Socket.SOCKET_ERR_LISTEN_FAILED, reason: "")
+		}
+		
+		
+		return (0, nil)
+	}
+	
+	///
+	/// Listen for a message on a UDP socket.
+	///
+	/// - Parameters:
+	///		- data:				Data buffer to receive the data read.
+	///		- port:				Port to listen on.
+	/// 	- maxBacklogSize: 	The maximum size of the queue containing pending connections. Default is *Socket.SOCKET_DEFAULT_MAX_BACKLOG*.
+	///
+	///	- Returns:				Tuple containing the number of bytes read and the `Address` of the client who sent the data.
+	///
+	public func listen(forMessage data: inout Data, on port: Int, maxBacklogSize: Int = Socket.SOCKET_DEFAULT_MAX_BACKLOG) throws -> (bytesRead: Int32, address: Address?) {
+		
+		// The socket must've been created...
+		if self.socketfd == Socket.SOCKET_INVALID_DESCRIPTOR {
+			
+			throw Error(code: Socket.SOCKET_ERR_BAD_DESCRIPTOR, reason: nil)
+		}
+		
+		// The socket must've been created for UDP...
+		guard let sig = self.signature,
+			sig.socketType == .datagram && sig.proto == .udp else {
+				
+				throw Error(code: Socket.SOCKET_ERR_WRONG_PROTOCOL, reason: "This is not a UDP socket.")
+		}
+		
+		// Set up the socket for listening for a message...
+		try self.listen(on: port, maxBacklogSize: maxBacklogSize)
+		
+		// If we're not bound, something went wrong...
+		guard sig.isBound == true else {
+			
+			throw Error(code: Socket.SOCKET_ERR_LISTEN_FAILED, reason: "")
+		}
+		
+		
+		return (0, nil)
 	}
 	
 	// MARK: -- Read
@@ -2298,33 +2435,6 @@ public class Socket: SocketReader, SocketWriter {
 	/// Read data from a UDP socket.
 	///
 	/// - Parameters:
-	///		- data: 	The buffer to return the data in.
-	///		- address: 	Address to write data to.
-	///
-	/// - Returns: The number of bytes returned in the buffer.
-	///
-	public func read(into data: NSMutableData, from address: Address) throws -> (bytesRead: Int, address: Address?) {
-		
-		// The socket must've been created...
-		if self.socketfd == Socket.SOCKET_INVALID_DESCRIPTOR {
-			
-			throw Error(code: Socket.SOCKET_ERR_BAD_DESCRIPTOR, reason: nil)
-		}
-		
-		// The socket must've been created for UDP...
-		guard let sig = self.signature,
-			sig.proto == .udp else {
-			
-			throw Error(code: Socket.SOCKET_ERR_WRONG_PROTOCOL, reason: "This is not a UDP socket.")
-		}
-		
-		return (0, nil)
-	}
-	
-	///
-	/// Read data from a UDP socket.
-	///
-	/// - Parameters:
 	///		- buffer: 	The buffer to return the data in.
 	/// 	- bufSize: 	The size of the buffer.
 	///		- address: 	Address to write data to.
@@ -2352,8 +2462,62 @@ public class Socket: SocketReader, SocketWriter {
 		// The socket must've been created for UDP...
 		guard let sig = self.signature,
 			sig.proto == .udp else {
+				
+				throw Error(code: Socket.SOCKET_ERR_WRONG_PROTOCOL, reason: "This is not a UDP socket.")
+		}
+		
+		return (0, nil)
+	}
+	
+	///
+	/// Read data from a UDP socket.
+	///
+	/// - Parameters:
+	///		- data: 	The buffer to return the data in.
+	///		- address: 	Address to write data to.
+	///
+	/// - Returns: The number of bytes returned in the buffer.
+	///
+	public func read(into data: NSMutableData, from address: Address) throws -> (bytesRead: Int, address: Address?) {
+		
+		// The socket must've been created...
+		if self.socketfd == Socket.SOCKET_INVALID_DESCRIPTOR {
+			
+			throw Error(code: Socket.SOCKET_ERR_BAD_DESCRIPTOR, reason: nil)
+		}
+		
+		// The socket must've been created for UDP...
+		guard let sig = self.signature,
+			sig.proto == .udp else {
 			
 			throw Error(code: Socket.SOCKET_ERR_WRONG_PROTOCOL, reason: "This is not a UDP socket.")
+		}
+		
+		return (0, nil)
+	}
+	
+	///
+	/// Read data from a UDP socket.
+	///
+	/// - Parameters:
+	///		- data: 	The buffer to return the data in.
+	///		- address: 	Address to write data to.
+	///
+	/// - Returns: The number of bytes returned in the buffer.
+	///
+	public func read(into data: inout Data, from address: Address) throws -> (bytesRead: Int, address: Address?) {
+		
+		// The socket must've been created...
+		if self.socketfd == Socket.SOCKET_INVALID_DESCRIPTOR {
+			
+			throw Error(code: Socket.SOCKET_ERR_BAD_DESCRIPTOR, reason: nil)
+		}
+		
+		// The socket must've been created for UDP...
+		guard let sig = self.signature,
+			sig.proto == .udp else {
+				
+				throw Error(code: Socket.SOCKET_ERR_WRONG_PROTOCOL, reason: "This is not a UDP socket.")
 		}
 		
 		return (0, nil)
@@ -2581,6 +2745,34 @@ public class Socket: SocketReader, SocketWriter {
 		
 		// If there's no data in the NSData object, why bother? Fail silently...
 		if data.length == 0 {
+			return
+		}
+	}
+	
+	///
+	/// Write data to a UDP socket.
+	///
+	/// - Parameters:
+	///		- data: 	The Data object containing the data to write.
+	///		- address: 	Address to write data to.
+	///
+	public func write(from data: Data, to addresss: Address) throws {
+		
+		// The socket must've been created...
+		if self.socketfd == Socket.SOCKET_INVALID_DESCRIPTOR {
+			
+			throw Error(code: Socket.SOCKET_ERR_BAD_DESCRIPTOR, reason: nil)
+		}
+		
+		// The socket must've been created for UDP...
+		guard let sig = self.signature,
+			sig.proto == .udp else {
+				
+				throw Error(code: Socket.SOCKET_ERR_WRONG_PROTOCOL, reason: "This is not a UDP socket.")
+		}
+		
+		// If there's no data in the NSData object, why bother? Fail silently...
+		if data.count == 0 {
 			return
 		}
 	}
