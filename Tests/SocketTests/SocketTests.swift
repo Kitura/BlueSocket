@@ -34,6 +34,7 @@ class SocketTests: XCTestCase {
 	let port: Int32 = 1337
 	let host: String = "127.0.0.1"
 	let path: String = "/tmp/server"
+	let testingUDP = false
 	
 	
 	override func setUp() {
@@ -49,6 +50,16 @@ class SocketTests: XCTestCase {
 	func createHelper(family: Socket.ProtocolFamily = .inet) throws -> Socket {
 		
 		let socket = try Socket.create(family: family)
+		XCTAssertNotNil(socket)
+		XCTAssertFalse(socket.isConnected)
+		XCTAssertTrue(socket.isBlocking)
+		
+		return socket
+	}
+	
+	func createUDPHelper(family: Socket.ProtocolFamily = .inet) throws -> Socket {
+		
+		let socket = try Socket.create(family: family, type: .datagram, proto: .udp)
 		XCTAssertNotNil(socket)
 		XCTAssertFalse(socket.isConnected)
 		XCTAssertTrue(socket.isBlocking)
@@ -308,6 +319,44 @@ class SocketTests: XCTestCase {
 		}
 	}
 	
+	func testCreateUDP() {
+		
+		if !testingUDP {
+			return
+		}
+		
+		do {
+			
+			// Create the socket...
+			let socket = try createUDPHelper()
+			
+			// Get the Signature...
+			let sig = socket.signature
+			XCTAssertNotNil(sig)
+			
+			// Check to ensure the family, type and protocol are correct...
+			XCTAssertEqual(sig!.protocolFamily, Socket.ProtocolFamily.inet)
+			XCTAssertEqual(sig!.socketType, Socket.SocketType.datagram)
+			XCTAssertEqual(sig!.proto, Socket.SocketProtocol.udp)
+			
+			socket.close()
+			XCTAssertFalse(socket.isActive)
+			
+		} catch let error {
+			
+			// See if it's a socket error or something else...
+			guard let socketError = error as? Socket.Error else {
+				
+				print("Unexpected error...")
+				XCTFail()
+				return
+			}
+			
+			print("testCreateUnix Error reported: \(socketError.description)")
+			XCTFail()
+		}
+	}
+	
 	func testListen() {
 		
 		do {
@@ -398,6 +447,42 @@ class SocketTests: XCTestCase {
 			}
 			
 			print("testListenUnix Error reported: \(socketError.description)")
+			XCTFail()
+		}
+	}
+	
+	func testListenUDP() {
+		
+		if !testingUDP {
+			return
+		}
+		
+		do {
+			
+			// Create the socket..
+			let socket = try createUDPHelper()
+			
+			// Listen on the port...
+			var data = Data()
+			_ = try socket.listen(forMessage: &data, on: Int(port))
+			XCTAssertTrue(socket.isListening)
+			XCTAssertEqual(socket.listeningPort, port)
+			
+			// Close the socket...
+			socket.close()
+			XCTAssertFalse(socket.isActive)
+			
+		} catch let error {
+			
+			// See if it's a socket error or something else...
+			guard let socketError = error as? Socket.Error else {
+				
+				print("Unexpected error...")
+				XCTFail()
+				return
+			}
+			
+			print("testListen Error reported: \(socketError.description)")
 			XCTFail()
 		}
 	}
@@ -846,6 +931,7 @@ class SocketTests: XCTestCase {
 		("testDefaultCreate", testDefaultCreate),
 		("testCreateIPV6", testCreateIPV6),
 		("testCreateUnix", testCreateUnix),
+		("testCreateUDP", testCreateUDP),
 		("testListen", testListen),
 		("testListenPort0", testListenPort0),
 		("testListenUnix", testListenUnix),

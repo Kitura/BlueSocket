@@ -824,6 +824,7 @@ public class Socket: SocketReader, SocketWriter {
 			throw Error(code: Socket.SOCKET_ERR_NOT_SUPPORTED_YET, reason: "Full support for Datagrams and UDP not available yet.")
 			
 		}
+		
 		return try Socket(family: family, type: type, proto: proto)
 	}
 	
@@ -2119,7 +2120,7 @@ public class Socket: SocketReader, SocketWriter {
 	///
 	///	- Returns:				Tuple containing the number of bytes read and the `Address` of the client who sent the data.
 	///
-	public func listen(forMessage buffer: UnsafeMutablePointer<CChar>, bufSize: Int, on port: Int, maxBacklogSize: Int = Socket.SOCKET_DEFAULT_MAX_BACKLOG) throws -> (bytesRead: Int32, address: Address?) {
+	public func listen(forMessage buffer: UnsafeMutablePointer<CChar>, bufSize: Int, on port: Int, maxBacklogSize: Int = Socket.SOCKET_DEFAULT_MAX_BACKLOG) throws -> (bytesRead: Int, address: Address?) {
 		
 		// Make sure the buffer is valid...
 		if bufSize == 0 {
@@ -2146,11 +2147,12 @@ public class Socket: SocketReader, SocketWriter {
 		}
 		
 		// If we're not bound, something went wrong...
-		guard sig.isBound == true else {
+		guard self.signature?.isBound == true else {
 			
 			throw Error(code: Socket.SOCKET_ERR_LISTEN_FAILED, reason: "")
 		}
 		
+		self.isListening = true
 		
 		return (0, nil)
 	}
@@ -2165,7 +2167,7 @@ public class Socket: SocketReader, SocketWriter {
 	///
 	///	- Returns:				Tuple containing the number of bytes read and the `Address` of the client who sent the data.
 	///
-	public func listen(forMessage data: NSMutableData, on port: Int, maxBacklogSize: Int = Socket.SOCKET_DEFAULT_MAX_BACKLOG) throws -> (bytesRead: Int32, address: Address?) {
+	public func listen(forMessage data: NSMutableData, on port: Int, maxBacklogSize: Int = Socket.SOCKET_DEFAULT_MAX_BACKLOG) throws -> (bytesRead: Int, address: Address?) {
 		
 		// The socket must've been created...
 		if self.socketfd == Socket.SOCKET_INVALID_DESCRIPTOR {
@@ -2186,11 +2188,12 @@ public class Socket: SocketReader, SocketWriter {
 		}
 		
 		// If we're not bound, something went wrong...
-		guard sig.isBound == true else {
+		guard self.signature?.isBound == true else {
 			
 			throw Error(code: Socket.SOCKET_ERR_LISTEN_FAILED, reason: "")
 		}
 		
+		self.isListening = true
 		
 		return (0, nil)
 	}
@@ -2205,7 +2208,7 @@ public class Socket: SocketReader, SocketWriter {
 	///
 	///	- Returns:				Tuple containing the number of bytes read and the `Address` of the client who sent the data.
 	///
-	public func listen(forMessage data: inout Data, on port: Int, maxBacklogSize: Int = Socket.SOCKET_DEFAULT_MAX_BACKLOG) throws -> (bytesRead: Int32, address: Address?) {
+	public func listen(forMessage data: inout Data, on port: Int, maxBacklogSize: Int = Socket.SOCKET_DEFAULT_MAX_BACKLOG) throws -> (bytesRead: Int, address: Address?) {
 		
 		// The socket must've been created...
 		if self.socketfd == Socket.SOCKET_INVALID_DESCRIPTOR {
@@ -2226,12 +2229,13 @@ public class Socket: SocketReader, SocketWriter {
 		}
 		
 		// If we're not bound, something went wrong...
-		guard sig.isBound == true else {
+		guard self.signature?.isBound == true else {
 			
 			throw Error(code: Socket.SOCKET_ERR_LISTEN_FAILED, reason: "")
 		}
 		
-		
+		self.isListening = true
+				
 		return (0, nil)
 	}
 	
@@ -2451,7 +2455,7 @@ public class Socket: SocketReader, SocketWriter {
 	///
 	/// - Returns: The number of bytes returned in the buffer.
 	///
-	public func read(into buffer: UnsafeMutablePointer<CChar>, bufSize: Int, from address: Address) throws -> (bytesRead: Int, address: Address?) {
+	public func read(into buffer: UnsafeMutablePointer<CChar>, bufSize: Int, from address: inout Address) throws -> Int {
 		
 		// Make sure the buffer is valid...
 		if bufSize == 0 {
@@ -2472,7 +2476,7 @@ public class Socket: SocketReader, SocketWriter {
 				throw Error(code: Socket.SOCKET_ERR_WRONG_PROTOCOL, reason: "This is not a UDP socket.")
 		}
 		
-		return (0, nil)
+		return 0
 	}
 	
 	///
@@ -2484,7 +2488,7 @@ public class Socket: SocketReader, SocketWriter {
 	///
 	/// - Returns: The number of bytes returned in the buffer.
 	///
-	public func read(into data: NSMutableData, from address: Address) throws -> (bytesRead: Int, address: Address?) {
+	public func read(into data: NSMutableData, from address: inout Address) throws -> Int {
 		
 		// The socket must've been created...
 		if self.socketfd == Socket.SOCKET_INVALID_DESCRIPTOR {
@@ -2499,7 +2503,7 @@ public class Socket: SocketReader, SocketWriter {
 			throw Error(code: Socket.SOCKET_ERR_WRONG_PROTOCOL, reason: "This is not a UDP socket.")
 		}
 		
-		return (0, nil)
+		return 0
 	}
 	
 	///
@@ -2511,7 +2515,7 @@ public class Socket: SocketReader, SocketWriter {
 	///
 	/// - Returns: The number of bytes returned in the buffer.
 	///
-	public func read(into data: inout Data, from address: Address) throws -> (bytesRead: Int, address: Address?) {
+	public func read(into data: inout Data, from address: inout Address) throws -> Int {
 		
 		// The socket must've been created...
 		if self.socketfd == Socket.SOCKET_INVALID_DESCRIPTOR {
@@ -2526,7 +2530,7 @@ public class Socket: SocketReader, SocketWriter {
 				throw Error(code: Socket.SOCKET_ERR_WRONG_PROTOCOL, reason: "This is not a UDP socket.")
 		}
 		
-		return (0, nil)
+		return 0
 	}
 	
 	// MARK: -- Write
