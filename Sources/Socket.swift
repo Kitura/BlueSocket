@@ -2453,9 +2453,9 @@ public class Socket: SocketReader, SocketWriter {
 	///		Call again with proper buffer size (see `Error.bufferSizeNeeded`) or
 	///		use `readData(data: NSMutableData)`.
 	///
-	/// - Returns: The number of bytes returned in the buffer.
+	/// - Returns: Tuple with the number of bytes returned in the buffer and the address they were received from.
 	///
-	public func read(into buffer: UnsafeMutablePointer<CChar>, bufSize: Int, from address: inout Address) throws -> Int {
+	public func readDatagram(into buffer: UnsafeMutablePointer<CChar>, bufSize: Int) throws -> (bytesRead: Int, address: Address?) {
 		
 		// Make sure the buffer is valid...
 		if bufSize == 0 {
@@ -2476,7 +2476,7 @@ public class Socket: SocketReader, SocketWriter {
 				throw Error(code: Socket.SOCKET_ERR_WRONG_PROTOCOL, reason: "This is not a UDP socket.")
 		}
 		
-		return 0
+		return (0, nil)
 	}
 	
 	///
@@ -2486,9 +2486,9 @@ public class Socket: SocketReader, SocketWriter {
 	///		- data: 	The buffer to return the data in.
 	///		- address: 	Address to write data to.
 	///
-	/// - Returns: The number of bytes returned in the buffer.
+	/// - Returns: Tuple with the number of bytes returned in the buffer and the address they were received from.
 	///
-	public func read(into data: NSMutableData, from address: inout Address) throws -> Int {
+	public func readDatagram(into data: NSMutableData) throws -> (bytesRead: Int, address: Address?) {
 		
 		// The socket must've been created...
 		if self.socketfd == Socket.SOCKET_INVALID_DESCRIPTOR {
@@ -2503,7 +2503,7 @@ public class Socket: SocketReader, SocketWriter {
 			throw Error(code: Socket.SOCKET_ERR_WRONG_PROTOCOL, reason: "This is not a UDP socket.")
 		}
 		
-		return 0
+		return (0, nil)
 	}
 	
 	///
@@ -2513,9 +2513,9 @@ public class Socket: SocketReader, SocketWriter {
 	///		- data: 	The buffer to return the data in.
 	///		- address: 	Address to write data to.
 	///
-	/// - Returns: The number of bytes returned in the buffer.
+	/// - Returns: Tuple with the number of bytes returned in the buffer and the address they were received from.
 	///
-	public func read(into data: inout Data, from address: inout Address) throws -> Int {
+	public func readDatagram(into data: inout Data) throws -> (bytesRead: Int, address: Address?) {
 		
 		// The socket must've been created...
 		if self.socketfd == Socket.SOCKET_INVALID_DESCRIPTOR {
@@ -2530,7 +2530,7 @@ public class Socket: SocketReader, SocketWriter {
 				throw Error(code: Socket.SOCKET_ERR_WRONG_PROTOCOL, reason: "This is not a UDP socket.")
 		}
 		
-		return 0
+		return (0, nil)
 	}
 	
 	// MARK: -- Write
