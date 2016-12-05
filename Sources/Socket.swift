@@ -389,11 +389,16 @@ public class Socket: SocketReader, SocketWriter {
 		public internal(set) var isSecure: Bool = false
 		
 		///
+		/// True is socket bound, false otherwise.
+		///
+		public internal(set) var isBound: Bool = false
+		
+		///
 		/// Returns a string description of the error.
 		///
 		public var description: String {
 			
-			return "Signature: family: \(protocolFamily), type: \(socketType), protocol: \(proto), address: \(address as Socket.Address?), hostname: \(hostname as String?), port: \(port), path: \(path), secure: \(isSecure)"
+			return "Signature: family: \(protocolFamily), type: \(socketType), protocol: \(proto), address: \(address as Socket.Address?), hostname: \(hostname as String?), port: \(port), path: \(path), bound: \(isBound), secure: \(isSecure)"
 		}
 		
 		// MARK: -- Public Functions
@@ -511,7 +516,6 @@ public class Socket: SocketReader, SocketWriter {
 			#endif
 			
 			self.address = .unix(remoteAddr)
-			print("Socket Signature:\(self)")
 		}
 		
 		///
@@ -1983,8 +1987,6 @@ public class Socket: SocketReader, SocketWriter {
 			
 		}
 		
-		self.signature?.address = address
-		
 		// Update our hostname and port...
 		if let (hostname, port) = Socket.hostnameAndPort(from: address) {
 			self.signature?.hostname = hostname
@@ -2005,6 +2007,8 @@ public class Socket: SocketReader, SocketWriter {
 		#endif
 		
 		self.isListening = true
+		self.signature?.address = address
+		self.signature?.isBound = true
 		self.signature?.isSecure = self.delegate != nil ? true : false
 	}
 	
@@ -2083,11 +2087,14 @@ public class Socket: SocketReader, SocketWriter {
 		
 		self.isListening = true
 		self.signature?.path = path
+		self.signature?.isBound = true
 		self.signature?.isSecure = false
 		self.signature?.address = signature.address
 	}
 	
 	// MARK: -- Read
+	
+	// MARK: --- TCP/UNIX
 	
 	///
 	/// Read data from the socket.
@@ -2285,6 +2292,8 @@ public class Socket: SocketReader, SocketWriter {
 		return returnCount
 	}
 	
+	// MARK: --- UDP
+	
 	///
 	/// Read data from a UDP socket.
 	///
@@ -2294,7 +2303,7 @@ public class Socket: SocketReader, SocketWriter {
 	///
 	/// - Returns: The number of bytes returned in the buffer.
 	///
-	public func read(into data: NSMutableData, from address: Address) throws -> Int {
+	public func read(into data: NSMutableData, from address: Address) throws -> (bytesRead: Int, address: Address?) {
 		
 		// The socket must've been created...
 		if self.socketfd == Socket.SOCKET_INVALID_DESCRIPTOR {
@@ -2309,7 +2318,7 @@ public class Socket: SocketReader, SocketWriter {
 			throw Error(code: Socket.SOCKET_ERR_WRONG_PROTOCOL, reason: "This is not a UDP socket.")
 		}
 		
-		return 0
+		return (0, nil)
 	}
 	
 	///
@@ -2326,7 +2335,7 @@ public class Socket: SocketReader, SocketWriter {
 	///
 	/// - Returns: The number of bytes returned in the buffer.
 	///
-	public func read(into buffer: UnsafeMutablePointer<CChar>, bufSize: Int, from address: Address) throws -> Int {
+	public func read(into buffer: UnsafeMutablePointer<CChar>, bufSize: Int, from address: Address) throws -> (bytesRead: Int, address: Address?) {
 		
 		// Make sure the buffer is valid...
 		if bufSize == 0 {
@@ -2347,10 +2356,12 @@ public class Socket: SocketReader, SocketWriter {
 			throw Error(code: Socket.SOCKET_ERR_WRONG_PROTOCOL, reason: "This is not a UDP socket.")
 		}
 		
-		return 0
+		return (0, nil)
 	}
 	
 	// MARK: -- Write
+	
+	// MARK: --- TCP/UNIX
 	
 	///
 	/// Write data to the socket.
@@ -2513,8 +2524,10 @@ public class Socket: SocketReader, SocketWriter {
 		}
 	}
 	
+	// MARK: --- UDP
+	
 	///
-	/// Write data to the socket.
+	/// Write data to a UDP socket.
 	///
 	/// - Parameters:
 	///		- buffer: 	The buffer containing the data to write.
