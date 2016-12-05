@@ -2140,8 +2140,10 @@ public class Socket: SocketReader, SocketWriter {
 				throw Error(code: Socket.SOCKET_ERR_WRONG_PROTOCOL, reason: "This is not a UDP socket.")
 		}
 		
-		// Set up the socket for listening for a message...
-		try self.listen(on: port, maxBacklogSize: maxBacklogSize)
+		// Set up the socket for listening for a message unless we're already set up...
+		if !sig.isBound {
+			try self.listen(on: port, maxBacklogSize: maxBacklogSize)
+		}
 		
 		// If we're not bound, something went wrong...
 		guard sig.isBound == true else {
@@ -2178,8 +2180,10 @@ public class Socket: SocketReader, SocketWriter {
 				throw Error(code: Socket.SOCKET_ERR_WRONG_PROTOCOL, reason: "This is not a UDP socket.")
 		}
 		
-		// Set up the socket for listening for a message...
-		try self.listen(on: port, maxBacklogSize: maxBacklogSize)
+		// Set up the socket for listening for a message unless we're already set up...
+		if !sig.isBound {
+			try self.listen(on: port, maxBacklogSize: maxBacklogSize)
+		}
 		
 		// If we're not bound, something went wrong...
 		guard sig.isBound == true else {
@@ -2216,8 +2220,10 @@ public class Socket: SocketReader, SocketWriter {
 				throw Error(code: Socket.SOCKET_ERR_WRONG_PROTOCOL, reason: "This is not a UDP socket.")
 		}
 		
-		// Set up the socket for listening for a message...
-		try self.listen(on: port, maxBacklogSize: maxBacklogSize)
+		// Set up the socket for listening for a message unless we're already set up...
+		if !sig.isBound {
+			try self.listen(on: port, maxBacklogSize: maxBacklogSize)
+		}
 		
 		// If we're not bound, something went wrong...
 		guard sig.isBound == true else {
