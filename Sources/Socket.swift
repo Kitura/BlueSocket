@@ -2445,7 +2445,7 @@ public class Socket: SocketReader, SocketWriter {
 	///
 	/// - Returns: The number of bytes returned in the buffer.
 	///
-	public func read(into buffer: UnsafeMutablePointer<CChar>, bufSize: Int) throws -> (bytesRead: Int, address: Address?) {
+	public func readDatagram(into buffer: UnsafeMutablePointer<CChar>, bufSize: Int) throws -> (bytesRead: Int, address: Address?) {
 		
 		// Make sure the buffer is valid...
 		if bufSize == 0 {
@@ -2478,7 +2478,7 @@ public class Socket: SocketReader, SocketWriter {
 	///
 	/// - Returns: The number of bytes returned in the buffer.
 	///
-	public func read(into data: NSMutableData) throws -> (bytesRead: Int, address: Address?) {
+	public func readDatagram(into data: NSMutableData) throws -> (bytesRead: Int, address: Address?) {
 		
 		// The socket must've been created...
 		if self.socketfd == Socket.SOCKET_INVALID_DESCRIPTOR {
@@ -2505,7 +2505,7 @@ public class Socket: SocketReader, SocketWriter {
 	///
 	/// - Returns: The number of bytes returned in the buffer.
 	///
-	public func read(into data: inout Data) throws -> (bytesRead: Int, address: Address?) {
+	public func readDatagram(into data: inout Data) throws -> (bytesRead: Int, address: Address?) {
 		
 		// The socket must've been created...
 		if self.socketfd == Socket.SOCKET_INVALID_DESCRIPTOR {
