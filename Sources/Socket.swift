@@ -1028,7 +1028,7 @@ public class Socket: SocketReader, SocketWriter {
 	
 	// MARK: Lifecycle Methods
 	
-	// MARK: -- Public
+	// MARK: -- Private
 	
 	///
 	/// Internal initializer to create a configured Socket instance.
@@ -1072,27 +1072,7 @@ public class Socket: SocketReader, SocketWriter {
 			proto: sockProto.value,
 			address: nil)
 	}
-	
-	///
-	/// Cleanup: close the socket, free memory buffers.
-	///
-	deinit {
-		
-		if self.socketfd > 0 {
-			
-			self.close()
-		}
-		
-		// Destroy and free the readBuffer...
-		self.readBuffer.deinitialize()
-		self.readBuffer.deallocate(capacity: self.readBufferSize)
-		
-		// If we have a delegate, tell it to cleanup too...
-		self.delegate?.deinitialize()
-	}
-	
-	// MARK: -- Private
-	
+
 	///
 	/// Private constructor to create an instance for existing open socket fd.
 	///
@@ -1139,6 +1119,24 @@ public class Socket: SocketReader, SocketWriter {
 			}
 		}
 	}
+
+    ///
+    /// Cleanup: close the socket, free memory buffers.
+    ///
+    deinit {
+
+        if self.socketfd > 0 {
+
+            self.close()
+        }
+
+        // Destroy and free the readBuffer...
+        self.readBuffer.deinitialize()
+        self.readBuffer.deallocate(capacity: self.readBufferSize)
+
+        // If we have a delegate, tell it to cleanup too...
+        self.delegate?.deinitialize()
+    }
 	
 	// MARK: Public Methods
 	
