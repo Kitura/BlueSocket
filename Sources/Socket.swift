@@ -425,13 +425,13 @@ public class Socket: SocketReader, SocketWriter {
 			
 			// Validate the parameters...
 			if type == .stream {
-				guard (pro == .tcp || pro == .unix) else {
+				guard pro == .tcp || pro == .unix else {
 					
 					throw Error(code: Socket.SOCKET_ERR_BAD_SIGNATURE_PARAMETERS, reason: "Stream socket must use either .tcp or .unix for the protocol.")
 				}
 			}
 			if type == .datagram {
-				guard pro == .udp else {
+				guard pro == .udp || pro == .unix else {
 					
 					throw Error(code: Socket.SOCKET_ERR_BAD_SIGNATURE_PARAMETERS, reason: "Datagram socket must use .udp for the protocol.")
 				}
@@ -470,13 +470,13 @@ public class Socket: SocketReader, SocketWriter {
 			
 			// Validate the parameters...
 			if socketType == .stream {
-				guard (proto == .tcp || proto == .unix) else {
+				guard proto == .tcp || proto == .unix else {
 					
 					throw Error(code: Socket.SOCKET_ERR_BAD_SIGNATURE_PARAMETERS, reason: "Stream socket must use either .tcp or .unix for the protocol.")
 				}
 			}
 			if socketType == .datagram {
-				guard proto == .udp else {
+				guard proto == .udp || proto == .unix else {
 					
 					throw Error(code: Socket.SOCKET_ERR_BAD_SIGNATURE_PARAMETERS, reason: "Datagram socket must use .udp for the protocol.")
 				}
@@ -515,13 +515,13 @@ public class Socket: SocketReader, SocketWriter {
 			
 			// Validate the parameters...
 			if socketType == .stream {
-				guard (proto == .tcp || proto == .unix) else {
+				guard proto == .tcp || proto == .unix else {
 					
 					throw Error(code: Socket.SOCKET_ERR_BAD_SIGNATURE_PARAMETERS, reason: "Stream socket must use either .tcp or .unix for the protocol.")
 				}
 			}
 			if socketType == .datagram {
-				guard proto == .udp else {
+				guard proto == .udp || proto == .unix else {
 					
 					throw Error(code: Socket.SOCKET_ERR_BAD_SIGNATURE_PARAMETERS, reason: "Datagram socket must use .udp for the protocol.")
 				}
@@ -877,13 +877,13 @@ public class Socket: SocketReader, SocketWriter {
 		
 		// Validate the parameters...
 		if type == .stream {
-			guard (proto == .tcp || proto == .unix) else {
+			guard proto == .tcp || proto == .unix else {
 				
 				throw Error(code: Socket.SOCKET_ERR_BAD_SIGNATURE_PARAMETERS, reason: "Stream socket must use either .tcp or .unix for the protocol.")
 			}
 		}
 		if type == .datagram {
-			guard proto == .udp else {
+			guard proto == .udp || proto == .unix else {
 				
 				throw Error(code: Socket.SOCKET_ERR_BAD_SIGNATURE_PARAMETERS, reason: "Datagram socket must use .udp for the protocol.")
 			}
@@ -2206,7 +2206,7 @@ public class Socket: SocketReader, SocketWriter {
 		
 		// The socket must've been created for UDP...
 		guard let sig = self.signature,
-			sig.socketType == .datagram && sig.proto == .udp else {
+			sig.socketType == .datagram else {
 				
 				throw Error(code: Socket.SOCKET_ERR_WRONG_PROTOCOL, reason: "This is not a UDP socket.")
 		}
@@ -2224,7 +2224,7 @@ public class Socket: SocketReader, SocketWriter {
 		
 		self.isListening = true
 		
-		return (0, nil)
+		return try self.readDatagram(into: buffer, bufSize: bufSize)
 	}
 	
 	///
@@ -2265,7 +2265,7 @@ public class Socket: SocketReader, SocketWriter {
 		
 		self.isListening = true
 		
-		return (0, nil)
+		return try self.readDatagram(into: data)
 	}
 	
 	///
@@ -2288,7 +2288,7 @@ public class Socket: SocketReader, SocketWriter {
 		
 		// The socket must've been created for UDP...
 		guard let sig = self.signature,
-			sig.socketType == .datagram && sig.proto == .udp else {
+			sig.socketType == .datagram else {
 				
 				throw Error(code: Socket.SOCKET_ERR_WRONG_PROTOCOL, reason: "This is not a UDP socket.")
 		}
@@ -2306,7 +2306,7 @@ public class Socket: SocketReader, SocketWriter {
 		
 		self.isListening = true
 				
-		return (0, nil)
+		return try self.readDatagram(into: &data)
 	}
 	
 	// MARK: -- Read
@@ -2541,12 +2541,41 @@ public class Socket: SocketReader, SocketWriter {
 		
 		// The socket must've been created for UDP...
 		guard let sig = self.signature,
-			sig.proto == .udp else {
+			sig.socketType == .datagram else {
 				
 				throw Error(code: Socket.SOCKET_ERR_WRONG_PROTOCOL, reason: "This is not a UDP socket.")
 		}
 		
-		return (0, nil)
+		// Read all available bytes...
+		let (count, address) = try self.readDatagramIntoStorage()
+		
+		// Check for disconnect...
+		if count == 0 {
+			
+			return (count, nil)
+		}
+		
+		// Did we get data?
+		var returnCount: Int = 0
+		if self.readStorage.length > 0 {
+			
+			// Is the caller's buffer big enough?
+			if bufSize < self.readStorage.length {
+				
+				// Nope, throw an exception telling the caller how big the buffer must be...
+				throw Error(bufferSize: self.readStorage.length)
+			}
+			
+			// - We've read data, copy to the callers buffer...
+			memcpy(buffer, self.readStorage.bytes, self.readStorage.length)
+			
+			returnCount = self.readStorage.length
+			
+			// - Reset the storage buffer...
+			self.readStorage.length = 0
+		}
+		
+		return (returnCount, address)
 	}
 	
 	///
@@ -2568,12 +2597,33 @@ public class Socket: SocketReader, SocketWriter {
 		
 		// The socket must've been created for UDP...
 		guard let sig = self.signature,
-			sig.proto == .udp else {
+			sig.socketType == .datagram else {
 			
 			throw Error(code: Socket.SOCKET_ERR_WRONG_PROTOCOL, reason: "This is not a UDP socket.")
 		}
 		
-		return (0, nil)
+		// Read all available bytes...
+		let (count, address) = try self.readDatagramIntoStorage()
+		
+		// Check for disconnect...
+		if count == 0 {
+			
+			return (count, nil)
+		}
+		
+		// Did we get data?
+		var returnCount: Int = 0
+		if count > 0 {
+			
+			data.append(self.readStorage.bytes, length: self.readStorage.length)
+			
+			returnCount = self.readStorage.length
+			
+			// - Reset the storage buffer...
+			self.readStorage.length = 0
+		}
+		
+		return (returnCount, address)
 	}
 	
 	///
@@ -2595,12 +2645,34 @@ public class Socket: SocketReader, SocketWriter {
 		
 		// The socket must've been created for UDP...
 		guard let sig = self.signature,
-			sig.proto == .udp else {
+			sig.socketType == .datagram else {
 				
 				throw Error(code: Socket.SOCKET_ERR_WRONG_PROTOCOL, reason: "This is not a UDP socket.")
 		}
 		
-		return (0, nil)
+		// Read all available bytes...
+		let (count, address) = try self.readDatagramIntoStorage()
+		
+		// Check for disconnect...
+		if count == 0 {
+			
+			return (count, nil)
+		}
+		
+		// Did we get data?
+		var returnCount: Int = 0
+		if count > 0 {
+			
+			// - Yes, move to caller's buffer...
+			data.append(self.readStorage.bytes.assumingMemoryBound(to: UInt8.self), count: self.readStorage.length)
+			
+			returnCount = self.readStorage.length
+			
+			// - Reset the storage buffer...
+			self.readStorage.length = 0
+		}
+		
+		return (returnCount, address)
 	}
 	
 	// MARK: -- Write
@@ -2778,22 +2850,69 @@ public class Socket: SocketReader, SocketWriter {
 	/// 	- bufSize: 	The size of the buffer.
 	///		- address: 	Address to write data to.
 	///
+	/// - Returns: Integer representing the number of bytes written.
+	///
 	@discardableResult public func write(from buffer: UnsafeRawPointer, bufSize: Int, to address: Address) throws -> Int {
 
+		// Make sure the buffer is valid...
+		if bufSize == 0 {
+			
+			throw Error(code: Socket.SOCKET_ERR_INVALID_BUFFER, reason: nil)
+		}
+		
 		// The socket must've been created and must be connected...
 		if self.socketfd == Socket.SOCKET_INVALID_DESCRIPTOR {
-
+			
 			throw Error(code: Socket.SOCKET_ERR_BAD_DESCRIPTOR, reason: nil)
 		}
-
+		
 		// The socket must've been created for UDP...
 		guard let sig = self.signature,
-			sig.proto == .udp else {
+			sig.socketType == .datagram else {
 
 			throw Error(code: Socket.SOCKET_ERR_WRONG_PROTOCOL, reason: "This is not a UDP socket.")
 		}
 
-		return 0
+		var sent = 0
+		var sendFlags: Int32 = 0
+		#if os(Linux)
+			if self.isListening {
+				sendFlags = Int32(MSG_NOSIGNAL)
+			}
+		#endif
+		
+		var addr = address.addr
+		let size = address.size
+		
+		while sent < bufSize {
+			
+			var s = 0
+			#if os(Linux)
+				s = Glibc.sendto(self.socketfd, buffer.advanced(by: sent), Int(bufSize - sent), sendFlags, &addr, socklen_t(size))
+			#else
+				s = Darwin.sendto(self.socketfd, buffer.advanced(by: sent), Int(bufSize - sent), sendFlags, &addr, socklen_t(size))
+			#endif
+
+			if s <= 0 {
+				
+				if errno == EAGAIN && !isBlocking {
+					
+					// We have written out as much as we can...
+					return sent
+				}
+				
+				// - Handle a connection reset by peer (ECONNRESET) and throw a different exception...
+				if errno == ECONNRESET {
+					
+					throw Error(code: Socket.SOCKET_ERR_CONNECTION_RESET, reason: self.lastError())
+				}
+				
+				throw Error(code: Socket.SOCKET_ERR_WRITE_FAILED, reason: self.lastError())
+			}
+			sent += s
+		}
+		
+		return sent
 	}
 
 	///
@@ -2802,6 +2921,8 @@ public class Socket: SocketReader, SocketWriter {
 	/// - Parameters:
 	///		- data: 	The NSData object containing the data to write.
 	///		- address: 	Address to write data to.
+	///
+	/// - Returns: Integer representing the number of bytes written.
 	///
 	@discardableResult public func write(from data: NSData, to address: Address) throws -> Int {
 
@@ -2816,12 +2937,32 @@ public class Socket: SocketReader, SocketWriter {
 	///		- data: 	The Data object containing the data to write.
 	///		- address: 	Address to write data to.
 	///
+	/// - Returns: Integer representing the number of bytes written.
+	///
 	@discardableResult public func write(from data: Data, to address: Address) throws -> Int {
 
 		// Send the bytes...
 		return try data.withUnsafeBytes() { [unowned self] (buffer: UnsafePointer<UInt8>) throws -> Int in
 
 			return try self.write(from: buffer, bufSize: data.count, to: address)
+		}
+	}
+	
+	///
+	/// Write a string to the UDP socket.
+	///
+	/// - Parameters:
+ 	///		- string: 	The string to write.
+	///		- address: 	Address to write data to.
+	///
+	/// - Returns: Integer representing the number of bytes written.
+	///
+	@discardableResult public func write(from string: String, to address: Address) throws -> Int {
+		
+		return try string.utf8CString.withUnsafeBufferPointer() {
+			
+			// The count returned by nullTerminatedUTF8 includes the null terminator...
+			return try self.write(from: $0.baseAddress!, bufSize: $0.count-1, to: address)
 		}
 	}
 	
@@ -3042,6 +3183,93 @@ public class Socket: SocketReader, SocketWriter {
 		} while count > 0
 		
 		return self.readStorage.length
+	}
+	
+	///
+	/// Private method that reads all available data on an open socket into storage.
+	///
+	/// - Returns: number of bytes read.
+	///
+	private func readDatagramIntoStorage() throws -> (bytesRead: Int, fromAddress: Address?) {
+		
+		// Clear the buffer...
+		self.readBuffer.deinitialize()
+		self.readBuffer.initialize(to: 0x0)
+		memset(self.readBuffer, 0x0, self.readBufferSize)
+		var address: Address? = nil
+		
+		let addr = sockaddr_storage()
+		var length = socklen_t(MemoryLayout<sockaddr_storage>.size)
+		var addrPtr = addr.asAddr()
+		
+		// Read all the available data...
+		var count: Int = 0
+		repeat {
+			
+			#if os(Linux)
+				count = Glibc.recvfrom(self.socketfd, self.readBuffer, self.readBufferSize, 0, &addrPtr, &length)
+			#else
+				count = Darwin.recvfrom(self.socketfd, self.readBuffer, self.readBufferSize, 0, &addrPtr, &length)
+			#endif
+			
+			// Check for error...
+			if count < 0 {
+				
+				// - Could be an error, but if errno is EAGAIN or EWOULDBLOCK (if a non-blocking socket),
+				//		it means there was NO data to read...
+				if errno == EAGAIN || errno == EWOULDBLOCK {
+					
+					return (0, address)
+				}
+				
+				// - Handle a connection reset by peer (ECONNRESET) and throw a different exception...
+				if errno == ECONNRESET {
+					
+					throw Error(code: Socket.SOCKET_ERR_CONNECTION_RESET, reason: self.lastError())
+				}
+				
+				// - Something went wrong...
+				throw Error(code: Socket.SOCKET_ERR_RECV_FAILED, reason: self.lastError())
+			}
+			
+			if count == 0 {
+				
+				self.remoteConnectionClosed = true
+				return (0, nil)
+			}
+			
+			if count > 0 {
+				self.readStorage.append(self.readBuffer, length: count)
+			}
+			
+			// Retrieve the address...
+			if addrPtr.sa_family == sa_family_t(AF_INET6) {
+				
+				var addr = sockaddr_in6()
+				memcpy(&addr, &addrPtr, Int(MemoryLayout<sockaddr_in6>.size))
+				address = .ipv6(addr)
+				
+			} else if addrPtr.sa_family == sa_family_t(AF_INET) {
+				
+				var addr = sockaddr_in()
+				memcpy(&addr, &addrPtr, Int(MemoryLayout<sockaddr_in>.size))
+				address = .ipv4(addr)
+				
+			} else {
+				
+				throw Error(code: Socket.SOCKET_ERR_WRONG_PROTOCOL, reason: "Unable to determine receiving socket protocol family.")
+			}
+			
+			// Didn't fill the buffer so we've got everything available...
+			if count < self.readBufferSize {
+				
+				break
+			}
+
+			
+		} while count > 0
+		
+		return (self.readStorage.length, address)
 	}
 	
 	///
