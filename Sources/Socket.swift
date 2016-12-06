@@ -889,12 +889,6 @@ public class Socket: SocketReader, SocketWriter {
 			}
 		}
 		
-		if type == .datagram || proto == .udp {
-			
-			throw Error(code: Socket.SOCKET_ERR_NOT_SUPPORTED_YET, reason: "Full support for Datagrams and UDP not available yet.")
-			
-		}
-		
 		return try Socket(family: family, type: type, proto: proto)
 	}
 	
