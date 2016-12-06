@@ -3,7 +3,6 @@
 ![Linux](https://img.shields.io/badge/os-linux-green.svg?style=flat)
 ![Apache 2](https://img.shields.io/badge/license-Apache2-blue.svg?style=flat)
 ![](https://img.shields.io/badge/Swift-3.0-orange.svg?style=flat)
-![](https://img.shields.io/badge/Snapshot-11/11-blue.svg?style=flat)
 [![Build Status - Master](https://travis-ci.org/IBM-Swift/BlueSocket.svg?branch=master)](https://travis-ci.org/IBM-Swift/BlueSocket)
 
 # BlueSocket
@@ -18,14 +17,14 @@ Socket framework for Swift using the Swift Package Manager. Works on macOS and L
 ## Prerequisites
 
 ### Swift
-* Swift Open Source `swift-3.0-RELEASE` toolchain (**Minimum REQUIRED for latest release**)
-* Swift Open Source `swift-DEVELOPMENT-SNAPSHOT-2016-11-11-a` toolchain (**Recommended**)
+* Swift Open Source `swift-3.0.1-RELEASE` toolchain (**Minimum REQUIRED for latest release**)
+* Swift Open Source `swift-3.0.2-PREVIEW-1` toolchain (**Recommended**)
 
 ### macOS
 
 * macOS 10.11.6 (*El Capitan*) or higher
 * iOS 9.0 or higher
-* Xcode Version 8.0 (8A218a) or higher using one of the above toolchains (*Recommended*)
+* Xcode Version 8.1 (8B62) or higher using one of the above toolchains (*Recommended*)
 
 ### Linux
 
@@ -72,6 +71,21 @@ The first you need to do is import the Socket framework.  This is done by the fo
 import Socket
 ```
 
+### Family, Type and Protocol Support
+
+**BlueSocket** supports the following families, types and protocols:
+- *Families:*
+	- IPV4:		`Socket.ProtocolFamily.inet`
+	- IPV6:		`Socket.ProtocolFamily.inet6`
+	- UNIX:		`Socket.ProtocolFamily.unix`
+- *Types:*
+	- Stream:	`Socket.SocketType.stream`
+	- Datagram:	`Socket.SocketType.datagram`
+- *Protocols:*
+	- TCP:		`Socket.SocketProtocol.tcp`
+	- UDP:		`Socket.SocketProtocol.udp`
+	- UNIX:		`Socket.SocketProtocol.unix`
+
 ### Creating a socket.
 
 **BlueSocket** provides four different factory methods that are used to create an instance.  These are:
@@ -85,7 +99,7 @@ import Socket
 To close the socket of an open instance, the following function is provided:
 - `close()` - This function will perform the necessary tasks in order to cleanly close an open socket.
 
-### Listen on a socket.
+### Listen on a socket (TCP/UNIX).
 
 To use **BlueSocket** to listen for an connection on a socket the following API is provided:
 - `listen(on port: Int, maxBacklogSize: Int = Socket.SOCKET_DEFAULT_MAX_BACKLOG)`
@@ -101,20 +115,20 @@ var socket = try Socket.create()
 try socket.listen(on: 1337)
 ```
 
-### Accepting a connection from a listening socket.
+### Accepting a connection from a listening socket (TCP/UNIX).
 
 When a listening socket detects an incoming connection request, control is returned to your program.  You can then either accept the connection or continue listening or both if your application is multi-threaded. **BlueSocket** supports two distinct ways of accepting an incoming connection. They are:
 - `acceptClientConnection()` - This function accepts the connection and returns a *new* `Socket` instance based on the newly connected socket. The instance that was listening in unaffected.
 - `acceptConnection()` - This function accepts the incoming connection, *replacing and closing* the existing listening socket. The properties that were formerly associated with the listening socket are replaced by the properties that are relevant to the newly connected socket.
 
-### Connecting a socket to a server.
+### Connecting a socket to a server (TCP/UNIX).
 
 In addition to the `create(connectedUsing:)` factory method described above, **BlueSocket** supports three additional instance functions for connecting a `Socket` instance to a server. They are:
 - `connect(to host: String, port: Int32)` - This API allows you to connect to a server based on the `hostname` and `port` you provide.
 - `connect(to path: String)` - This API can only be used with the `.unix` protocol family. It allows you to connect to a server based on the `path` you provide.
 - `connect(using signature: Signature)` - This API allows you specify the connection information by providing a `Socket.Signature` instance containing the information.  Refer to `Socket.Signature` in *Socket.swift* for more information.
 
-### Reading data from a socket.
+### Reading data from a socket (TCP/UNIX).
 
 **BlueSocket** supports four different ways to read data from a socket. These are (in recommended use order):
 - `read(into data: inout Data)` - This function reads all the data available on a socket and returns it in the `Data` object that was passed.
@@ -123,13 +137,38 @@ In addition to the `create(connectedUsing:)` factory method described above, **B
 - `read(into buffer: UnsafeMutablePointer<CChar>, bufSize: Int)` - This function allows you to read data into a buffer of a specified size by providing an *unsafe* pointer to that buffer and an integer the denotes the size of that buffer.  This API (in addition to other types of exceptions) will throw a `Socket.SOCKET_ERR_RECV_BUFFER_TOO_SMALL` if the buffer provided is too small. You will need to call again with proper buffer size (see `Error.bufferSizeNeeded`in *Socket.swift* for more information).
 - **Note:** All of the read APIs above except `readString()` can return zero (0). This can indicate that the remote connection was closed or it could indicate that the socket would block (assuming you've turned off blocking).  To differentiate between the two, the property `remoteConnectionClosed` can be checked. If `true`, the socket remote partner has closed the connection and this `Socket` instance should be closed.
 
-### Writing data to a Socket.
+### Writing data to a Socket (TCP/UNIX).
 
 In addition to reading from a socket, **BlueSocket** also supplies four methods for writing data to a socket. These are (in recommended use order):
 - `write(from data: Data)` - This function writes the data contained within the `Data` object to the socket.
 - `write(from data: NSData)` - This function writes the data contained within the `NSData` object to the socket.
 - `write(from string: String)` - This function writes the data contained in the `String` provided to the socket.
-- `write(from buffer: UnsafePointer<Void>, bufSize: Int)` - This function writes the data contained within the buffer of the specified size by providing an *unsafe* pointer to that buffer and an integer the denotes the size of that buffer.
+- `write(from buffer: UnsafeRawPointer, bufSize: Int)` - This function writes the data contained within the buffer of the specified size by providing an *unsafe* pointer to that buffer and an integer that denotes the size of that buffer.
+
+### Listening for a datagram message (UDP).
+
+**BlueSocket** supports three different ways to listen for incoming datagrams. These are (in recommended use order):
+- `listen(forMessage data: inout Data, on port: Int, maxBacklogSize: Int = Socket.SOCKET_DEFAULT_MAX_BACKLOG)` - This function listens for an incoming datagram, reads it and returns it in the passed `Data` object.  It returns a tuple containing the number of bytes read and the `Address` of where the data originated.
+- `listen(forMessage data: NSMutableData, on port: Int, maxBacklogSize: Int = Socket.SOCKET_DEFAULT_MAX_BACKLOG)` - This function listens for an incoming datagram, reads it and returns it in the passed `NSMutableData` object.  It returns a tuple containing the number of bytes read and the `Address` of where the data originated.
+- `listen(forMessage buffer: UnsafeMutablePointer<CChar>, bufSize: Int, on port: Int, maxBacklogSize: Int = Socket.SOCKET_DEFAULT_MAX_BACKLOG)` - This function listens for an incoming datagram, reads it and returns it in the passed `Data` object.  It returns a tuple containing the number of bytes read and the `Address` of where the data originated.
+- **Note 1:** These functions will determine the appropriate socket configuration based on the `port` specified. Setting the value of `port` to zero (0) will cause the function to determine a suitable free port.
+- **Note 2:** The parameter, `maxBacklogSize` allows you to set the size of the queue holding pending connections. The function will determine the appropriate socket configuration based on the `port` specified.  For convenience on macOS, the constant `Socket.SOCKET_MAX_DARWIN_BACKLOG` can be set to use the maximum allowed backlog size.  The default value for all platforms is `Socket.SOCKET_DEFAULT_MAX_BACKLOG`, currently set to *50*. For server use, it may be necessary to increase this value.
+
+### Reading a datagram (UDP).
+
+**BlueSocket** supports three different ways to read incoming datagrams. These are (in recommended use order):
+- `readDatagram(into data: inout Data)` - This function reads an incoming datagram and returns it in the passed `Data` object.  It returns a tuple containing the number of bytes read and the `Address` of where the data originated.
+- `readDatagram(into data: NSMutableData)` - This function reads an incoming datagram and returns it in the passed `NSMutableData` object.  It returns a tuple containing the number of bytes read and the `Address` of where the data originated.
+- `readDatagram(into buffer: UnsafeMutablePointer<CChar>, bufSize: Int)` - This function reads an incoming datagram and returns it in the passed `Data` object.  It returns a tuple containing the number of bytes read and the `Address` of where the data originated. This API (in addition to other types of exceptions) will throw a `Socket.SOCKET_ERR_RECV_BUFFER_TOO_SMALL` if the buffer provided is too small. You will need to call again with proper buffer size (see `Error.bufferSizeNeeded`in *Socket.swift* for more information).
+
+### Writing a datagram (UDP).
+
+**BlueSocket** also supplies four methods for writing datagrams to a socket. These are (in recommended use order):
+- `write(from data: Data, to address: Address)` - This function writes the datagram contained within the `Data` object to the socket.
+- `write(from data: NSData, to address: Address)` - This function writes the datagram contained within the `NSData` object to the socket.
+- `write(from string: String, to address: Address)` - This function writes the datagram contained in the `String` provided to the socket.
+- `write(from buffer: UnsafeRawPointer, bufSize: Int, to address: Address)` - This function writes the data contained within the buffer of the specified size by providing an *unsafe* pointer to that buffer and an integer that denotes the size of that buffer.
+- **Note:** In all four of the APIs above, the `address` parameter represents the address for the destination you are sending the datagram to.
 
 ### IMPORTANT NOTE about NSData and NSMutableData
 
