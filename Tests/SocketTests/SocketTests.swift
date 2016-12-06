@@ -196,6 +196,75 @@ class SocketTests: XCTestCase {
 			XCTFail()
 		}
 	}
+
+	func launchUDPHelper(family: Socket.ProtocolFamily = .inet) {
+		let queue: DispatchQueue? = DispatchQueue.global(qos: .userInteractive)
+		guard let pQueue = queue else {
+
+			print("Unable to access global interactive QOS queue")
+			XCTFail()
+			return
+		}
+
+		pQueue.async { [unowned self] in
+
+			do {
+
+				try self.runUDPHelper(family: family)
+
+			} catch let error {
+
+				guard let socketError = error as? Socket.Error else {
+
+					print("Unexpected error...")
+					XCTFail()
+					return
+				}
+
+				print("launchServerHelper Error reported:\n \(socketError.description)")
+				XCTFail()
+			}
+		}
+	}
+
+	func runUDPHelper(family: Socket.ProtocolFamily) throws {
+
+		do {
+			let socket = try createUDPHelper()
+			try socket.listen(on: Int(port))
+
+			var data = Data()
+
+			let (_, address) = try socket.readDatagram(into: &data)
+
+			guard let response = NSString(data: data, encoding: String.Encoding.utf8.rawValue) else {
+
+				print("Error decoding response...")
+				data.count = 0
+				XCTFail()
+				return
+			}
+
+			let (remoteHost, remotePort) = Socket.hostnameAndPort(from: address!)!
+			print("Received from \(remoteHost):\(remotePort): \(response)\n")
+			print("Sending response")
+			let responseString: String = "Server response: \(response)"
+			try socket.write(from: responseString.data(using: String.Encoding.utf8)!, to: address!)
+		} catch let error {
+			guard let socketError = error as? Socket.Error else {
+
+				print("Unexpected error...")
+				XCTFail()
+				return
+			}
+
+			if socketError.errorCode == Int32(Socket.SOCKET_ERR_WRITE_FAILED) {
+				return
+			}
+			print("serverHelper Error reported: \(socketError.description)")
+			XCTFail()
+		}
+	}
 	
 	func readAndPrint(socket: Socket, data: inout Data) throws {
 		
@@ -887,6 +956,69 @@ class SocketTests: XCTestCase {
 		}
 		
 	}
+
+	func testReadWriteUDP() {
+		let hostname = "127.0.0.1"
+		let port: Int32 = 1337
+
+		let bufSize = 4096
+		var data = Data()
+
+		do {
+			self.launchUDPHelper()
+
+			// Need to wait for the helper to come up...
+			#if os(Linux)
+				_ = Glibc.sleep(2)
+			#else
+				_ = Darwin.sleep(2)
+			#endif
+
+			let socket = try self.createUDPHelper()
+
+			// Defer cleanup...
+			defer {
+				// Close the socket...
+				socket.close()
+				XCTAssertFalse(socket.isActive)
+			}
+
+			try socket.write(from: "Hello from UDP".data(using: .utf8)!, to: Socket.Address(host: hostname, port: port)!)
+
+			var data = Data()
+			let (_, address) = try socket.readDatagram(into: &data)
+
+			guard let response = NSString(data: data, encoding: String.Encoding.utf8.rawValue) else {
+
+				print("Error decoding response...")
+				data.count = 0
+				XCTFail()
+				return
+			}
+
+			let (remoteHost, remotePort) = Socket.hostnameAndPort(from: address!)!
+			print("Received from \(remoteHost):\(remotePort): \(response)\n")
+
+			// Need to wait for the server to go down before continuing...
+			#if os(Linux)
+				_ = Glibc.sleep(1)
+			#else
+				_ = Darwin.sleep(1)
+			#endif
+
+		} catch let error {
+			// See if it's a socket error or something else...
+			guard let socketError = error as? Socket.Error else {
+
+				print("Unexpected error...")
+				XCTFail()
+				return
+			}
+
+			print("testReadWriteUDP Error reported: \(socketError.description)")
+			XCTFail()
+		}
+	}
 	
 	func testReadWriteUnix() {
 		
@@ -982,6 +1114,7 @@ class SocketTests: XCTestCase {
 		("testBlocking", testBlocking),
 		("testIsReadableWritable", testIsReadableWritable),
 		("testReadWrite", testReadWrite),
+		("testReadWriteUDP", testReadWriteUDP),
 		("testReadWriteUnix", testReadWriteUnix),
 	]
 }
