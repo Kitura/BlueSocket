@@ -34,7 +34,6 @@ class SocketTests: XCTestCase {
 	let port: Int32 = 1337
 	let host: String = "127.0.0.1"
 	let path: String = "/tmp/server"
-	let testingUDP = false
 	
 	
 	override func setUp() {
@@ -390,10 +389,6 @@ class SocketTests: XCTestCase {
 	
 	func testCreateUDP() {
 		
-		if !testingUDP {
-			return
-		}
-		
 		do {
 			
 			// Create the socket...
@@ -522,7 +517,11 @@ class SocketTests: XCTestCase {
 	
 	func testListenUDP() {
 		
-		if !testingUDP {
+		let queue: DispatchQueue? = DispatchQueue.global(qos: .userInteractive)
+		guard let pQueue = queue else {
+			
+			print("Unable to access global interactive QOS queue")
+			XCTFail()
 			return
 		}
 		
@@ -531,9 +530,37 @@ class SocketTests: XCTestCase {
 			// Create the socket..
 			let socket = try createUDPHelper()
 			
-			// Listen on the port...
-			var data = Data()
-			_ = try socket.listen(forMessage: &data, on: Int(port))
+			pQueue.async { [unowned self, socket] in
+				
+				do {
+					// Listen on the port...
+					var data = Data()
+					_ = try socket.listen(forMessage: &data, on: Int(self.port))
+					
+				} catch let error {
+					
+					// See if it's a socket error or something else...
+					guard let socketError = error as? Socket.Error else {
+						
+						print("Unexpected error...")
+						XCTFail()
+						return
+					}
+					
+					if socketError.errorCode != Int32(Socket.SOCKET_ERR_RECV_FAILED) {
+						print("testListenUDP Error reported: \(socketError.description)")
+						XCTFail()
+					}
+				}
+			}
+			
+			// Give the thread time to start...
+			#if os(Linux)
+				_ = Glibc.sleep(1)
+			#else
+				_ = Darwin.sleep(1)
+			#endif
+			
 			XCTAssertTrue(socket.isListening)
 			XCTAssertEqual(socket.listeningPort, port)
 			
@@ -551,14 +578,18 @@ class SocketTests: XCTestCase {
 				return
 			}
 			
-			print("testListen Error reported: \(socketError.description)")
+			print("testListenUDP Error reported: \(socketError.description)")
 			XCTFail()
 		}
 	}
 	
 	func testListenPort0UDP() {
 		
-		if !testingUDP {
+		let queue: DispatchQueue? = DispatchQueue.global(qos: .userInteractive)
+		guard let pQueue = queue else {
+			
+			print("Unable to access global interactive QOS queue")
+			XCTFail()
 			return
 		}
 		
@@ -567,9 +598,37 @@ class SocketTests: XCTestCase {
 			// Create the socket..
 			let socket = try createUDPHelper()
 			
-			// Listen on the port...
-			var data = Data()
-			_ = try socket.listen(forMessage: &data, on: Int(0))
+			pQueue.async { [unowned socket] in
+				
+				do {
+					// Listen on the port...
+					var data = Data()
+					_ = try socket.listen(forMessage: &data, on: Int(0))
+					
+				} catch let error {
+					
+					// See if it's a socket error or something else...
+					guard let socketError = error as? Socket.Error else {
+						
+						print("Unexpected error...")
+						XCTFail()
+						return
+					}
+					
+					if socketError.errorCode != Int32(Socket.SOCKET_ERR_RECV_FAILED) {
+						print("testListenPort0UDP Error reported: \(socketError.description)")
+						XCTFail()
+					}
+				}
+			}
+			
+			// Give the thread time to start...
+			#if os(Linux)
+				_ = Glibc.sleep(1)
+			#else
+				_ = Darwin.sleep(1)
+			#endif
+			
 			XCTAssertTrue(socket.isListening)
 			XCTAssertGreaterThan(socket.listeningPort, 0)
 			print("Listening port: \(socket.listeningPort)")
@@ -588,7 +647,7 @@ class SocketTests: XCTestCase {
 				return
 			}
 			
-			print("testListenPort0 Error reported: \(socketError.description)")
+			print("testListenPort0UDP Error reported: \(socketError.description)")
 			XCTFail()
 		}
 	}
@@ -958,6 +1017,7 @@ class SocketTests: XCTestCase {
 	}
 
 	func testReadWriteUDP() {
+		
 		let hostname = "127.0.0.1"
 		let port: Int32 = 1337
 
@@ -965,6 +1025,7 @@ class SocketTests: XCTestCase {
 		var data = Data()
 
 		do {
+			
 			self.launchUDPHelper()
 
 			// Need to wait for the helper to come up...
@@ -983,7 +1044,8 @@ class SocketTests: XCTestCase {
 				XCTAssertFalse(socket.isActive)
 			}
 
-			try socket.write(from: "Hello from UDP".data(using: .utf8)!, to: Socket.Address(host: hostname, port: port)!)
+			let addr = Socket.createAddress(host: hostname, port: port)
+			try socket.write(from: "Hello from UDP".data(using: .utf8)!, to: addr!)
 
 			var data = Data()
 			let (_, address) = try socket.readDatagram(into: &data)

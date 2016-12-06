@@ -304,65 +304,6 @@ public class Socket: SocketReader, SocketWriter {
 		case unix(sockaddr_un)
 
 		///
-		/// Creates an Address for a given sockaddr.
-		///
-		/// - Returns: An Address instance, or nil if the sockaddr is not IPV4, IPV6, or Unix.
-		///
-		init?(addr: sockaddr_storage) {
-			switch Int32(addr.ss_family) {
-			case AF_INET:
-				self = .ipv4(addr.asIPV4())
-			case AF_INET6:
-				self = .ipv6(addr.asIPV6())
-			case AF_UNIX:
-				self = .unix(addr.asUnix())
-			default:
-				return nil
-			}
-		}
-
-		///
-		/// Creates an Address for a given host and port.
-		///
-		/// - Returns: An Address instance, or nil if the hostname and port are not valid.
-		///
-		init?(host: String, port: Int32) {
-			var info: UnsafeMutablePointer<addrinfo>? = UnsafeMutablePointer<addrinfo>.allocate(capacity: 1)
-
-			// Retrieve the info on our target...
-			var status: Int32 = getaddrinfo(host, String(port), nil, &info)
-			if status != 0 {
-
-				return nil
-			}
-
-			// Defer cleanup of our target info...
-			defer {
-
-				if info != nil {
-					freeaddrinfo(info)
-				}
-			}
-
-			var address: Address
-			if info!.pointee.ai_family == Int32(AF_INET) {
-
-				var addr = sockaddr_in()
-				memcpy(&addr, info!.pointee.ai_addr, Int(MemoryLayout<sockaddr_in>.size))
-				address = .ipv4(addr)
-
-			} else if info!.pointee.ai_family == Int32(AF_INET6) {
-
-				var addr = sockaddr_in6()
-				memcpy(&addr, info!.pointee.ai_addr, Int(MemoryLayout<sockaddr_in6>.size))
-				address = .ipv6(addr)
-			} else {
-				return nil
-			}
-			self = address
-		}
-
-		///
 		/// Size of address. (Readonly)
 		///
 		public var size: Int {
@@ -395,6 +336,7 @@ public class Socket: SocketReader, SocketWriter {
 				return addr.asAddr()
 			}
 		}
+		
 	}
 	
 	// MARK: Structs
@@ -1154,6 +1096,78 @@ public class Socket: SocketReader, SocketWriter {
 		return dataSockets
 	}
 	
+	///
+	/// Creates an Address for a given host and port.
+	///
+	///	- Parameters:
+	/// 	- hostname:			Hostname for this signature.
+	/// 	- port:				Port for this signature.
+	///
+	/// - Returns: An Address instance, or nil if the hostname and port are not valid.
+	///
+	public class func createAddress(host: String, port: Int32) -> Address? {
+		
+		var info: UnsafeMutablePointer<addrinfo>? = UnsafeMutablePointer<addrinfo>.allocate(capacity: 1)
+		
+		// Retrieve the info on our target...
+		var status: Int32 = getaddrinfo(host, String(port), nil, &info)
+		if status != 0 {
+			
+			return nil
+		}
+		
+		// Defer cleanup of our target info...
+		defer {
+			
+			if info != nil {
+				freeaddrinfo(info)
+			}
+		}
+		
+		var address: Address
+		if info!.pointee.ai_family == Int32(AF_INET) {
+			
+			var addr = sockaddr_in()
+			memcpy(&addr, info!.pointee.ai_addr, Int(MemoryLayout<sockaddr_in>.size))
+			address = .ipv4(addr)
+			
+		} else if info!.pointee.ai_family == Int32(AF_INET6) {
+			
+			var addr = sockaddr_in6()
+			memcpy(&addr, info!.pointee.ai_addr, Int(MemoryLayout<sockaddr_in6>.size))
+			address = .ipv6(addr)
+			
+		} else {
+			
+			return nil
+		}
+		
+		return address
+	}
+
+	///
+	/// Creates an Address for a given sockaddr.
+	///
+	/// - Parameters:
+	///		- addr:			The sockaddr_storage from which to create the address.
+	///
+	/// - Returns: An Address instance, or nil if the sockaddr is not IPV4, IPV6, or Unix.
+	///
+	public class func createAddress(addr: sockaddr_storage) -> Address? {
+		switch Int32(addr.ss_family) {
+		case AF_INET:
+			return .ipv4(addr.asIPV4())
+		case AF_INET6:
+			return .ipv6(addr.asIPV6())
+		case AF_UNIX:
+			return .unix(addr.asUnix())
+		default:
+			return nil
+		}
+	}
+
+	///
+
 	// MARK: Lifecycle Methods
 	
 	// MARK: -- Private
@@ -3227,7 +3241,7 @@ public class Socket: SocketReader, SocketWriter {
 		} while count > 0 && sig.proto != .udp
 
 		if let addr = storagePtr?.pointee {
-			return (self.readStorage.length, Address(addr: addr))
+			return (self.readStorage.length, Socket.createAddress(addr: addr))
 		}
 
 		return (self.readStorage.length, nil)
