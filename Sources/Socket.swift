@@ -304,47 +304,6 @@ public class Socket: SocketReader, SocketWriter {
 		case unix(sockaddr_un)
 
 		///
-		/// Creates an Address for a given host and port.
-		///
-		/// - Returns: An Address instance, or nil if the hostname and port are not valid.
-		///
-		init?(host: String, port: Int32) {
-			var info: UnsafeMutablePointer<addrinfo>? = UnsafeMutablePointer<addrinfo>.allocate(capacity: 1)
-
-			// Retrieve the info on our target...
-			var status: Int32 = getaddrinfo(host, String(port), nil, &info)
-			if status != 0 {
-
-				return nil
-			}
-
-			// Defer cleanup of our target info...
-			defer {
-
-				if info != nil {
-					freeaddrinfo(info)
-				}
-			}
-
-			var address: Address
-			if info!.pointee.ai_family == Int32(AF_INET) {
-
-				var addr = sockaddr_in()
-				memcpy(&addr, info!.pointee.ai_addr, Int(MemoryLayout<sockaddr_in>.size))
-				address = .ipv4(addr)
-
-			} else if info!.pointee.ai_family == Int32(AF_INET6) {
-
-				var addr = sockaddr_in6()
-				memcpy(&addr, info!.pointee.ai_addr, Int(MemoryLayout<sockaddr_in6>.size))
-				address = .ipv6(addr)
-			} else {
-				return nil
-			}
-			self = address
-		}
-
-		///
 		/// Size of address. (Readonly)
 		///
 		public var size: Int {
@@ -377,6 +336,7 @@ public class Socket: SocketReader, SocketWriter {
 				return addr.asAddr()
 			}
 		}
+		
 	}
 	
 	// MARK: Structs
@@ -1134,6 +1094,55 @@ public class Socket: SocketReader, SocketWriter {
 		}
 		
 		return dataSockets
+	}
+	
+	///
+	/// Creates an Address for a given host and port.
+	///
+	///	- Parameters:
+	/// 	- hostname:			Hostname for this signature.
+	/// 	- port:				Port for this signature.
+	///
+	/// - Returns: An Address instance, or nil if the hostname and port are not valid.
+	///
+	public class func createAddress(host: String, port: Int32) -> Address? {
+		
+		var info: UnsafeMutablePointer<addrinfo>? = UnsafeMutablePointer<addrinfo>.allocate(capacity: 1)
+		
+		// Retrieve the info on our target...
+		var status: Int32 = getaddrinfo(host, String(port), nil, &info)
+		if status != 0 {
+			
+			return nil
+		}
+		
+		// Defer cleanup of our target info...
+		defer {
+			
+			if info != nil {
+				freeaddrinfo(info)
+			}
+		}
+		
+		var address: Address
+		if info!.pointee.ai_family == Int32(AF_INET) {
+			
+			var addr = sockaddr_in()
+			memcpy(&addr, info!.pointee.ai_addr, Int(MemoryLayout<sockaddr_in>.size))
+			address = .ipv4(addr)
+			
+		} else if info!.pointee.ai_family == Int32(AF_INET6) {
+			
+			var addr = sockaddr_in6()
+			memcpy(&addr, info!.pointee.ai_addr, Int(MemoryLayout<sockaddr_in6>.size))
+			address = .ipv6(addr)
+			
+		} else {
+			
+			return nil
+		}
+		
+		return address
 	}
 	
 	// MARK: Lifecycle Methods
