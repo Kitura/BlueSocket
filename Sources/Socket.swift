@@ -1144,7 +1144,30 @@ public class Socket: SocketReader, SocketWriter {
 		
 		return address
 	}
-	
+
+	///
+	/// Creates an Address for a given sockaddr.
+	///
+	/// - Parameters:
+	///		- addr:			The sockaddr_storage from which to create the address.
+	///
+	/// - Returns: An Address instance, or nil if the sockaddr is not IPV4, IPV6, or Unix.
+	///
+	public class func createAddress(addr: sockaddr_storage) -> Address? {
+		switch Int32(addr.ss_family) {
+		case AF_INET:
+			return .ipv4(addr.asIPV4())
+		case AF_INET6:
+			return .ipv6(addr.asIPV6())
+		case AF_UNIX:
+			return .unix(addr.asUnix())
+		default:
+			return nil
+		}
+	}
+
+	///
+
 	// MARK: Lifecycle Methods
 	
 	// MARK: -- Private
@@ -2409,7 +2432,7 @@ public class Socket: SocketReader, SocketWriter {
 		}
 		
 		// Read all available bytes...
-		let count = try self.readDataIntoStorage()
+		let (count, _) = try self.readDataIntoStorage()
 		
 		// Check for disconnect...
 		if count == 0 {
@@ -2485,7 +2508,7 @@ public class Socket: SocketReader, SocketWriter {
 		}
 		
 		// Read all available bytes...
-		let count = try self.readDataIntoStorage()
+		let (count, _) = try self.readDataIntoStorage()
 		
 		// Check for disconnect...
 		if count == 0 {
@@ -2529,7 +2552,7 @@ public class Socket: SocketReader, SocketWriter {
 		}
 		
 		// Read all available bytes...
-		let count = try self.readDataIntoStorage()
+		let (count, _) = try self.readDataIntoStorage()
 		
 		// Check for disconnect...
 		if count == 0 {
@@ -2563,10 +2586,6 @@ public class Socket: SocketReader, SocketWriter {
 	/// 	- bufSize: 	The size of the buffer.
 	///		- address: 	Address to write data to.
 	///
-	/// - Throws: `Socket.SOCKET_ERR_RECV_BUFFER_TOO_SMALL` if the buffer provided is too small.
-	///		Call again with proper buffer size (see `Error.bufferSizeNeeded`) or
-	///		use `readData(data: NSMutableData)`.
-	///
 	/// - Returns: Tuple with the number of bytes returned in the buffer and the address they were received from.
 	///
 	public func readDatagram(into buffer: UnsafeMutablePointer<CChar>, bufSize: Int) throws -> (bytesRead: Int, address: Address?) {
@@ -2591,23 +2610,17 @@ public class Socket: SocketReader, SocketWriter {
 		}
 		
 		// Read all available bytes...
-		let (count, address) = try self.readDatagramIntoStorage()
-		
-		// Check for disconnect...
-		if count == 0 {
-			
-			return (count, nil)
-		}
+		let (count, address) = try self.readDataIntoStorage()
 		
 		// Did we get data?
 		var returnCount: Int = 0
-		if self.readStorage.length > 0 {
+		if count > 0 {
 			
 			// Is the caller's buffer big enough?
 			if bufSize < self.readStorage.length {
-				
-				// Nope, throw an exception telling the caller how big the buffer must be...
-				throw Error(bufferSize: self.readStorage.length)
+
+				// Since this is UDP, quietly discard the remaining bytes...
+				self.readStorage.length = bufSize
 			}
 			
 			// - We've read data, copy to the callers buffer...
@@ -2647,13 +2660,7 @@ public class Socket: SocketReader, SocketWriter {
 		}
 		
 		// Read all available bytes...
-		let (count, address) = try self.readDatagramIntoStorage()
-		
-		// Check for disconnect...
-		if count == 0 {
-			
-			return (count, nil)
-		}
+		let (count, address) = try self.readDataIntoStorage()
 		
 		// Did we get data?
 		var returnCount: Int = 0
@@ -2695,13 +2702,7 @@ public class Socket: SocketReader, SocketWriter {
 		}
 		
 		// Read all available bytes...
-		let (count, address) = try self.readDatagramIntoStorage()
-		
-		// Check for disconnect...
-		if count == 0 {
-			
-			return (count, nil)
-		}
+		let (count, address) = try self.readDataIntoStorage()
 		
 		// Did we get data?
 		var returnCount: Int = 0
@@ -2945,12 +2946,6 @@ public class Socket: SocketReader, SocketWriter {
 					return sent
 				}
 				
-				// - Handle a connection reset by peer (ECONNRESET) and throw a different exception...
-				if errno == ECONNRESET {
-					
-					throw Error(code: Socket.SOCKET_ERR_CONNECTION_RESET, reason: self.lastError())
-				}
-				
 				throw Error(code: Socket.SOCKET_ERR_WRITE_FAILED, reason: self.lastError())
 			}
 			sent += s
@@ -3128,191 +3123,131 @@ public class Socket: SocketReader, SocketWriter {
 	///
 	/// - Returns: number of bytes read.
 	///
-	private func readDataIntoStorage() throws -> Int {
-		
-		// Clear the buffer...
-		self.readBuffer.deinitialize()
-		self.readBuffer.initialize(to: 0x0)
-		memset(self.readBuffer, 0x0, self.readBufferSize)
-		
-		// Read all the available data...
-		var count: Int = 0
-		repeat {
-			
-			if self.delegate != nil {
-				
-				repeat {
-					
-					do {
-
-						count = try self.delegate!.recv(buffer: self.readBuffer, bufSize: self.readBufferSize)
-						
-						break
-					
-					} catch let error {
-						
-						guard let err = error as? SSLError else {
-							
-							throw error
-						}
-						
-						switch err {
-							
-						case .success:
-							break
-							
-						case .retryNeeded:
-							do {
-								
-								try wait(forRead: true)
-								
-							} catch let waitError {
-								
-								throw waitError
-							}
-							continue
-							
-						default:
-							throw Error(with: err)
-						}
-						
-					}
-					
-				} while true
-				
-			} else {
-				#if os(Linux)
-					count = Glibc.recv(self.socketfd, self.readBuffer, self.readBufferSize, 0)
-				#else
-					count = Darwin.recv(self.socketfd, self.readBuffer, self.readBufferSize, 0)
-				#endif
-			}
-			
-			// Check for error...
-			if count < 0 {
-				
-				// - Could be an error, but if errno is EAGAIN or EWOULDBLOCK (if a non-blocking socket),
-				//		it means there was NO data to read...
-				if errno == EAGAIN || errno == EWOULDBLOCK {
-					
-					return 0
-				}
-				
-				// - Handle a connection reset by peer (ECONNRESET) and throw a different exception...
-				if errno == ECONNRESET {
-					
-					throw Error(code: Socket.SOCKET_ERR_CONNECTION_RESET, reason: self.lastError())
-				}
-				
-				// - Something went wrong...
-				throw Error(code: Socket.SOCKET_ERR_RECV_FAILED, reason: self.lastError())
-			}
-			
-			if count == 0 {
-				
-				self.remoteConnectionClosed = true
-				return 0
-			}
-			
-			if count > 0 {
-				self.readStorage.append(self.readBuffer, length: count)
-			}
-			
-			// Didn't fill the buffer so we've got everything available...
-			if count < self.readBufferSize {
-				
-				break
-			}
-			
-		} while count > 0
-		
-		return self.readStorage.length
-	}
-	
-	///
-	/// Private method that reads all available data on an open socket into storage.
-	///
-	/// - Returns: number of bytes read.
-	///
-	private func readDatagramIntoStorage() throws -> (bytesRead: Int, fromAddress: Address?) {
+	private func readDataIntoStorage() throws -> (bytesRead: Int, address: Address?) {
 		
 		// Clear the buffer...
 		self.readBuffer.deinitialize()
 		self.readBuffer.initialize(to: 0x0)
 		memset(self.readBuffer, 0x0, self.readBufferSize)
 		var address: Address? = nil
-		
+
+		guard let sig = self.signature else {
+			throw Error(code: Socket.SOCKET_ERR_INTERNAL, reason: "Socket signature not found.")
+		}
+
 		let addr = sockaddr_storage()
 		var length = socklen_t(MemoryLayout<sockaddr_storage>.size)
 		var addrPtr = addr.asAddr()
-		
+
 		// Read all the available data...
 		var count: Int = 0
 		repeat {
-			
-			#if os(Linux)
-				count = Glibc.recvfrom(self.socketfd, self.readBuffer, self.readBufferSize, 0, &addrPtr, &length)
-			#else
-				count = Darwin.recvfrom(self.socketfd, self.readBuffer, self.readBufferSize, 0, &addrPtr, &length)
-			#endif
-			
+
+			if self.delegate != nil {
+
+				repeat {
+
+					do {
+
+						count = try self.delegate!.recv(buffer: self.readBuffer, bufSize: self.readBufferSize)
+
+						break
+
+					} catch let error {
+
+						guard let err = error as? SSLError else {
+
+							throw error
+						}
+
+						switch err {
+
+						case .success:
+							break
+
+						case .retryNeeded:
+							do {
+
+								try wait(forRead: true)
+
+							} catch let waitError {
+
+								throw waitError
+							}
+							continue
+
+						default:
+							throw Error(with: err)
+						}
+
+					}
+
+				} while true
+
+			} else {
+				#if os(Linux)
+					count = Glibc.recvfrom(self.socketfd, self.readBuffer, self.readBufferSize, 0, &addrPtr, &length)
+				#else
+					count = Darwin.recvfrom(self.socketfd, self.readBuffer, self.readBufferSize, 0, &addrPtr, &length)
+				#endif
+			}
+
 			// Check for error...
 			if count < 0 {
-				
+
 				// - Could be an error, but if errno is EAGAIN or EWOULDBLOCK (if a non-blocking socket),
 				//		it means there was NO data to read...
 				if errno == EAGAIN || errno == EWOULDBLOCK {
-					
-					return (0, address)
+
+					return (0, nil)
 				}
-				
+
 				// - Handle a connection reset by peer (ECONNRESET) and throw a different exception...
 				if errno == ECONNRESET {
-					
+
 					throw Error(code: Socket.SOCKET_ERR_CONNECTION_RESET, reason: self.lastError())
 				}
-				
+
 				// - Something went wrong...
 				throw Error(code: Socket.SOCKET_ERR_RECV_FAILED, reason: self.lastError())
 			}
-			
-			if count == 0 {
-				
+
+			if count == 0 && sig.proto != .udp {
+
 				self.remoteConnectionClosed = true
 				return (0, nil)
 			}
-			
+
 			if count > 0 {
 				self.readStorage.append(self.readBuffer, length: count)
 			}
-			
-			// Retrieve the address...
-			if addrPtr.sa_family == sa_family_t(AF_INET6) {
-				
-				var addr = sockaddr_in6()
-				memcpy(&addr, &addrPtr, Int(MemoryLayout<sockaddr_in6>.size))
-				address = .ipv6(addr)
-				
-			} else if addrPtr.sa_family == sa_family_t(AF_INET) {
-				
-				var addr = sockaddr_in()
-				memcpy(&addr, &addrPtr, Int(MemoryLayout<sockaddr_in>.size))
-				address = .ipv4(addr)
-				
-			} else {
-				
-				throw Error(code: Socket.SOCKET_ERR_WRONG_PROTOCOL, reason: "Unable to determine receiving socket protocol family.")
-			}
-			
+
 			// Didn't fill the buffer so we've got everything available...
 			if count < self.readBufferSize {
-				
+
 				break
 			}
 
-			
-		} while count > 0
-		
+		} while count > 0 && sig.proto != .udp
+
+		// Retrieve the address...
+		if addrPtr.sa_family == sa_family_t(AF_INET6) {
+
+			var addr = sockaddr_in6()
+			memcpy(&addr, &addrPtr, Int(MemoryLayout<sockaddr_in6>.size))
+			address = .ipv6(addr)
+
+		} else if addrPtr.sa_family == sa_family_t(AF_INET) {
+
+			var addr = sockaddr_in()
+			memcpy(&addr, &addrPtr, Int(MemoryLayout<sockaddr_in>.size))
+			address = .ipv4(addr)
+
+		} else {
+
+			address = nil
+		}
+
 		return (self.readStorage.length, address)
 	}
 	
