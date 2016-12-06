@@ -2769,7 +2769,7 @@ public class Socket: SocketReader, SocketWriter {
 	}
 	
 	// MARK: --- UDP
-	
+
 	///
 	/// Write data to a UDP socket.
 	///
@@ -2778,29 +2778,24 @@ public class Socket: SocketReader, SocketWriter {
 	/// 	- bufSize: 	The size of the buffer.
 	///		- address: 	Address to write data to.
 	///
-	public func write(from buffer: UnsafeRawPointer, bufSize: Int, to addresss: Address) throws {
-		
-		// Make sure the buffer is valid...
-		if bufSize == 0 {
-			
-			throw Error(code: Socket.SOCKET_ERR_INVALID_BUFFER, reason: nil)
-		}
-		
+	@discardableResult public func write(from buffer: UnsafeRawPointer, bufSize: Int, to address: Address) throws -> Int {
+
 		// The socket must've been created and must be connected...
 		if self.socketfd == Socket.SOCKET_INVALID_DESCRIPTOR {
-			
+
 			throw Error(code: Socket.SOCKET_ERR_BAD_DESCRIPTOR, reason: nil)
 		}
-		
+
 		// The socket must've been created for UDP...
 		guard let sig = self.signature,
 			sig.proto == .udp else {
-			
+
 			throw Error(code: Socket.SOCKET_ERR_WRONG_PROTOCOL, reason: "This is not a UDP socket.")
 		}
-		
+
+		return 0
 	}
-	
+
 	///
 	/// Write data to a UDP socket.
 	///
@@ -2808,27 +2803,12 @@ public class Socket: SocketReader, SocketWriter {
 	///		- data: 	The NSData object containing the data to write.
 	///		- address: 	Address to write data to.
 	///
-	public func write(from data: NSData, to addresss: Address) throws {
-		
-		// The socket must've been created...
-		if self.socketfd == Socket.SOCKET_INVALID_DESCRIPTOR {
-			
-			throw Error(code: Socket.SOCKET_ERR_BAD_DESCRIPTOR, reason: nil)
-		}
-		
-		// The socket must've been created for UDP...
-		guard let sig = self.signature,
-			sig.proto == .udp else {
-			
-			throw Error(code: Socket.SOCKET_ERR_WRONG_PROTOCOL, reason: "This is not a UDP socket.")
-		}
-		
-		// If there's no data in the NSData object, why bother? Fail silently...
-		if data.length == 0 {
-			return
-		}
+	@discardableResult public func write(from data: NSData, to address: Address) throws -> Int {
+
+		// Send the bytes...
+		return try write(from: data.bytes.assumingMemoryBound(to: UInt8.self), bufSize: data.length)
 	}
-	
+
 	///
 	/// Write data to a UDP socket.
 	///
@@ -2836,24 +2816,12 @@ public class Socket: SocketReader, SocketWriter {
 	///		- data: 	The Data object containing the data to write.
 	///		- address: 	Address to write data to.
 	///
-	public func write(from data: Data, to addresss: Address) throws {
-		
-		// The socket must've been created...
-		if self.socketfd == Socket.SOCKET_INVALID_DESCRIPTOR {
-			
-			throw Error(code: Socket.SOCKET_ERR_BAD_DESCRIPTOR, reason: nil)
-		}
-		
-		// The socket must've been created for UDP...
-		guard let sig = self.signature,
-			sig.proto == .udp else {
-				
-				throw Error(code: Socket.SOCKET_ERR_WRONG_PROTOCOL, reason: "This is not a UDP socket.")
-		}
-		
-		// If there's no data in the NSData object, why bother? Fail silently...
-		if data.count == 0 {
-			return
+	@discardableResult public func write(from data: Data, to address: Address) throws -> Int {
+
+		// Send the bytes...
+		return try data.withUnsafeBytes() { [unowned self] (buffer: UnsafePointer<UInt8>) throws -> Int in
+
+			return try self.write(from: buffer, bufSize: data.count, to: address)
 		}
 	}
 	
