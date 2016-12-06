@@ -3129,25 +3129,15 @@ public class Socket: SocketReader, SocketWriter {
 		self.readBuffer.deinitialize()
 		self.readBuffer.initialize(to: 0x0)
 		memset(self.readBuffer, 0x0, self.readBufferSize)
+		var address: Address? = nil
 
 		guard let sig = self.signature else {
 			throw Error(code: Socket.SOCKET_ERR_INTERNAL, reason: "Socket signature not found.")
 		}
 
-		var storagePtr: UnsafeMutablePointer<sockaddr_storage>?
-		var len: socklen_t
-		if sig.proto == .udp {
-			storagePtr = UnsafeMutablePointer<sockaddr_storage>.allocate(capacity: 1)
-			len = socklen_t(MemoryLayout<sockaddr_storage>.size)
-		} else {
-			storagePtr = nil
-			len = 0
-		}
-
-		var addrPtr: UnsafeMutablePointer<sockaddr>? = nil
-		storagePtr?.withMemoryRebound(to: sockaddr.self, capacity: 1) {
-			addrPtr = $0
-		}
+		let addr = sockaddr_storage()
+		var length = socklen_t(MemoryLayout<sockaddr_storage>.size)
+		var addrPtr = addr.asAddr()
 
 		// Read all the available data...
 		var count: Int = 0
@@ -3196,9 +3186,9 @@ public class Socket: SocketReader, SocketWriter {
 
 			} else {
 				#if os(Linux)
-					count = Glibc.recvfrom(self.socketfd, self.readBuffer, self.readBufferSize, 0, addrPtr, &len)
+					count = Glibc.recvfrom(self.socketfd, self.readBuffer, self.readBufferSize, 0, &addrPtr, &length)
 				#else
-					count = Darwin.recvfrom(self.socketfd, self.readBuffer, self.readBufferSize, 0, addrPtr, &len)
+					count = Darwin.recvfrom(self.socketfd, self.readBuffer, self.readBufferSize, 0, &addrPtr, &length)
 				#endif
 			}
 
@@ -3240,11 +3230,25 @@ public class Socket: SocketReader, SocketWriter {
 
 		} while count > 0 && sig.proto != .udp
 
-		if let addr = storagePtr?.pointee {
-			return (self.readStorage.length, Socket.createAddress(addr: addr))
+		// Retrieve the address...
+		if addrPtr.sa_family == sa_family_t(AF_INET6) {
+
+			var addr = sockaddr_in6()
+			memcpy(&addr, &addrPtr, Int(MemoryLayout<sockaddr_in6>.size))
+			address = .ipv6(addr)
+
+		} else if addrPtr.sa_family == sa_family_t(AF_INET) {
+
+			var addr = sockaddr_in()
+			memcpy(&addr, &addrPtr, Int(MemoryLayout<sockaddr_in>.size))
+			address = .ipv4(addr)
+
+		} else {
+
+			address = nil
 		}
 
-		return (self.readStorage.length, nil)
+		return (self.readStorage.length, address)
 	}
 	
 	///
