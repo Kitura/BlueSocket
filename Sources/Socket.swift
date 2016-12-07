@@ -2562,14 +2562,15 @@ public class Socket: SocketReader, SocketWriter {
 	///		- buffer: 	The buffer to return the data in.
 	/// 	- bufSize: 	The size of the buffer.
 	///		- address: 	Address to write data to.
+	///		- truncate: Whether to truncate messages that are too long, or throw an error.
 	///
-	/// - Throws: `Socket.SOCKET_ERR_RECV_BUFFER_TOO_SMALL` if the buffer provided is too small.
+	/// - Throws: `Socket.SOCKET_ERR_RECV_BUFFER_TOO_SMALL` if the buffer provided is too small and `truncate == false`.
 	///		Call again with proper buffer size (see `Error.bufferSizeNeeded`) or
 	///		use `readData(data: NSMutableData)`.
 	///
 	/// - Returns: Tuple with the number of bytes returned in the buffer and the address they were received from.
 	///
-	public func readDatagram(into buffer: UnsafeMutablePointer<CChar>, bufSize: Int) throws -> (bytesRead: Int, address: Address?) {
+	public func readDatagram(into buffer: UnsafeMutablePointer<CChar>, bufSize: Int, truncate: Bool = true) throws -> (bytesRead: Int, address: Address?) {
 		
 		// Make sure the buffer is valid...
 		if bufSize == 0 {
@@ -2605,9 +2606,17 @@ public class Socket: SocketReader, SocketWriter {
 			
 			// Is the caller's buffer big enough?
 			if bufSize < self.readStorage.length {
-				
-				// Nope, throw an exception telling the caller how big the buffer must be...
-				throw Error(bufferSize: self.readStorage.length)
+
+				// Buffer too small, can we just quietly truncate?
+				if truncate {
+
+					// Yep, discard the excess data...
+					self.readStorage.length = bufSize
+				} else {
+
+					// Nope, throw an exception telling the caller how big the buffer must be...
+					throw Error(bufferSize: self.readStorage.length)
+				}
 			}
 			
 			// - We've read data, copy to the callers buffer...

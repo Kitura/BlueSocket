@@ -227,28 +227,36 @@ class SocketTests: XCTestCase {
 	}
 
 	func runUDPHelper(family: Socket.ProtocolFamily) throws {
-
+		var keepRunning = true
 		do {
 			let socket = try createUDPHelper()
 			try socket.listen(on: Int(port))
 
 			var data = Data()
 
-			let (_, address) = try socket.readDatagram(into: &data)
-
-			guard let response = NSString(data: data, encoding: String.Encoding.utf8.rawValue) else {
-
-				print("Error decoding response...")
+			repeat {
 				data.count = 0
-				XCTFail()
-				return
-			}
+				let (_, address) = try socket.readDatagram(into: &data)
 
-			let (remoteHost, remotePort) = Socket.hostnameAndPort(from: address!)!
-			print("Received from \(remoteHost):\(remotePort): \(response)\n")
-			print("Sending response")
-			let responseString: String = "Server response: \(response)"
-			try socket.write(from: responseString.data(using: String.Encoding.utf8)!, to: address!)
+				guard let response = NSString(data: data, encoding: String.Encoding.utf8.rawValue) else {
+
+					print("Error decoding response...")
+					data.count = 0
+					XCTFail()
+					return
+				}
+
+				if response.hasPrefix(QUIT) {
+					keepRunning = false
+				}
+
+				let (remoteHost, remotePort) = Socket.hostnameAndPort(from: address!)!
+				print("Received from \(remoteHost):\(remotePort): \(response)\n")
+				print("Sending response")
+				let responseString: String = "Server response: \(response)"
+				try socket.write(from: responseString.data(using: String.Encoding.utf8)!, to: address!)
+			} while keepRunning
+
 		} catch let error {
 			guard let socketError = error as? Socket.Error else {
 
@@ -1045,10 +1053,11 @@ class SocketTests: XCTestCase {
 			}
 
 			let addr = Socket.createAddress(host: hostname, port: port)
+
 			try socket.write(from: "Hello from UDP".data(using: .utf8)!, to: addr!)
 
 			var data = Data()
-			let (_, address) = try socket.readDatagram(into: &data)
+			var (_, address) = try socket.readDatagram(into: &data)
 
 			guard let response = NSString(data: data, encoding: String.Encoding.utf8.rawValue) else {
 
@@ -1058,8 +1067,23 @@ class SocketTests: XCTestCase {
 				return
 			}
 
-			let (remoteHost, remotePort) = Socket.hostnameAndPort(from: address!)!
+			var (remoteHost, remotePort) = Socket.hostnameAndPort(from: address!)!
 			print("Received from \(remoteHost):\(remotePort): \(response)\n")
+
+			try socket.write(from: "Hello again".data(using: .utf8)!, to: addr!)
+
+			let buf = UnsafeMutablePointer<CChar>.allocate(capacity: 10);
+			buf.initialize(to: 0, count: 10)
+
+			// Save room for a null character...
+			(_, address) = try socket.readDatagram(into: buf, bufSize: 9)
+
+			let response2 = String(cString: buf)
+			(remoteHost, remotePort) = Socket.hostnameAndPort(from: address!)!
+			print("Received from \(remoteHost):\(remotePort): \(response2)\n")
+
+			print("Sending quit to server...")
+			try socket.write(from: "QUIT".data(using: .utf8)!, to: addr!)
 
 			// Need to wait for the server to go down before continuing...
 			#if os(Linux)
