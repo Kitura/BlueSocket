@@ -2401,8 +2401,12 @@ public class Socket: SocketReader, SocketWriter {
 
 					memcpy(buffer, self.readStorage.bytes, self.readStorage.length)
 
-					self.readStorage.replaceBytes(in: NSRange(location:0, length:bufSize), withBytes: nil, length: 0)
-
+					#if os(Linux)
+						// Workaround for apparent bug in NSMutableData
+						self.readStorage = NSMutableData(bytes: self.readStorage.bytes.advanced(by: bufSize), length:self.readStorage.length - bufSize)
+					#else
+						self.readStorage.replaceBytes(in: NSRange(location:0, length:bufSize), withBytes: nil, length: 0)
+					#endif
 					return bufSize
 
 				} else {
@@ -2444,7 +2448,12 @@ public class Socket: SocketReader, SocketWriter {
 					// Yep, copy what storage we can and remove the bytes from the internal buffer.
 					memcpy(buffer, self.readStorage.bytes, bufSize)
 
-					self.readStorage.replaceBytes(in: NSRange(location:0, length:bufSize), withBytes: nil, length: 0)
+					#if os(Linux)
+						// Workaround for apparent bug in NSMutableData
+						self.readStorage = NSMutableData(bytes: self.readStorage.bytes.advanced(by: bufSize), length:self.readStorage.length - bufSize)
+					#else
+						self.readStorage.replaceBytes(in: NSRange(location:0, length:bufSize), withBytes: nil, length: 0)
+					#endif
 
 					return bufSize
 
