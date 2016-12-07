@@ -1105,7 +1105,7 @@ public class Socket: SocketReader, SocketWriter {
 	///
 	/// - Returns: An Address instance, or nil if the hostname and port are not valid.
 	///
-	public class func createAddress(host: String, port: Int32) -> Address? {
+	public class func createAddress(for host: String, on port: Int32) -> Address? {
 		
 		var info: UnsafeMutablePointer<addrinfo>? = UnsafeMutablePointer<addrinfo>.allocate(capacity: 1)
 		
