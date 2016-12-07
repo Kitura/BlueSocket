@@ -2359,18 +2359,21 @@ public class Socket: SocketReader, SocketWriter {
 	
 	///
 	/// Read data from the socket.
+	///		**Note:** Calling with `truncate: true` will leave un
 	///
 	/// - Parameters:
 	///		- buffer: The buffer to return the data in.
 	/// 	- bufSize: The size of the buffer.
+	///		- truncate: Whether the data should be truncated if there is more available data than could fit in `buffer`.
+	///			**Note:** If called with `truncate = true` unretrieved data will be returned on next `read` call.
 	///
-	/// - Throws: `Socket.SOCKET_ERR_RECV_BUFFER_TOO_SMALL` if the buffer provided is too small.
+	/// - Throws: `Socket.SOCKET_ERR_RECV_BUFFER_TOO_SMALL` if the buffer provided is too small and `truncate = false`.
 	///		Call again with proper buffer size (see `Error.bufferSizeNeeded`) or
 	///		use `readData(data: NSMutableData)`.
 	///
 	/// - Returns: The number of bytes returned in the buffer.
 	///
-	public func read(into buffer: UnsafeMutablePointer<CChar>, bufSize: Int) throws -> Int {
+	public func read(into buffer: UnsafeMutablePointer<CChar>, bufSize: Int, truncate: Bool = false) throws -> Int {
 		
 		// Make sure the buffer is valid...
 		if bufSize == 0 {
@@ -2393,8 +2396,19 @@ public class Socket: SocketReader, SocketWriter {
 		if self.readStorage.length > 0 {
 			
 			if bufSize < self.readStorage.length {
+
+				if truncate {
+
+					memcpy(buffer, self.readStorage.bytes, self.readStorage.length)
+
+					self.readStorage.replaceBytes(in: NSRange(location:0, length:bufSize), withBytes: nil, length: 0)
+
+					return bufSize
+
+				} else {
 				
-				throw Error(bufferSize: self.readStorage.length)
+					throw Error(bufferSize: self.readStorage.length)
+				}
 			}
 			
 			let returnCount = self.readStorage.length
@@ -2423,9 +2437,22 @@ public class Socket: SocketReader, SocketWriter {
 			
 			// Is the caller's buffer big enough?
 			if bufSize < self.readStorage.length {
-				
-				// Nope, throw an exception telling the caller how big the buffer must be...
-				throw Error(bufferSize: self.readStorage.length)
+
+				// It isn't should we just use the available space?
+				if truncate {
+
+					// Yep, copy what storage we can and remove the bytes from the internal buffer.
+					memcpy(buffer, self.readStorage.bytes, bufSize)
+
+					self.readStorage.replaceBytes(in: NSRange(location:0, length:bufSize), withBytes: nil, length: 0)
+
+					return bufSize
+
+				} else {
+
+					// Nope, throw an exception telling the caller how big the buffer must be...
+					throw Error(bufferSize: self.readStorage.length)
+				}
 			}
 			
 			// - We've read data, copy to the callers buffer...
@@ -3143,6 +3170,11 @@ public class Socket: SocketReader, SocketWriter {
 		self.readBuffer.deinitialize()
 		self.readBuffer.initialize(to: 0x0)
 		memset(self.readBuffer, 0x0, self.readBufferSize)
+
+		var recvFlags: Int32 = 0
+		if (self.readStorage.length > 0) {
+			recvFlags |= MSG_DONTWAIT
+		}
 		
 		// Read all the available data...
 		var count: Int = 0
@@ -3191,9 +3223,9 @@ public class Socket: SocketReader, SocketWriter {
 				
 			} else {
 				#if os(Linux)
-					count = Glibc.recv(self.socketfd, self.readBuffer, self.readBufferSize, 0)
+					count = Glibc.recv(self.socketfd, self.readBuffer, self.readBufferSize, recvFlags)
 				#else
-					count = Darwin.recv(self.socketfd, self.readBuffer, self.readBufferSize, 0)
+					count = Darwin.recv(self.socketfd, self.readBuffer, self.readBufferSize, recvFlags)
 				#endif
 			}
 			
@@ -3203,8 +3235,9 @@ public class Socket: SocketReader, SocketWriter {
 				// - Could be an error, but if errno is EAGAIN or EWOULDBLOCK (if a non-blocking socket),
 				//		it means there was NO data to read...
 				if errno == EAGAIN || errno == EWOULDBLOCK {
-					
-					return 0
+
+					// So return the size of whatever data we already have (possibly none)
+					return self.readStorage.length
 				}
 				
 				// - Handle a connection reset by peer (ECONNRESET) and throw a different exception...
@@ -3250,6 +3283,11 @@ public class Socket: SocketReader, SocketWriter {
 		self.readBuffer.initialize(to: 0x0)
 		memset(self.readBuffer, 0x0, self.readBufferSize)
 		var address: Address? = nil
+
+		var recvFlags: Int32 = 0
+		if (self.readStorage.length > 0) {
+			recvFlags |= MSG_DONTWAIT
+		}
 		
 		let addr = sockaddr_storage()
 		var length = socklen_t(MemoryLayout<sockaddr_storage>.size)
@@ -3260,9 +3298,9 @@ public class Socket: SocketReader, SocketWriter {
 		repeat {
 			
 			#if os(Linux)
-				count = Glibc.recvfrom(self.socketfd, self.readBuffer, self.readBufferSize, 0, &addrPtr, &length)
+				count = Glibc.recvfrom(self.socketfd, self.readBuffer, self.readBufferSize, recvFlags, &addrPtr, &length)
 			#else
-				count = Darwin.recvfrom(self.socketfd, self.readBuffer, self.readBufferSize, 0, &addrPtr, &length)
+				count = Darwin.recvfrom(self.socketfd, self.readBuffer, self.readBufferSize, recvFlags, &addrPtr, &length)
 			#endif
 			
 			// Check for error...
@@ -3271,8 +3309,9 @@ public class Socket: SocketReader, SocketWriter {
 				// - Could be an error, but if errno is EAGAIN or EWOULDBLOCK (if a non-blocking socket),
 				//		it means there was NO data to read...
 				if errno == EAGAIN || errno == EWOULDBLOCK {
-					
-					return (0, address)
+
+					// FIXME: If we reach this point because data is available in the internal buffer, we will be *unable* to associate it with an address...
+					return (self.readStorage.length, nil)
 				}
 				
 				// - Handle a connection reset by peer (ECONNRESET) and throw a different exception...

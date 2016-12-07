@@ -253,7 +253,7 @@ class SocketTests: XCTestCase {
 				let (remoteHost, remotePort) = Socket.hostnameAndPort(from: address!)!
 				print("Received from \(remoteHost):\(remotePort): \(response)\n")
 				print("Sending response")
-				let responseString: String = "Server response: \(response)"
+				let responseString: String = "Server response: \n\(response)\n"
 				try socket.write(from: responseString.data(using: String.Encoding.utf8)!, to: address!)
 			} while keepRunning
 
@@ -273,7 +273,7 @@ class SocketTests: XCTestCase {
 		}
 	}
 	
-	func readAndPrint(socket: Socket, data: inout Data) throws {
+	func readAndPrint(socket: Socket, data: inout Data) throws -> String? {
 		
 		data.count = 0
 		let	bytesRead = try socket.read(into: &data)
@@ -285,12 +285,14 @@ class SocketTests: XCTestCase {
 				
 				print("Error accessing received data...")
 				XCTFail()
-				return
+				return nil
 			}
 			
 			print("Response:\n\(response)")
-			
+			return response as String
 		}
+
+		return nil
 	}
 	
 	func testDefaultCreate() {
@@ -988,14 +990,17 @@ class SocketTests: XCTestCase {
 			print("\nConnected to host: \(hostname):\(port)")
 			print("\tSocket signature: \(socket.signature!.description)\n")
 			
-			try readAndPrint(socket: socket, data: &data)
+			_ = try readAndPrint(socket: socket, data: &data)
 			
 			let hello = "Hello from client..."
 			try socket.write(from: hello)
 			
 			print("Wrote '\(hello)' to socket...")
 			
-			try readAndPrint(socket: socket, data: &data)
+			let response = try readAndPrint(socket: socket, data: &data)
+
+			XCTAssertNotNil(response)
+			XCTAssertEqual(response, "Server response: \n\(hello)\n")
 			
 			try socket.write(from: "QUIT")
 			
@@ -1019,6 +1024,101 @@ class SocketTests: XCTestCase {
 			}
 			
 			print("testReadWrite Error reported: \(socketError.description)")
+			XCTFail()
+		}
+		
+	}
+
+	func testTruncateTCP() {
+
+		let hostname = "127.0.0.1"
+		let port: Int32 = 1337
+
+		let bufSize = 4096
+		var data = Data()
+
+		do {
+
+			// Launch the server helper...
+			launchServerHelper()
+
+			// Need to wait for the server to come up...
+			#if os(Linux)
+				_ = Glibc.sleep(2)
+			#else
+				_ = Darwin.sleep(2)
+			#endif
+
+			// Create the signature...
+			let signature = try Socket.Signature(socketType: .stream, proto: .tcp, hostname: hostname, port: port)!
+
+			// Create the socket...
+			let socket = try createHelper()
+
+			// Defer cleanup...
+			defer {
+				// Close the socket...
+				socket.close()
+				XCTAssertFalse(socket.isActive)
+			}
+
+			// Connect to the server helper...
+			try socket.connect(using: signature)
+			if !socket.isConnected {
+
+				fatalError("Failed to connect to the server...")
+			}
+
+			print("\nConnected to host: \(hostname):\(port)")
+			print("\tSocket signature: \(socket.signature!.description)\n")
+
+			_ = try readAndPrint(socket: socket, data: &data)
+
+			let hello = "Hello from client..."
+			try socket.write(from: hello)
+
+			print("Wrote '\(hello)' to socket...")
+
+			let buf = UnsafeMutablePointer<CChar>.allocate(capacity: 19);
+			buf.initialize(to: 0, count: 19)
+
+			defer {
+				buf.deinitialize()
+				buf.deallocate(capacity: 19)
+			}
+
+			// Save room for a null character...
+			_ = try socket.read(into: buf, bufSize: 18, truncate: true)
+			let response = String(cString: buf)
+
+			XCTAssertEqual(response, "Server response: \n")
+
+			let response2 = try readAndPrint(socket: socket, data: &data)
+
+			XCTAssertEqual(response2, "\(hello)\n")
+
+			try socket.write(from: "QUIT")
+
+			print("Sent quit to server...")
+
+			// Need to wait for the server to go down before continuing...
+			#if os(Linux)
+				_ = Glibc.sleep(1)
+			#else
+				_ = Darwin.sleep(1)
+			#endif
+
+		} catch let error {
+
+			// See if it's a socket error or something else...
+			guard let socketError = error as? Socket.Error else {
+
+				print("Unexpected error...")
+				XCTFail()
+				return
+			}
+
+			print("testTruncateTCP Error reported: \(socketError.description)")
 			XCTFail()
 		}
 		
@@ -1146,14 +1246,17 @@ class SocketTests: XCTestCase {
 			print("\nConnected to path: \(path)")
 			print("\tSocket signature: \(socket.signature!.description)\n")
 			
-			try readAndPrint(socket: socket, data: &data)
+			_ = try readAndPrint(socket: socket, data: &data)
 			
 			let hello = "Hello from client..."
 			try socket.write(from: hello)
 			
 			print("Wrote '\(hello)' to socket...")
 			
-			try readAndPrint(socket: socket, data: &data)
+			let response = try readAndPrint(socket: socket, data: &data)
+
+			XCTAssertNotNil(response)
+			XCTAssertEqual(response!, "Server response: \n\(hello)\n")
 			
 			try socket.write(from: "QUIT")
 			
