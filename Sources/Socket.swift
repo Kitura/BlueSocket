@@ -3173,7 +3173,7 @@ public class Socket: SocketReader, SocketWriter {
 
 		var recvFlags: Int32 = 0
 		if (self.readStorage.length > 0) {
-			recvFlags |= MSG_DONTWAIT
+			recvFlags |= Int32(MSG_DONTWAIT)
 		}
 		
 		// Read all the available data...
@@ -3286,7 +3286,7 @@ public class Socket: SocketReader, SocketWriter {
 
 		var recvFlags: Int32 = 0
 		if (self.readStorage.length > 0) {
-			recvFlags |= MSG_DONTWAIT
+			recvFlags |= Int32(MSG_DONTWAIT)
 		}
 		
 		let addr = sockaddr_storage()
