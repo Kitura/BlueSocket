@@ -861,7 +861,7 @@ public class Socket: SocketReader, SocketWriter {
 	}
 	
 	
-	// MARK: Class Methods
+	// MARK: Class Functions
 	
 	///
 	/// Create a configured Socket instance.
@@ -1105,7 +1105,7 @@ public class Socket: SocketReader, SocketWriter {
 	///
 	/// - Returns: An Address instance, or nil if the hostname and port are not valid.
 	///
-	public class func createAddress(host: String, port: Int32) -> Address? {
+	public class func createAddress(for host: String, on port: Int32) -> Address? {
 		
 		var info: UnsafeMutablePointer<addrinfo>? = UnsafeMutablePointer<addrinfo>.allocate(capacity: 1)
 		
@@ -1145,7 +1145,7 @@ public class Socket: SocketReader, SocketWriter {
 		return address
 	}
 	
-	// MARK: Lifecycle Methods
+	// MARK: Lifecycle Functions
 	
 	// MARK: -- Private
 	
@@ -1257,7 +1257,7 @@ public class Socket: SocketReader, SocketWriter {
         self.delegate?.deinitialize()
     }
 	
-	// MARK: Public Methods
+	// MARK: Public Functions
 	
 	// MARK: -- Accept
 	
@@ -2523,12 +2523,6 @@ public class Socket: SocketReader, SocketWriter {
 		// Read all available bytes...
 		let count = try self.readDataIntoStorage()
 		
-		// Check for disconnect...
-		if count == 0 {
-			
-			return count
-		}
-		
 		// Did we get data?
 		var returnCount: Int = 0
 		if count > 0 {
@@ -2566,12 +2560,6 @@ public class Socket: SocketReader, SocketWriter {
 		
 		// Read all available bytes...
 		let count = try self.readDataIntoStorage()
-		
-		// Check for disconnect...
-		if count == 0 {
-			
-			return count
-		}
 		
 		// Did we get data?
 		var returnCount: Int = 0
@@ -2694,12 +2682,6 @@ public class Socket: SocketReader, SocketWriter {
 		// Read all available bytes...
 		let (count, address) = try self.readDatagramIntoStorage()
 		
-		// Check for disconnect...
-		if count == 0 {
-			
-			return (count, nil)
-		}
-		
 		// Did we get data?
 		var returnCount: Int = 0
 		if count > 0 {
@@ -2741,12 +2723,6 @@ public class Socket: SocketReader, SocketWriter {
 		
 		// Read all available bytes...
 		let (count, address) = try self.readDatagramIntoStorage()
-		
-		// Check for disconnect...
-		if count == 0 {
-			
-			return (count, nil)
-		}
 		
 		// Did we get data?
 		var returnCount: Int = 0
@@ -3166,10 +3142,10 @@ public class Socket: SocketReader, SocketWriter {
 		self.isBlocking = shouldBlock
 	}
 	
-	// MARK: Private Methods
+	// MARK: Private Functions
 	
 	///
-	/// Private method that reads all available data on an open socket into storage.
+	/// Private function that reads all available data on an open socket into storage.
 	///
 	/// - Returns: number of bytes read.
 	///
@@ -3281,7 +3257,7 @@ public class Socket: SocketReader, SocketWriter {
 	}
 	
 	///
-	/// Private method that reads all available data on an open socket into storage.
+	/// Private function that reads all available data on an open socket into storage.
 	///
 	/// - Returns: number of bytes read.
 	///
@@ -3301,80 +3277,69 @@ public class Socket: SocketReader, SocketWriter {
 		let addr = sockaddr_storage()
 		var length = socklen_t(MemoryLayout<sockaddr_storage>.size)
 		var addrPtr = addr.asAddr()
-		
+
 		// Read all the available data...
-		var count: Int = 0
-		repeat {
-			
-			#if os(Linux)
-				count = Glibc.recvfrom(self.socketfd, self.readBuffer, self.readBufferSize, recvFlags, &addrPtr, &length)
-			#else
-				count = Darwin.recvfrom(self.socketfd, self.readBuffer, self.readBufferSize, recvFlags, &addrPtr, &length)
-			#endif
-			
-			// Check for error...
-			if count < 0 {
-				
-				// - Could be an error, but if errno is EAGAIN or EWOULDBLOCK (if a non-blocking socket),
-				//		it means there was NO data to read...
-				if errno == EAGAIN || errno == EWOULDBLOCK {
+		#if os(Linux)
+			let count = Glibc.recvfrom(self.socketfd, self.readBuffer, self.readBufferSize, recvFlags, &addrPtr, &length)
+		#else
+			let count = Darwin.recvfrom(self.socketfd, self.readBuffer, self.readBufferSize, recvFlags, &addrPtr, &length)
+		#endif
 
-					// FIXME: If we reach this point because data is available in the internal buffer, we will be *unable* to associate it with an address...
-					return (self.readStorage.length, nil)
-				}
-				
-				// - Handle a connection reset by peer (ECONNRESET) and throw a different exception...
-				if errno == ECONNRESET {
-					
-					throw Error(code: Socket.SOCKET_ERR_CONNECTION_RESET, reason: self.lastError())
-				}
-				
-				// - Something went wrong...
-				throw Error(code: Socket.SOCKET_ERR_RECV_FAILED, reason: self.lastError())
-			}
-			
-			if count == 0 {
-				
-				self.remoteConnectionClosed = true
-				return (0, nil)
-			}
-			
-			if count > 0 {
-				self.readStorage.append(self.readBuffer, length: count)
-			}
-			
-			// Retrieve the address...
-			if addrPtr.sa_family == sa_family_t(AF_INET6) {
-				
-				var addr = sockaddr_in6()
-				memcpy(&addr, &addrPtr, Int(MemoryLayout<sockaddr_in6>.size))
-				address = .ipv6(addr)
-				
-			} else if addrPtr.sa_family == sa_family_t(AF_INET) {
-				
-				var addr = sockaddr_in()
-				memcpy(&addr, &addrPtr, Int(MemoryLayout<sockaddr_in>.size))
-				address = .ipv4(addr)
-				
-			} else {
-				
-				throw Error(code: Socket.SOCKET_ERR_WRONG_PROTOCOL, reason: "Unable to determine receiving socket protocol family.")
-			}
-			
-			// Didn't fill the buffer so we've got everything available...
-			if count < self.readBufferSize {
-				
-				break
+		// Check for error...
+		if count < 0 {
+
+			// - Could be an error, but if errno is EAGAIN or EWOULDBLOCK (if a non-blocking socket),
+			//		it means there was NO data to read...
+			if errno == EAGAIN || errno == EWOULDBLOCK {
+
+				// FIXME: If we reach this point because data is available in the internal buffer, we will be *unable* to associate it with an address...
+				return (self.readStorage.length, nil)
 			}
 
+			// - Handle a connection reset by peer (ECONNRESET) and throw a different exception...
+			if errno == ECONNRESET {
+
+				throw Error(code: Socket.SOCKET_ERR_CONNECTION_RESET, reason: self.lastError())
+			}
+
+			// - Something went wrong...
+			throw Error(code: Socket.SOCKET_ERR_RECV_FAILED, reason: self.lastError())
+		}
+
+		if count == 0 {
 			
-		} while count > 0
+			self.remoteConnectionClosed = true
+			return (0, nil)
+		}
+		
+		if count > 0 {
+			self.readStorage.append(self.readBuffer, length: count)
+		}
+		
+		// Retrieve the address...
+		if addrPtr.sa_family == sa_family_t(AF_INET6) {
+			
+			var addr = sockaddr_in6()
+			memcpy(&addr, &addrPtr, Int(MemoryLayout<sockaddr_in6>.size))
+			address = .ipv6(addr)
+			
+		} else if addrPtr.sa_family == sa_family_t(AF_INET) {
+			
+			var addr = sockaddr_in()
+			memcpy(&addr, &addrPtr, Int(MemoryLayout<sockaddr_in>.size))
+			address = .ipv4(addr)
+			
+		} else {
+			
+			throw Error(code: Socket.SOCKET_ERR_WRONG_PROTOCOL, reason: "Unable to determine receiving socket protocol family.")
+		}
+		
 		
 		return (self.readStorage.length, address)
 	}
 	
 	///
-	/// Private method to wait for this instance to be either readable or writable.
+	/// Private function to wait for this instance to be either readable or writable.
 	///
 	///	- Parameter forRead:	True to wait for socket to be readable, false waits for it to be writable.
 	///
@@ -3405,7 +3370,7 @@ public class Socket: SocketReader, SocketWriter {
 	}
 	
 	///
-	/// Private method to return the last error based on the value of errno.
+	/// Private function to return the last error based on the value of errno.
 	///
 	/// - Returns: String containing relevant text about the error.
 	///

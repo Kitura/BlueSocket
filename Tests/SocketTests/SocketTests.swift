@@ -1152,7 +1152,7 @@ class SocketTests: XCTestCase {
 				XCTAssertFalse(socket.isActive)
 			}
 
-			let addr = Socket.createAddress(host: hostname, port: port)
+			let addr = Socket.createAddress(for: hostname, on: port)
 
 			try socket.write(from: "Hello from UDP".data(using: .utf8)!, to: addr!)
 
