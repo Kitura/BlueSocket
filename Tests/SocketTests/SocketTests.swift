@@ -289,7 +289,7 @@ class SocketTests: XCTestCase {
 			}
 			
 			print("Response:\n\(response)")
-			return response as String
+			return String(describing: response)
 		}
 
 		return nil
