@@ -1154,6 +1154,7 @@ class SocketTests: XCTestCase {
 
 			let addr = Socket.createAddress(for: hostname, on: port)
 
+			XCTAssertNotNil(addr)
 			try socket.write(from: "Hello from UDP".data(using: .utf8)!, to: addr!)
 
 			var data = Data()
