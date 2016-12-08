@@ -2176,7 +2176,8 @@ public class Socket: SocketReader, SocketWriter {
 
 		// Create the signature...
 		let sig = try Signature(socketType: .stream, proto: .unix, path: path)
-		guard let signature = sig else {
+		guard let signature = sig,
+			let address = signature.address else {
 			
 			throw Error(code:Socket.SOCKET_ERR_BAD_SIGNATURE_PARAMETERS, reason: nil)
 		}
@@ -2189,11 +2190,11 @@ public class Socket: SocketReader, SocketWriter {
 		#endif
 		
 		// Try to bind the socket to the address...
-		var localAddr = signature.address!.addr
+		var localAddr = address.addr
 		#if os(Linux)
-			let rc = Glibc.bind(self.socketfd, &localAddr, socklen_t(signature.address!.size))
+			let rc = Glibc.bind(self.socketfd, &localAddr, socklen_t(address.size))
 		#else
-			let rc = Darwin.bind(self.socketfd, &localAddr, socklen_t(signature.address!.size))
+			let rc = Darwin.bind(self.socketfd, &localAddr, socklen_t(address.size))
 		#endif
 		
 		if rc < 0 {
@@ -2359,7 +2360,6 @@ public class Socket: SocketReader, SocketWriter {
 	
 	///
 	/// Read data from the socket.
-	///		**Note:** Calling with `truncate: true` will leave un
 	///
 	/// - Parameters:
 	///		- buffer: The buffer to return the data in.
