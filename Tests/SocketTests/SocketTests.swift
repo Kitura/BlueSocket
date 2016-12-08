@@ -115,8 +115,10 @@ class SocketTests: XCTestCase {
 			
 			var socket: Socket
 			
-			if family == .inet {
+			// Are we setting uo a TCP or UNIX based server?
+			if family == .inet || family == .inet6 {
 			
+				// Setting up TCP...
 				try listener.listen(on: Int(port), maxBacklogSize: 10)
 
 				print("Listening on port: \(port)")
@@ -127,6 +129,7 @@ class SocketTests: XCTestCase {
 				
 			} else {
 				
+				// Setting up UNIX...
 				try listener.listen(on: path, maxBacklogSize: 10)
 
 				print("Listening on path: \(path)")
@@ -159,11 +162,14 @@ class SocketTests: XCTestCase {
 						
 						keepRunning = false
 					}
-					if family == .inet {
+					
+					// TCP or UNIX?
+					if family == .inet || family == .inet6 {
 						print("Server received from connection at \(socket.remoteHostname):\(socket.remotePort): \(response) ")
 					} else {
 						print("Server received from connection at \(socket.remotePath!): \(response) ")
 					}
+					
 					let reply = "Server response: \n\(response)\n"
 					try socket.write(from: reply)
 					
@@ -188,6 +194,7 @@ class SocketTests: XCTestCase {
 				return
 			}
 			
+			// This error is expected when we're shutting it down...
 			if socketError.errorCode == Int32(Socket.SOCKET_ERR_WRITE_FAILED) {
 				return
 			}
@@ -197,6 +204,7 @@ class SocketTests: XCTestCase {
 	}
 
 	func launchUDPHelper(family: Socket.ProtocolFamily = .inet) {
+		
 		let queue: DispatchQueue? = DispatchQueue.global(qos: .userInteractive)
 		guard let pQueue = queue else {
 
@@ -209,7 +217,7 @@ class SocketTests: XCTestCase {
 
 			do {
 
-				try self.runUDPHelper(family: family)
+				try self.udpHelper(family: family)
 
 			} catch let error {
 
@@ -220,23 +228,24 @@ class SocketTests: XCTestCase {
 					return
 				}
 
-				print("launchServerHelper Error reported:\n \(socketError.description)")
+				print("launchUDPHelper Error reported:\n \(socketError.description)")
 				XCTFail()
 			}
 		}
 	}
 
-	func runUDPHelper(family: Socket.ProtocolFamily) throws {
+	func udpHelper(family: Socket.ProtocolFamily) throws {
+		
 		var keepRunning = true
 		do {
 			let socket = try createUDPHelper()
 			try socket.listen(on: Int(port))
 
-			var data = Data()
-
 			repeat {
-				data.count = 0
-				let (_, address) = try socket.readDatagram(into: &data)
+				
+				var data = Data()
+				
+				let (bytesRead, address) = try socket.readDatagram(into: &data)
 
 				guard let response = NSString(data: data, encoding: String.Encoding.utf8.rawValue) else {
 
@@ -251,13 +260,15 @@ class SocketTests: XCTestCase {
 				}
 
 				let (remoteHost, remotePort) = Socket.hostnameAndPort(from: address!)!
-				print("Received from \(remoteHost):\(remotePort): \(response)\n")
+				print("Received \(bytesRead) bytes from \(remoteHost):\(remotePort): \(response)\n")
 				print("Sending response")
 				let responseString: String = "Server response: \n\(response)\n"
 				try socket.write(from: responseString.data(using: String.Encoding.utf8)!, to: address!)
+				
 			} while keepRunning
 
 		} catch let error {
+			
 			guard let socketError = error as? Socket.Error else {
 
 				print("Unexpected error...")
@@ -265,10 +276,11 @@ class SocketTests: XCTestCase {
 				return
 			}
 
+			// This error is expected when we're shutting it down...
 			if socketError.errorCode == Int32(Socket.SOCKET_ERR_WRITE_FAILED) {
 				return
 			}
-			print("serverHelper Error reported: \(socketError.description)")
+			print("udpHelper Error reported: \(socketError.description)")
 			XCTFail()
 		}
 	}
@@ -675,7 +687,7 @@ class SocketTests: XCTestCase {
 			XCTAssertEqual(socket.listeningPort, port)
 			
 			// Create a signature...
-			let signature = try Socket.Signature(socketType: .stream, proto: .tcp, hostname: host, port: port)
+			let signature = try Socket.Signature(family: .inet, socketType: .stream, proto: .tcp, hostname: host, port: port)
 			XCTAssertNotNil(signature)
 			
 			// Create a connected socket using the signature...
@@ -799,7 +811,7 @@ class SocketTests: XCTestCase {
 			print("Listener signature: \(socket.signature?.description as String?)")
 			
 			// Create a signature...
-			let signature = try Socket.Signature(socketType: .stream, proto: .tcp, hostname: socket.remoteHostname, port: socket.remotePort)
+			let signature = try Socket.Signature(family: .inet, socketType: .stream, proto: .tcp, hostname: socket.remoteHostname, port: socket.remotePort)
 			XCTAssertNotNil(signature)
 			
 			// Create a connected socket using the signature...
@@ -842,7 +854,7 @@ class SocketTests: XCTestCase {
 			XCTAssertEqual(socket.listeningPort, port)
 			
 			// Create a signature...
-			let signature = try Socket.Signature(socketType: .stream, proto: .tcp, hostname: host, port: port)
+			let signature = try Socket.Signature(family: .inet, socketType: .stream, proto: .tcp, hostname: host, port: port)
 			XCTAssertNotNil(signature)
 			
 			// Create a connected socket using the signature...
@@ -968,7 +980,7 @@ class SocketTests: XCTestCase {
 			#endif
 			
 			// Create the signature...
-			let signature = try Socket.Signature(socketType: .stream, proto: .tcp, hostname: hostname, port: port)!
+			let signature = try Socket.Signature(family: .inet, socketType: .stream, proto: .tcp, hostname: hostname, port: port)!
 			
 			// Create the socket...
 			let socket = try createHelper()
@@ -1050,7 +1062,7 @@ class SocketTests: XCTestCase {
 			#endif
 
 			// Create the signature...
-			let signature = try Socket.Signature(socketType: .stream, proto: .tcp, hostname: hostname, port: port)!
+			let signature = try Socket.Signature(family: .inet, socketType: .stream, proto: .tcp, hostname: hostname, port: port)!
 
 			// Create the socket...
 			let socket = try createHelper()
