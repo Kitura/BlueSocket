@@ -450,7 +450,7 @@ public class Socket: SocketReader, SocketWriter {
 		/// Create a socket signature
 		///
 		///	- Parameters:
-		///		- protocolFamily:	The protocol family to use (only `.inet` and `.inet6` supported).
+		///		- protocolFamily:	The protocol family to use (only `.inet` and `.inet6` supported by this `init` function).
 		///		- socketType:		The type of socket to create.
 		///		- proto:			The protocool to use for the socket.
 		/// 	- hostname:			Hostname for this signature.
@@ -458,16 +458,16 @@ public class Socket: SocketReader, SocketWriter {
 		///
 		/// - Returns: New Signature instance
 		///
-		public init?(family: ProtocolFamily, socketType: SocketType, proto: SocketProtocol, hostname: String?, port: Int32?) throws {
+		public init?(protocolFamily: ProtocolFamily, socketType: SocketType, proto: SocketProtocol, hostname: String?, port: Int32?) throws {
 			
 			// Make sure we have what we need...
 			guard let _ = hostname,
-				let port = port, family == .inet || family == .inet6 else {
+				let port = port, protocolFamily == .inet || protocolFamily == .inet6 else {
 					
 					throw Error(code: Socket.SOCKET_ERR_BAD_SIGNATURE_PARAMETERS, reason: "Missing hostname, port or both or invalid protocol family.")
 			}
 			
-			self.protocolFamily = family
+			self.protocolFamily = protocolFamily
 			
 			// Validate the parameters...
 			if socketType == .stream {
