@@ -687,7 +687,7 @@ class SocketTests: XCTestCase {
 			XCTAssertEqual(socket.listeningPort, port)
 			
 			// Create a signature...
-			let signature = try Socket.Signature(family: .inet, socketType: .stream, proto: .tcp, hostname: host, port: port)
+			let signature = try Socket.Signature(protocolFamily: .inet, socketType: .stream, proto: .tcp, hostname: host, port: port)
 			XCTAssertNotNil(signature)
 			
 			// Create a connected socket using the signature...
@@ -811,7 +811,7 @@ class SocketTests: XCTestCase {
 			print("Listener signature: \(socket.signature?.description as String?)")
 			
 			// Create a signature...
-			let signature = try Socket.Signature(family: .inet, socketType: .stream, proto: .tcp, hostname: socket.remoteHostname, port: socket.remotePort)
+			let signature = try Socket.Signature(protocolFamily: .inet, socketType: .stream, proto: .tcp, hostname: socket.remoteHostname, port: socket.remotePort)
 			XCTAssertNotNil(signature)
 			
 			// Create a connected socket using the signature...
@@ -854,7 +854,7 @@ class SocketTests: XCTestCase {
 			XCTAssertEqual(socket.listeningPort, port)
 			
 			// Create a signature...
-			let signature = try Socket.Signature(family: .inet, socketType: .stream, proto: .tcp, hostname: host, port: port)
+			let signature = try Socket.Signature(protocolFamily: .inet, socketType: .stream, proto: .tcp, hostname: host, port: port)
 			XCTAssertNotNil(signature)
 			
 			// Create a connected socket using the signature...
@@ -980,7 +980,7 @@ class SocketTests: XCTestCase {
 			#endif
 			
 			// Create the signature...
-			let signature = try Socket.Signature(family: .inet, socketType: .stream, proto: .tcp, hostname: hostname, port: port)!
+			let signature = try Socket.Signature(protocolFamily: .inet, socketType: .stream, proto: .tcp, hostname: hostname, port: port)!
 			
 			// Create the socket...
 			let socket = try createHelper()
@@ -1062,7 +1062,7 @@ class SocketTests: XCTestCase {
 			#endif
 
 			// Create the signature...
-			let signature = try Socket.Signature(family: .inet, socketType: .stream, proto: .tcp, hostname: hostname, port: port)!
+			let signature = try Socket.Signature(protocolFamily: .inet, socketType: .stream, proto: .tcp, hostname: hostname, port: port)!
 
 			// Create the socket...
 			let socket = try createHelper()
