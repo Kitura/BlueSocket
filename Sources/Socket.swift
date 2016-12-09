@@ -1312,7 +1312,7 @@ public class Socket: SocketReader, SocketWriter {
 						continue
 					}
 					
-                    //Note: if you're running tests inside Xcode and the tests stop on this line
+                    // Note: if you're running tests inside Xcode and the tests stop on this line
                     //  and the tests fail, but they work if you run `swift test` on the
                     //  command line, Hit `Deactivate Breakpoints` in Xcode and try again
 					throw Error(code: Socket.SOCKET_ERR_ACCEPT_FAILED, reason: self.lastError())
@@ -1339,6 +1339,9 @@ public class Socket: SocketReader, SocketWriter {
 						continue
 					}
 					
+					// Note: if you're running tests inside Xcode and the tests stop on this line
+					//  and the tests fail, but they work if you run `swift test` on the
+					//  command line, Hit `Deactivate Breakpoints` in Xcode and try again
 					throw Error(code: Socket.SOCKET_ERR_ACCEPT_FAILED, reason: self.lastError())
 				}
 				socketfd2 = fd
@@ -1449,6 +1452,9 @@ public class Socket: SocketReader, SocketWriter {
 						continue
 					}
 					
+					// Note: if you're running tests inside Xcode and the tests stop on this line
+					//  and the tests fail, but they work if you run `swift test` on the
+					//  command line, Hit `Deactivate Breakpoints` in Xcode and try again
 					throw Error(code: Socket.SOCKET_ERR_ACCEPT_FAILED, reason: self.lastError())
 				}
 				socketfd2 = fd
@@ -1473,6 +1479,9 @@ public class Socket: SocketReader, SocketWriter {
 						continue
 					}
 					
+					// Note: if you're running tests inside Xcode and the tests stop on this line
+					//  and the tests fail, but they work if you run `swift test` on the
+					//  command line, Hit `Deactivate Breakpoints` in Xcode and try again
 					throw Error(code: Socket.SOCKET_ERR_ACCEPT_FAILED, reason: self.lastError())
 				}
 				socketfd2 = fd
