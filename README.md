@@ -8,7 +8,7 @@
 # BlueSocket
 
 ## Overview
-Socket framework for Swift using the Swift Package Manager. Works on macOS and Linux.
+Socket framework for Swift using the Swift Package Manager. Works on iOS, macOS, and Linux.
 
 ## Contents
 
@@ -20,16 +20,18 @@ Socket framework for Swift using the Swift Package Manager. Works on macOS and L
 * Swift Open Source `swift-3.0.1-RELEASE` toolchain (**Minimum REQUIRED for latest release**)
 * Swift Open Source `swift-3.0.2-RELEASE` toolchain (**Recommended**)
 
+### iOS
+* iOS 9.0 or higher
+
 ### macOS
 
 * macOS 10.11.6 (*El Capitan*) or higher
-* iOS 9.0 or higher
 * Xcode Version 8.2 (8C38) or higher using one of the above toolchains (*Recommended*)
 
 ### Linux
 
 * Ubuntu 16.04 (or 16.10 but only tested on 16.04)
-* One of the Swift Open Source toolchain listed above
+* One of the Swift Open Source toolchains listed above
 
 ### Add-ins
 
@@ -63,6 +65,23 @@ To run the supplied unit tests for **Socket** from the command line:
 ```
 
 ## Using BlueSocket
+
+### Including in your project
+
+#### Swift Package Manager
+
+To include BlueSocket into a Swift Package Manager package, add it to the `dependencies` attribute defined in your `Package.swift` file. You can select the version using the `majorVersion` and `minor` parameters. For example:
+```
+dependencies: [
+.Package(url: "https://github.com/IBM-Swift/BlueSocket", majorVersion: <majorVersion>, minor: <minor>)
+]
+```
+
+#### Carthage
+To include BlueSocket in a project using Carthage, add a line to your `Cartfile` with the GitHub organization and project names and version. For example:
+```
+github "IBM-Swift/BlueSocket" ~> <majorVersion>.<minor>
+```
 
 ### Before starting
 
