@@ -33,7 +33,7 @@ class SocketTests: XCTestCase {
 	let QUIT: String = "QUIT"
 	let port: Int32 = 1337
 	let host: String = "127.0.0.1"
-	let path: String = "/tmp/server"
+	let path: String = "/tmp/server.test.socket"
 	
 	
 	override func setUp() {

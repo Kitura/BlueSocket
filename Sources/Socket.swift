@@ -609,6 +609,57 @@ public class Socket: SocketReader, SocketWriter {
 			self.hostname = hostname
 			self.port = port
 		}
+
+		///
+		///	Retrieve the UNIX address as an UnsafeMutablePointer
+		///
+		///	- Returns: Tuple containing the pointer plus the size.  **Needs to be deallocated after use.**
+		///
+		internal func unixAddress() throws -> (UnsafeMutablePointer<UInt8>, Int) {
+			
+			// Throw an exception if the path is not set...
+			if path == nil {
+				
+				throw Error(code: Socket.SOCKET_ERR_BAD_SIGNATURE_PARAMETERS, reason: "Specified path contains zero (0) bytes.")
+			}
+			
+			let utf8 = path!.utf8
+
+			// macOS has a size identifier in front, Linux does not...
+			#if os(Linux)
+				let addrLen = MemoryLayout<sockaddr_un>.size
+			#else
+				let addrLen = MemoryLayout<UInt8>.size + MemoryLayout<sa_family_t>.size + utf8.count + 1
+			#endif
+			let addrPtr = UnsafeMutablePointer<UInt8>.allocate(capacity: addrLen)
+			
+			var memLoc = 0
+			
+			// macOS uses one byte for sa_family_t, Linux uses two...
+			#if os(Linux)
+				let afUnixShort = UInt16(AF_UNIX)
+				addrPtr[memLoc] = UInt8(afUnixShort & 0xFF)
+				memLoc += 1
+				addrPtr[memLoc] = UInt8((afUnixShort >> 8) & 0xFF)
+				memLoc += 1
+			#else
+				addrPtr[memLoc] = UInt8(addrLen)
+				memLoc += 1
+				addrPtr[memLoc] = UInt8(AF_UNIX)
+				memLoc += 1
+			#endif
+			
+			// Copy the pathname...
+			for char in utf8 {
+				addrPtr[memLoc] = char
+				memLoc += 1
+			}
+			
+			addrPtr[memLoc] = 0
+			
+			return (addrPtr, addrLen)
+		}
+		
 	}
 	
 	// MARK: -- Error
@@ -1583,6 +1634,13 @@ public class Socket: SocketReader, SocketWriter {
 		if let _ = self.signature {
 			self.signature!.hostname = Socket.NO_HOSTNAME
 			self.signature!.port = Socket.SOCKET_INVALID_PORT
+			if self.signature!.path != nil {
+				#if os(Linux)
+					_ = Glibc.unlink(self.signature!.path!)
+				#else
+					_ = Darwin.unlink(self.signature!.path!)
+				#endif
+			}
 			self.signature!.path = nil
 			self.signature!.isSecure = false
 		}
@@ -1818,17 +1876,20 @@ public class Socket: SocketReader, SocketWriter {
 		}
 		
 		// Now, do the connection using the supplied address...
-		var remoteAddr = signature.address!.addr
+		let (addrPtr, addrLen) = try signature.unixAddress()
+		defer {
+			addrPtr.deallocate(capacity: addrLen)
+		}
 		
-		#if os(Linux)
-			let rc = withUnsafeMutablePointer(to: &remoteAddr) {
-				Glibc.connect(self.socketfd, UnsafeMutablePointer($0), socklen_t(signature.address!.size))
-			}
-		#else
-			let rc = withUnsafeMutablePointer(to: &remoteAddr) {
-				Darwin.connect(self.socketfd, UnsafeMutablePointer($0), socklen_t(signature.address!.size))
-			}
-		#endif
+		let rc = addrPtr.withMemoryRebound(to: sockaddr.self, capacity: 1) {
+			(p:UnsafeMutablePointer<sockaddr>) -> Int32 in
+
+			#if os(Linux)
+				return Glibc.connect(self.socketfd, p, socklen_t(addrLen))
+			#else
+				return Darwin.connect(self.socketfd, p, socklen_t(addrLen))
+			#endif
+		}
 		if rc < 0 {
 			
 			throw Error(code: Socket.SOCKET_ERR_CONNECT_FAILED, reason: self.lastError())
@@ -2188,8 +2249,7 @@ public class Socket: SocketReader, SocketWriter {
 
 		// Create the signature...
 		let sig = try Signature(socketType: .stream, proto: .unix, path: path)
-		guard let signature = sig,
-			let address = signature.address else {
+		guard let signature = sig else {
 			
 			throw Error(code:Socket.SOCKET_ERR_BAD_SIGNATURE_PARAMETERS, reason: nil)
 		}
@@ -2202,12 +2262,21 @@ public class Socket: SocketReader, SocketWriter {
 		#endif
 		
 		// Try to bind the socket to the address...
-		var localAddr = address.addr
-		#if os(Linux)
-			let rc = Glibc.bind(self.socketfd, &localAddr, socklen_t(address.size))
-		#else
-			let rc = Darwin.bind(self.socketfd, &localAddr, socklen_t(address.size))
-		#endif
+		// Now, do the connection using the supplied address from the signature...
+		let (addrPtr, addrLen) = try signature.unixAddress()
+		defer {
+			addrPtr.deallocate(capacity: addrLen)
+		}
+		
+		let rc = addrPtr.withMemoryRebound(to: sockaddr.self, capacity: 1) {
+			(p:UnsafeMutablePointer<sockaddr>) -> Int32 in
+			
+			#if os(Linux)
+				return Glibc.bind(self.socketfd, p, socklen_t(addrLen))
+			#else
+				return Darwin.bind(self.socketfd, p, socklen_t(addrLen))
+			#endif
+		}
 		
 		if rc < 0 {
 			
