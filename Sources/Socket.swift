@@ -692,7 +692,7 @@ public class Socket: SocketReader, SocketWriter {
 		public var description: String {
 			
 			let reason: String = self.errorReason ?? "Reason: Unavailable"
-			return "Error code: \(self.errorCode), \(reason)"
+			return "Error code: \(self.errorCode)(0x\(String(self.errorCode, radix: 16, uppercase: true))), \(reason)"
 		}
 		
 		///
@@ -1303,9 +1303,6 @@ public class Socket: SocketReader, SocketWriter {
         // Destroy and free the readBuffer...
         self.readBuffer.deinitialize()
         self.readBuffer.deallocate(capacity: self.readBufferSize)
-
-        // If we have a delegate, tell it to cleanup too...
-        self.delegate?.deinitialize()
     }
 	
 	// MARK: Public Functions
@@ -1613,6 +1610,9 @@ public class Socket: SocketReader, SocketWriter {
 	public func close() {
 		
 		if self.socketfd != Socket.SOCKET_INVALID_DESCRIPTOR {
+			
+			// If we have a delegate, tell it to cleanup too...
+			self.delegate?.deinitialize()
 			
 			// Note: if the socket is listening, we need to shut it down prior to closing
 			//		or the socket will be left hanging until it times out.
