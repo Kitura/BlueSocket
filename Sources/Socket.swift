@@ -1905,6 +1905,12 @@ public class Socket: SocketReader, SocketWriter {
 	///
 	public func connect(using signature: Signature) throws {
 		
+		// Make sure we've got a valid socket...
+		if self.socketfd == Socket.SOCKET_INVALID_DESCRIPTOR {
+			
+			throw Error(code: Socket.SOCKET_ERR_BAD_DESCRIPTOR, reason: nil)
+		}
+		
 		// Ensure we've got a proper address...
 		//	Handle the Unix style socket first...
 		if let path = signature.path {
@@ -2006,6 +2012,12 @@ public class Socket: SocketReader, SocketWriter {
 	/// 	- maxBacklogSize: 		The maximum size of the queue containing pending connections. Default is *Socket.SOCKET_DEFAULT_MAX_BACKLOG*.
 	///
 	public func listen(on port: Int, maxBacklogSize: Int = Socket.SOCKET_DEFAULT_MAX_BACKLOG) throws {
+		
+		// Make sure we've got a valid socket...
+		if self.socketfd == Socket.SOCKET_INVALID_DESCRIPTOR {
+			
+			throw Error(code: Socket.SOCKET_ERR_BAD_DESCRIPTOR, reason: nil)
+		}
 		
 		// Set a flag so that this address can be re-used immediately after the connection
 		// closes.  (TCP normally imposes a delay before an address can be re-used.)
@@ -2223,6 +2235,12 @@ public class Socket: SocketReader, SocketWriter {
 	///
 	public func listen(on path: String, maxBacklogSize: Int = Socket.SOCKET_DEFAULT_MAX_BACKLOG) throws {
 
+		// Make sure we've got a valid socket...
+		if self.socketfd == Socket.SOCKET_INVALID_DESCRIPTOR {
+			
+			throw Error(code: Socket.SOCKET_ERR_BAD_DESCRIPTOR, reason: nil)
+		}
+		
 		// Make sure this is a UNIX socket...
 		guard let sockSig = self.signature, sockSig.protocolFamily == .unix else {
 			
