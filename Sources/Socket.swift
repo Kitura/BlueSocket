@@ -2843,9 +2843,7 @@ public class Socket: SocketReader, SocketWriter {
 		var sent = 0
 		var sendFlags: Int32 = 0
 		#if os(Linux)
-			if self.isListening {
-				sendFlags = Int32(MSG_NOSIGNAL)
-			}
+			sendFlags = Int32(MSG_NOSIGNAL)
 		#endif
 		while sent < bufSize {
 			
@@ -3009,9 +3007,7 @@ public class Socket: SocketReader, SocketWriter {
 		var sent = 0
 		var sendFlags: Int32 = 0
 		#if os(Linux)
-			if self.isListening {
-				sendFlags = Int32(MSG_NOSIGNAL)
-			}
+			sendFlags = Int32(MSG_NOSIGNAL)
 		#endif
 		
 		var addr = address.addr
