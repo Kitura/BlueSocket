@@ -1608,44 +1608,8 @@ public class Socket: SocketReader, SocketWriter {
 	/// Closes the current socket.
 	///
 	public func close() {
-		
-		if self.socketfd != Socket.SOCKET_INVALID_DESCRIPTOR {
-			
-			// If we have a delegate, tell it to cleanup too...
-			self.delegate?.deinitialize()
-			
-			// Note: if the socket is listening, we need to shut it down prior to closing
-			//		or the socket will be left hanging until it times out.
-			#if os(Linux)
-				if self.isListening {
-					_ = Glibc.shutdown(self.socketfd, Int32(SHUT_RDWR))
-				}
-				_ = Glibc.close(self.socketfd)
-			#else
-				if self.isListening {
-					_ = Darwin.shutdown(self.socketfd, Int32(SHUT_RDWR))
-				}
-				_ = Darwin.close(self.socketfd)
-			#endif
-			
-			self.socketfd = Socket.SOCKET_INVALID_DESCRIPTOR
-		}
-		
-		if let _ = self.signature {
-			self.signature!.hostname = Socket.NO_HOSTNAME
-			self.signature!.port = Socket.SOCKET_INVALID_PORT
-			if self.signature!.path != nil {
-				#if os(Linux)
-					_ = Glibc.unlink(self.signature!.path!)
-				#else
-					_ = Darwin.unlink(self.signature!.path!)
-				#endif
-			}
-			self.signature!.path = nil
-			self.signature!.isSecure = false
-		}
-		self.isConnected = false
-		self.isListening = false
+
+		self.close(withSSLCleanup: true)
 	}
 	
 	// MARK: -- Connect
@@ -1794,7 +1758,7 @@ public class Socket: SocketReader, SocketWriter {
 		// Close the existing socket (if open) before replacing it...
 		if self.socketfd != Socket.SOCKET_INVALID_DESCRIPTOR {
 			
-			self.close()
+			self.close(withSSLCleanup: false)
 		}
 		
 		self.socketfd = socketDescriptor!
@@ -3229,6 +3193,55 @@ public class Socket: SocketReader, SocketWriter {
 	}
 	
 	// MARK: Private Functions
+	
+	///
+	/// Closes the current socket.
+	///
+	///	- Parameters:
+	///		- withSSLCleanup:	True to deinitialize the SSLService if present.
+	///
+	private func close(withSSLCleanup: Bool) {
+		
+		if self.socketfd != Socket.SOCKET_INVALID_DESCRIPTOR {
+			
+			// If we have a delegate, tell it to cleanup too...
+			if withSSLCleanup {
+				self.delegate?.deinitialize()
+			}
+			
+			// Note: if the socket is listening, we need to shut it down prior to closing
+			//		or the socket will be left hanging until it times out.
+			#if os(Linux)
+				if self.isListening {
+					_ = Glibc.shutdown(self.socketfd, Int32(SHUT_RDWR))
+				}
+				_ = Glibc.close(self.socketfd)
+			#else
+				if self.isListening {
+					_ = Darwin.shutdown(self.socketfd, Int32(SHUT_RDWR))
+				}
+				_ = Darwin.close(self.socketfd)
+			#endif
+			
+			self.socketfd = Socket.SOCKET_INVALID_DESCRIPTOR
+		}
+		
+		if let _ = self.signature {
+			self.signature!.hostname = Socket.NO_HOSTNAME
+			self.signature!.port = Socket.SOCKET_INVALID_PORT
+			if self.signature!.path != nil {
+				#if os(Linux)
+					_ = Glibc.unlink(self.signature!.path!)
+				#else
+					_ = Darwin.unlink(self.signature!.path!)
+				#endif
+			}
+			self.signature!.path = nil
+			self.signature!.isSecure = false
+		}
+		self.isConnected = false
+		self.isListening = false
+	}
 	
 	///
 	/// Private function that reads all available data on an open socket into storage.
