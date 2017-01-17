@@ -1235,6 +1235,16 @@ public class Socket: SocketReader, SocketWriter {
 			throw Error(code: Socket.SOCKET_ERR_UNABLE_TO_CREATE_SOCKET, reason: self.lastError())
 		}
 		
+		#if !os(Linux)
+			// Set the socket to ignore SIGPIPE to avoid dying on interrupted connections...
+			// Note: Linux does not support the SO_NOSIGPIPE option. Instead, we use the
+			// MSG_NOSIGNAL flags passed to send.  See the write() functions below.
+			var on: Int32 = 1
+			if setsockopt(self.socketfd, SOL_SOCKET, SO_NOSIGPIPE, &on, socklen_t(MemoryLayout<Int32>.size)) < 0 {
+				throw Error(code: Socket.SOCKET_ERR_SETSOCKOPT_FAILED, reason: self.lastError())
+			}
+		#endif
+		
 		// Create the signature...
 		try self.signature = Signature(
 			protocolFamily: family.value,
@@ -1265,6 +1275,14 @@ public class Socket: SocketReader, SocketWriter {
 			let type = Int32(SOCK_STREAM.rawValue)
 		#else
 			let type = SOCK_STREAM
+			
+			// Set the socket to ignore SIGPIPE to avoid dying on interrupted connections...
+			// Note: Linux does not support the SO_NOSIGPIPE option. Instead, we use the
+			// MSG_NOSIGNAL flags passed to send.  See the write() functions below.
+			var on: Int32 = 1
+			if setsockopt(self.socketfd, SOL_SOCKET, SO_NOSIGPIPE, &on, socklen_t(MemoryLayout<Int32>.size)) < 0 {
+				throw Error(code: Socket.SOCKET_ERR_SETSOCKOPT_FAILED, reason: self.lastError())
+			}
 		#endif
 		
 		if path != nil {
@@ -1991,16 +2009,6 @@ public class Socket: SocketReader, SocketWriter {
 			throw Error(code: Socket.SOCKET_ERR_SETSOCKOPT_FAILED, reason: self.lastError())
 		}
 		
-		#if !os(Linux)
-			// Set the socket to ignore SIGPIPE to avoid dying on interrupted connections...
-			//	Note: Linux does not support the SO_NOSIGPIPE option. Instead, we use the
-			//		  MSG_NOSIGNAL flags passed to send.  See the writeData() functions below.
-			if setsockopt(self.socketfd, SOL_SOCKET, SO_NOSIGPIPE, &on, socklen_t(MemoryLayout<Int32>.size)) < 0 {
-				
-				throw Error(code: Socket.SOCKET_ERR_SETSOCKOPT_FAILED, reason: self.lastError())
-			}
-		#endif
-		
 		// Get the signature for the socket...
 		guard let sig = self.signature else {
 			
@@ -2219,16 +2227,6 @@ public class Socket: SocketReader, SocketWriter {
 			throw Error(code: Socket.SOCKET_ERR_SETSOCKOPT_FAILED, reason: self.lastError())
 		}
 		
-		#if !os(Linux)
-			// Set the socket to ignore SIGPIPE to avoid dying on interrupted connections...
-			//	Note: Linux does not support the SO_NOSIGPIPE option. Instead, we use the
-			//		  MSG_NOSIGNAL flags passed to send.  See the writeData() functions below.
-			if setsockopt(self.socketfd, SOL_SOCKET, SO_NOSIGPIPE, &on, socklen_t(MemoryLayout<Int32>.size)) < 0 {
-				
-				throw Error(code: Socket.SOCKET_ERR_SETSOCKOPT_FAILED, reason: self.lastError())
-			}
-		#endif
-
 		// Create the signature...
 		let sig = try Signature(socketType: .stream, proto: .unix, path: path)
 		guard let signature = sig else {
@@ -2825,9 +2823,9 @@ public class Socket: SocketReader, SocketWriter {
 		var sent = 0
 		var sendFlags: Int32 = 0
 		#if os(Linux)
-			if self.isListening {
-				sendFlags = Int32(MSG_NOSIGNAL)
-			}
+			// Ignore SIGPIPE to avoid process termination if the reader has closed the connection.
+			// On Linux, we set the MSG_NOSIGNAL send flag. On OSX, we set SO_NOSIGPIPE during init().
+			sendFlags = Int32(MSG_NOSIGNAL)
 		#endif
 		while sent < bufSize {
 			
@@ -2991,9 +2989,9 @@ public class Socket: SocketReader, SocketWriter {
 		var sent = 0
 		var sendFlags: Int32 = 0
 		#if os(Linux)
-			if self.isListening {
-				sendFlags = Int32(MSG_NOSIGNAL)
-			}
+			// Ignore SIGPIPE to avoid process termination if the reader has closed the connection.
+			// On Linux, we set the MSG_NOSIGNAL send flag. On OSX, we set SO_NOSIGPIPE during init().
+			sendFlags = Int32(MSG_NOSIGNAL)
 		#endif
 		
 		var addr = address.addr
