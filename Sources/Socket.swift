@@ -3227,7 +3227,11 @@ public class Socket: SocketReader, SocketWriter {
 		if let _ = self.signature {
 			self.signature!.hostname = Socket.NO_HOSTNAME
 			self.signature!.port = Socket.SOCKET_INVALID_PORT
-			if self.signature!.path != nil {
+			
+			// If we've got a path to a UNIX socket and we're listening...
+			//		Delete the file represented by the path as this listener
+			//		is no longer available.
+			if self.signature!.path != nil && self.isListening {
 				#if os(Linux)
 					_ = Glibc.unlink(self.signature!.path!)
 				#else
