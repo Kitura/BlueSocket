@@ -2803,11 +2803,6 @@ public class Socket: SocketReader, SocketWriter {
 	///
 	@discardableResult public func write(from buffer: UnsafeRawPointer, bufSize: Int) throws -> Int {
 		
-		// If the remote connection has closed, disallow the operation...
-		if self.remoteConnectionClosed {
-			return 0
-		}
-		
 		// Make sure the buffer is valid...
 		if bufSize == 0 {
 			
@@ -3262,11 +3257,6 @@ public class Socket: SocketReader, SocketWriter {
 	///
 	private func readDataIntoStorage() throws -> Int {
 		
-		// If the remote connection has closed, disallow the operation...
-		if self.remoteConnectionClosed {
-			return 0
-		}
-		
 		// Clear the buffer...
 		self.readBuffer.deinitialize()
 		self.readBuffer.initialize(to: 0x0)
@@ -3378,11 +3368,6 @@ public class Socket: SocketReader, SocketWriter {
 	/// - Returns: number of bytes read.
 	///
 	private func readDatagramIntoStorage() throws -> (bytesRead: Int, fromAddress: Address?) {
-		
-		// If the remote connection has closed, disallow the operation...
-		if self.remoteConnectionClosed {
-			return (0, nil)
-		}
 		
 		// Clear the buffer...
 		self.readBuffer.deinitialize()
