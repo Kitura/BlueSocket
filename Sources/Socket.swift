@@ -434,7 +434,7 @@ public class Socket: SocketReader, SocketWriter {
 			if type == .datagram {
 				guard pro == .udp || pro == .unix else {
 					
-					throw Error(code: Socket.SOCKET_ERR_BAD_SIGNATURE_PARAMETERS, reason: "Datagram socket must use .udp for the protocol.")
+					throw Error(code: Socket.SOCKET_ERR_BAD_SIGNATURE_PARAMETERS, reason: "Datagram socket must use .udp or .unix for the protocol.")
 				}
 			}
 			
@@ -479,7 +479,7 @@ public class Socket: SocketReader, SocketWriter {
 			if socketType == .datagram {
 				guard proto == .udp || proto == .unix else {
 					
-					throw Error(code: Socket.SOCKET_ERR_BAD_SIGNATURE_PARAMETERS, reason: "Datagram socket must use .udp for the protocol.")
+					throw Error(code: Socket.SOCKET_ERR_BAD_SIGNATURE_PARAMETERS, reason: "Datagram socket must use .udp or .unix for the protocol.")
 				}
 			}
 			
@@ -524,7 +524,7 @@ public class Socket: SocketReader, SocketWriter {
 			if socketType == .datagram {
 				guard proto == .udp || proto == .unix else {
 					
-					throw Error(code: Socket.SOCKET_ERR_BAD_SIGNATURE_PARAMETERS, reason: "Datagram socket must use .udp for the protocol.")
+					throw Error(code: Socket.SOCKET_ERR_BAD_SIGNATURE_PARAMETERS, reason: "Datagram socket must use .udp or .unix for the protocol.")
 				}
 			}
 			
@@ -937,7 +937,7 @@ public class Socket: SocketReader, SocketWriter {
 		if type == .datagram {
 			guard proto == .udp || proto == .unix else {
 				
-				throw Error(code: Socket.SOCKET_ERR_BAD_SIGNATURE_PARAMETERS, reason: "Datagram socket must use .udp for the protocol.")
+				throw Error(code: Socket.SOCKET_ERR_BAD_SIGNATURE_PARAMETERS, reason: "Datagram socket must use .udp or .unix for the protocol.")
 			}
 		}
 		
