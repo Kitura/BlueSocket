@@ -72,15 +72,15 @@ To run the supplied unit tests for **Socket** from the command line:
 
 To include BlueSocket into a Swift Package Manager package, add it to the `dependencies` attribute defined in your `Package.swift` file. You can select the version using the `majorVersion` and `minor` parameters. For example:
 ```
-dependencies: [
-.Package(url: "https://github.com/IBM-Swift/BlueSocket", majorVersion: <majorVersion>, minor: <minor>)
-]
+	dependencies: [
+		.Package(url: "https://github.com/IBM-Swift/BlueSocket", majorVersion: <majorVersion>, minor: <minor>)
+	]
 ```
 
 #### Carthage
 To include BlueSocket in a project using Carthage, add a line to your `Cartfile` with the GitHub organization and project names and version. For example:
 ```
-github "IBM-Swift/BlueSocket" ~> <majorVersion>.<minor>
+	github "IBM-Swift/BlueSocket" ~> <majorVersion>.<minor>
 ```
 
 ### Before starting
@@ -112,6 +112,15 @@ import Socket
 - `create(family family: ProtocolFamily, type: SocketType, proto: SocketProtocol)` - This API allows you to create a configured `Socket` instance customized for your needs.  You can customize the protocol family, socket type and socket protocol.
 - `create(connectedUsing signature: Signature)` - This API will allow you create a `Socket` instance and have it attempt to connect to a server based on the information you pass in the `Socket.Signature`.
 - `create(fromNativeHandle nativeHandle: Int32, address: Address?)` - This API lets you wrap a native file descriptor describing an existing socket in a new instance of `Socket`.
+
+#### Setting the read buffer size.
+
+**BlueSocket** allows you to set the size of the read buffer that it will use. Then, depending on the needs of the application, you can change it to a higher or lower value. The default is set to `Socket.SOCKET_DEFAULT_READ_BUFFER_SIZE` which has a value of `4096`. The minimum read buffer size is `Socket.SOCKET_MINIMUM_READ_BUFFER_SIZE` which is set to `1024`. Below illustrates how to change the read buffer size (exception handling omitted for brevity):
+```
+let mySocket = try Socket.create()
+mySocket.readBufferSize = 32768
+```
+The example above sets the default read buffer size to *32768*.  This setting should be done *prior* to using the `Socket` instance for the first time.
 
 ### Closing a socket.
 
