@@ -797,7 +797,6 @@ public class Socket: SocketReader, SocketWriter {
 				readBufferSize = Socket.SOCKET_MINIMUM_READ_BUFFER_SIZE
 			}
 			
-			print("Creating read buffer of size: \(readBufferSize)")
 			if readBufferSize != oldValue {
 				
 				readBuffer.deinitialize()
@@ -3217,12 +3216,16 @@ public class Socket: SocketReader, SocketWriter {
 			#if os(Linux)
 				if self.isListening {
 					_ = Glibc.shutdown(self.socketfd, Int32(SHUT_RDWR))
+					self.isListening = false
 				}
+				self.isConnected = false
 				_ = Glibc.close(self.socketfd)
 			#else
 				if self.isListening {
 					_ = Darwin.shutdown(self.socketfd, Int32(SHUT_RDWR))
+					self.isListening = false
 				}
+				self.isConnected = false
 				_ = Darwin.close(self.socketfd)
 			#endif
 			
@@ -3246,8 +3249,6 @@ public class Socket: SocketReader, SocketWriter {
 			self.signature!.path = nil
 			self.signature!.isSecure = false
 		}
-		self.isConnected = false
-		self.isListening = false
 	}
 	
 	///
@@ -3258,10 +3259,8 @@ public class Socket: SocketReader, SocketWriter {
 	private func readDataIntoStorage() throws -> Int {
 		
 		// Clear the buffer...
-		self.readBuffer.deinitialize()
 		self.readBuffer.initialize(to: 0x0)
-		memset(self.readBuffer, 0x0, self.readBufferSize)
-
+		
 		var recvFlags: Int32 = 0
 		if (self.readStorage.length > 0) {
 			recvFlags |= Int32(MSG_DONTWAIT)
@@ -3271,16 +3270,24 @@ public class Socket: SocketReader, SocketWriter {
 		var count: Int = 0
 		repeat {
 			
-			if self.delegate != nil {
+			if self.delegate == nil {
+				
+				#if os(Linux)
+					count = Glibc.recv(self.socketfd, self.readBuffer, self.readBufferSize, recvFlags)
+				#else
+					count = Darwin.recv(self.socketfd, self.readBuffer, self.readBufferSize, recvFlags)
+				#endif
+				
+			} else {
 				
 				repeat {
 					
 					do {
-
+						
 						count = try self.delegate!.recv(buffer: self.readBuffer, bufSize: self.readBufferSize)
 						
 						break
-					
+						
 					} catch let error {
 						
 						guard let err = error as? SSLError else {
@@ -3312,33 +3319,28 @@ public class Socket: SocketReader, SocketWriter {
 					
 				} while true
 				
-			} else {
-				#if os(Linux)
-					count = Glibc.recv(self.socketfd, self.readBuffer, self.readBufferSize, recvFlags)
-				#else
-					count = Darwin.recv(self.socketfd, self.readBuffer, self.readBufferSize, recvFlags)
-				#endif
 			}
-			
 			// Check for error...
 			if count < 0 {
 				
-				// - Could be an error, but if errno is EAGAIN or EWOULDBLOCK (if a non-blocking socket),
-				//		it means there was NO data to read...
-				if errno == EAGAIN || errno == EWOULDBLOCK {
-
-					// So return the size of whatever data we already have (possibly none)
-					return self.readStorage.length
-				}
-				
-				// - Handle a connection reset by peer (ECONNRESET) and throw a different exception...
-				if errno == ECONNRESET {
+				switch errno {
 					
+					// - Could be an error, but if errno is EAGAIN or EWOULDBLOCK (if a non-blocking socket),
+				//	it means there was NO data to read...
+				case EAGAIN:
+					fallthrough
+				case EWOULDBLOCK:
+					return self.readStorage.length
+					
+				case ECONNRESET:
+					// - Handle a connection reset by peer (ECONNRESET) and throw a different exception...
 					throw Error(code: Socket.SOCKET_ERR_CONNECTION_RESET, reason: self.lastError())
+					
+				default:
+					// - Something went wrong...
+					throw Error(code: Socket.SOCKET_ERR_RECV_FAILED, reason: self.lastError())
 				}
 				
-				// - Something went wrong...
-				throw Error(code: Socket.SOCKET_ERR_RECV_FAILED, reason: self.lastError())
 			}
 			
 			if count == 0 {
@@ -3347,9 +3349,8 @@ public class Socket: SocketReader, SocketWriter {
 				return 0
 			}
 			
-			if count > 0 {
-				self.readStorage.append(self.readBuffer, length: count)
-			}
+			// Save the data in the buffer...
+			self.readStorage.append(self.readBuffer, length: count)
 			
 			// Didn't fill the buffer so we've got everything available...
 			if count < self.readBufferSize {
@@ -3370,9 +3371,7 @@ public class Socket: SocketReader, SocketWriter {
 	private func readDatagramIntoStorage() throws -> (bytesRead: Int, fromAddress: Address?) {
 		
 		// Clear the buffer...
-		self.readBuffer.deinitialize()
 		self.readBuffer.initialize(to: 0x0)
-		memset(self.readBuffer, 0x0, self.readBufferSize)
 		var address: Address? = nil
 
 		var recvFlags: Int32 = 0
@@ -3418,9 +3417,8 @@ public class Socket: SocketReader, SocketWriter {
 			return (0, nil)
 		}
 		
-		if count > 0 {
-			self.readStorage.append(self.readBuffer, length: count)
-		}
+		// Save the data in the buffer...
+		self.readStorage.append(self.readBuffer, length: count)
 		
 		// Retrieve the address...
 		if addrPtr.sa_family == sa_family_t(AF_INET6) {
