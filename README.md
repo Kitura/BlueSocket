@@ -20,12 +20,13 @@ Socket framework for Swift using the Swift Package Manager. Works on iOS, macOS,
 * Swift Open Source `swift-3.0.1-RELEASE` toolchain (**Minimum REQUIRED for latest release**)
 * Swift Open Source `swift-3.0.2-RELEASE` toolchain (**Recommended**)
 
-### iOS
-* iOS 9.0 or higher
-
 ### macOS
 
 * macOS 10.11.6 (*El Capitan*) or higher
+* Xcode Version 8.2 (8C38) or higher using one of the above toolchains (*Recommended*)
+
+### iOS
+* iOS 10.0 or higher
 * Xcode Version 8.2 (8C38) or higher using one of the above toolchains (*Recommended*)
 
 ### Linux
@@ -36,7 +37,6 @@ Socket framework for Swift using the Swift Package Manager. Works on iOS, macOS,
 ### Add-ins
 
 * [BlueSSLService](https://github.com/IBM-Swift/BlueSSLService.git) can be used to add **SSL/TLS** support.
-* **Note:** **BlueSSLService** is *NOT* supported on iOS.
 
 ## Build
 
