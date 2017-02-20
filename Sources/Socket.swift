@@ -399,7 +399,7 @@ public class Socket: SocketReader, SocketWriter {
 		///
 		public var description: String {
 			
-			return "Signature: family: \(protocolFamily), type: \(socketType), protocol: \(proto), address: \(address as Socket.Address?), hostname: \(hostname as String?), port: \(port), path: \(path), bound: \(isBound), secure: \(isSecure)"
+			return "Signature: family: \(protocolFamily), type: \(socketType), protocol: \(proto), address: \(address as Socket.Address?), hostname: \(hostname as String?), port: \(port), path: \(String(describing: path)), bound: \(isBound), secure: \(isSecure)"
 		}
 		
 		// MARK: -- Public Functions
@@ -1118,9 +1118,9 @@ public class Socket: SocketReader, SocketWriter {
 		// Issue the select...
 		var count: Int32 = 0
 		if waitForever {
-			count = select(highSocketfd + 1, &readfds, nil, nil, nil)
+			count = select(highSocketfd + Int32(1), &readfds, nil, nil, nil)
 		} else {
-			count = select(highSocketfd + 1, &readfds, nil, nil, &timer)
+			count = select(highSocketfd + Int32(1), &readfds, nil, nil, &timer)
 		}
 		
 		// A count of less than zero indicates select failed...
@@ -3121,7 +3121,7 @@ public class Socket: SocketReader, SocketWriter {
 		if waitForever {
 			
 			// Wait forever for data...
-			count = select(self.socketfd + 1, &readfds, &writefds, nil, nil)
+			count = select(self.socketfd + Int32(1), &readfds, &writefds, nil, nil)
 		
 		} else {
 		
@@ -3150,7 +3150,7 @@ public class Socket: SocketReader, SocketWriter {
 			}
 			
 			// See if there's data on the socket...
-			count = select(self.socketfd + 1, &readfds, &writefds, nil, &timer)
+			count = select(self.socketfd + Int32(1), &readfds, &writefds, nil, &timer)
 		}
 		
 		// A count of less than zero indicates select failed...
