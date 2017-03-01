@@ -1157,7 +1157,7 @@ public class Socket: SocketReader, SocketWriter {
 	///
 	public class func createAddress(for host: String, on port: Int32) -> Address? {
 		
-		var info: UnsafeMutablePointer<addrinfo>? = UnsafeMutablePointer<addrinfo>.allocate(capacity: 1)
+		var info: UnsafeMutablePointer<addrinfo>?
 		
 		// Retrieve the info on our target...
 		var status: Int32 = getaddrinfo(host, String(port), nil, &info)
@@ -1700,7 +1700,7 @@ public class Socket: SocketReader, SocketWriter {
 				ai_next: nil)
 		#endif
 		
-		var targetInfo: UnsafeMutablePointer<addrinfo>? = UnsafeMutablePointer<addrinfo>.allocate(capacity: 1)
+		var targetInfo: UnsafeMutablePointer<addrinfo>?
 		
 		// Retrieve the info on our target...
 		var status: Int32 = getaddrinfo(host, String(port), &hints, &targetInfo)
@@ -2056,7 +2056,7 @@ public class Socket: SocketReader, SocketWriter {
 				ai_next: nil)
 		#endif
 		
-		var targetInfo: UnsafeMutablePointer<addrinfo>? = UnsafeMutablePointer<addrinfo>.allocate(capacity: 1)
+		var targetInfo: UnsafeMutablePointer<addrinfo>?
 		
 		// Retrieve the info on our target...
 		let status: Int32 = getaddrinfo(nil, String(port), &hints, &targetInfo)
