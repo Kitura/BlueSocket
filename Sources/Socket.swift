@@ -84,6 +84,8 @@ public class Socket: SocketReader, SocketWriter {
 	public static let SOCKET_ERR_WRONG_PROTOCOL				= -9973
 	public static let SOCKET_ERR_NOT_ACTIVE					= -9972
 	public static let SOCKET_ERR_CONNECTION_RESET			= -9971
+	public static let SOCKET_ERR_SET_RECV_TIMEOUT_FAILED	= -9970
+	public static let SOCKET_ERR_SET_WRITE_TIMEOUT_FAILED	= -9969
 	
 
 	///
@@ -3192,6 +3194,86 @@ public class Socket: SocketReader, SocketWriter {
 		}
 		
 		self.isBlocking = shouldBlock
+	}
+	
+	///
+	/// Set read timeout.
+	///
+	/// - Parameters:
+	///		- timeout:		Timeout (in msec) before returning.  A timeout value of 0 will return immediately.
+	///
+	public func setReadTimeout(value: UInt = 0) throws {
+		
+		// Default timeout of zero (i.e. don't wait)...
+		var timer = timeval()
+		
+		// But honor callers desires...
+		if value > 0 {
+			
+			// First get seconds...
+			let secs = Int(Double(value / 1000))
+			timer.tv_sec = secs
+			
+			// Now get the leftover millisecs...
+			let msecs = Int32(Double(value % 1000))
+			
+			// Note: timeval expects microseconds, convert now...
+			let uSecs = msecs * 1000
+			
+			// Now the leftover microseconds...
+			#if os(Linux)
+				timer.tv_usec = Int(uSecs)
+			#else
+				timer.tv_usec = Int32(uSecs)
+			#endif
+		}
+		
+		let result = setsockopt(self.socketfd, SOL_SOCKET, SO_RCVTIMEO, &timer, socklen_t(MemoryLayout<timeval>.stride))
+
+		if result < 0 {
+			
+			throw Error(code: Socket.SOCKET_ERR_SET_RECV_TIMEOUT_FAILED, reason: self.lastError())
+		}
+	}
+	
+	///
+	/// Set write timeout.
+	///
+	/// - Parameters:
+	///		- timeout:		Timeout (in msec) before returning.  A timeout value of 0 will return immediately.
+	///
+	public func setWriteTimeout(value: UInt = 0) throws {
+		
+		// Default timeout of zero (i.e. don't wait)...
+		var timer = timeval()
+		
+		// But honor callers desires...
+		if value > 0 {
+			
+			// First get seconds...
+			let secs = Int(Double(value / 1000))
+			timer.tv_sec = secs
+			
+			// Now get the leftover millisecs...
+			let msecs = Int32(Double(value % 1000))
+			
+			// Note: timeval expects microseconds, convert now...
+			let uSecs = msecs * 1000
+			
+			// Now the leftover microseconds...
+			#if os(Linux)
+				timer.tv_usec = Int(uSecs)
+			#else
+				timer.tv_usec = Int32(uSecs)
+			#endif
+		}
+		
+		let result = setsockopt(self.socketfd, SOL_SOCKET, SO_SNDTIMEO, &timer, socklen_t(MemoryLayout<timeval>.stride))
+		
+		if result < 0 {
+			
+			throw Error(code: Socket.SOCKET_ERR_SET_WRITE_TIMEOUT_FAILED, reason: self.lastError())
+		}
 	}
 	
 	// MARK: Private Functions
