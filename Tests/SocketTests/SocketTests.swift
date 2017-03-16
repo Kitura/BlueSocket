@@ -927,6 +927,80 @@ class SocketTests: XCTestCase {
 		}
 	}
 	
+	func testSetReadTimeout() {
+		
+		do {
+			
+			// Create the socket...
+			let socket = try createUDPHelper()
+			
+			// Set a timeout of 300 ms...
+			try socket.setReadTimeout(value: UInt(300))
+			
+			// Try a read with nobody listening...
+			var data: Data = Data()
+			let (bytes, addr) = try socket.readDatagram(into: &data)
+			XCTAssertEqual(bytes, 0)
+			XCTAssertNil(addr)
+			XCTAssertEqual(errno, EAGAIN)
+			
+			// Close the socket...
+			socket.close()
+			XCTAssertFalse(socket.isActive)
+			
+		} catch let error {
+			
+			// See if it's a socket error or something else...
+			guard let socketError = error as? Socket.Error else {
+				
+				print("Unexpected error...")
+				XCTFail()
+				return
+			}
+			
+			print("testSetReadTimeout Error reported: \(socketError.description)")
+			XCTFail()
+		}
+	}
+	
+	func testSetWriteTimeout() {
+		
+		do {
+			
+			// Create the socket...
+			let socket = try createUDPHelper()
+			
+			// Set a timeout of 300 ms...
+			try socket.setWriteTimeout(value: UInt(300))
+			
+			// Try a write to a `bogus` address...
+			let addr = Socket.createAddress(for: "foobar.org", on: 2142)
+			XCTAssertNotNil(addr)
+			
+			// It should be noted that this write should succeed...
+			//	If this was a TCP socket, the results would be different...
+			let bytesWritten = try socket.write(from: "Hello from UDP".data(using: .utf8)!, to: addr!)
+			XCTAssertEqual(bytesWritten, 14)
+			
+			// Close the socket...
+			socket.close()
+			XCTAssertFalse(socket.isActive)
+			
+		} catch let error {
+			
+			// See if it's a socket error or something else...
+			guard let socketError = error as? Socket.Error else {
+				
+				print("Unexpected error...")
+				XCTFail()
+				return
+			}
+			
+			print("testSetWriteTimeout Error reported: \(socketError.description)")
+			XCTFail()
+		}
+	}
+	
 	func testIsReadableWritable() {
 		
 		do {
@@ -1314,6 +1388,8 @@ class SocketTests: XCTestCase {
 		("testConnectPort0", testConnectPort0),
 		("testHostnameAndPort", testHostnameAndPort),
 		("testBlocking", testBlocking),
+		("testSetReadTimeout", testSetReadTimeout),
+		("testSetWriteTimeout", testSetWriteTimeout),
 		("testIsReadableWritable", testIsReadableWritable),
 		("testReadWrite", testReadWrite),
 		("testTruncateTCP", testTruncateTCP),
