@@ -426,9 +426,9 @@ let package = Package(
 	exclude: ["EchoServer.xcodeproj"]
 )
 ```
-The following command sequence will build and run the echo server on Linux.  If running on macOS or with any toolchain **NEWER** than the 8/18 toolchain, you can omit the `-Xcc -fblocks` switch as it's no longer needed.
+The following command sequence will build and run the echo server on Linux.
 ```
-$ swift build -Xcc -fblocks
+$ swift build
 $ .build/debug/EchoServer
 Swift Echo Server Sample
 Connect with a command line window by entering 'telnet 127.0.0.1 1337'
