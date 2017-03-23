@@ -3407,7 +3407,7 @@ public class Socket: SocketReader, SocketWriter {
 				
 				switch errno {
 					
-					// - Could be an error, but if errno is EAGAIN or EWOULDBLOCK (if a non-blocking socket),
+				// - Could be an error, but if errno is EAGAIN or EWOULDBLOCK (if a non-blocking socket),
 				//	it means there was NO data to read...
 				case EAGAIN:
 					fallthrough
