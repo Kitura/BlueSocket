@@ -2015,7 +2015,15 @@ public class Socket: SocketReader, SocketWriter {
 			
 			throw Error(code: Socket.SOCKET_ERR_INTERNAL, reason: "Socket signature not found.")
 		}
-		
+
+        // Configure ipv6 socket so that it can share ports with ipv4 on the same port.
+        if sig.protocolFamily == .inet6 && sig.proto == .tcp {
+            if setsockopt(self.socketfd, Int32(IPPROTO_IPV6), IPV6_V6ONLY, &on, socklen_t(MemoryLayout<Int32>.size)) < 0 {
+
+                throw Error(code: Socket.SOCKET_ERR_SETSOCKOPT_FAILED, reason: self.lastError())
+            }
+        }
+
 		// No SSL over UDP...
 		if sig.socketType != .datagram && sig.proto != .udp {
 
