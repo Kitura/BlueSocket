@@ -1669,9 +1669,9 @@ public class Socket: SocketReader, SocketWriter {
 			throw Error(code: Socket.SOCKET_ERR_INVALID_HOSTNAME, reason: nil)
 		}
 		
-		if port == 0 {
+		if port < 1024 || port > 65535 {
 			
-			throw Error(code: Socket.SOCKET_ERR_INVALID_PORT, reason: "Connect to port cannot be zero (0).")
+			throw Error(code: Socket.SOCKET_ERR_INVALID_PORT, reason: "Invalid port specified.  Must be between 1024 and 49151.")
 		}
 		
 		// Tell the delegate to initialize as a client...
