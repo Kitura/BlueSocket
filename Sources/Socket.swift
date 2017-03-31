@@ -2020,7 +2020,15 @@ public class Socket: SocketReader, SocketWriter {
 			
 			throw Error(code: Socket.SOCKET_ERR_SETSOCKOPT_FAILED, reason: self.lastError())
 		}
-		
+
+        // SO_REUSEPORT allows completely duplicate bindings by multiple processes if they 
+        // all set SO_REUSEPORT before binding the port.  This option permits multiple
+        // instances of a program to each receive UDP/IP multicast or broadcast datagrams 
+        // destined for the bound port.
+        if setsockopt(self.socketfd, SOL_SOCKET, SO_REUSEPORT, &on, socklen_t(MemoryLayout<Int32>.size)) < 0 {
+            throw Error(code: Socket.SOCKET_ERR_SETSOCKOPT_FAILED, reason: self.lastError())
+        }
+
 		// Get the signature for the socket...
 		guard let sig = self.signature else {
 			
