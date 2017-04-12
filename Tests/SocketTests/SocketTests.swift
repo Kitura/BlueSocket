@@ -1371,15 +1371,6 @@ class SocketTests: XCTestCase {
 		}
 	}
     
-    func testLinuxTestSuiteIncludesAllTests() {
-        #if os(macOS) || os(iOS) || os(tvOS) || os(watchOS)
-            let thisClass = type(of: self)
-            let linuxCount = thisClass.allTests.count
-            let darwinCount = Int(thisClass.defaultTestSuite().testCaseCount)
-            XCTAssertEqual(linuxCount, darwinCount, "\(darwinCount - linuxCount) tests are missing from allTests")
-        #endif
-    }
-	
 	static var allTests = [
 		("testDefaultCreate", testDefaultCreate),
 		("testCreateIPV6", testCreateIPV6),
@@ -1403,6 +1394,5 @@ class SocketTests: XCTestCase {
 		("testTruncateTCP", testTruncateTCP),
 		("testReadWriteUDP", testReadWriteUDP),
 		("testReadWriteUnix", testReadWriteUnix),
-        ("testLinuxTestSuiteIncludesAllTests", testLinuxTestSuiteIncludesAllTests)
 	]
 }
