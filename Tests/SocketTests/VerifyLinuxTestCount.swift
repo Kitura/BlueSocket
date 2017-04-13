@@ -14,10 +14,11 @@
  * limitations under the License.
  **/
 
-#if os(OSX)
+#if os(macOS)
     import XCTest
     
     class VerifyLinuxTestCount: XCTestCase {
+		
         func testVerifyLinuxTestCount() {
             var linuxCount: Int
             var darwinCount: Int
