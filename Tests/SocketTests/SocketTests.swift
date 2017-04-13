@@ -1369,9 +1369,8 @@ class SocketTests: XCTestCase {
 			print("testReadWriteUnix Error reported: \(socketError.description)")
 			XCTFail()
 		}
-		
 	}
-	
+    
 	static var allTests = [
 		("testDefaultCreate", testDefaultCreate),
 		("testCreateIPV6", testCreateIPV6),
