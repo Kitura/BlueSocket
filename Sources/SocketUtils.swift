@@ -400,7 +400,7 @@ public extension sockaddr_un {
 		public static func SET(fd: Int32, set: inout fd_set) {
 			let intOffset = Int(fd / 32)
 			let bitOffset = fd % 32
-			let mask = 1 << bitOffset
+			let mask = Int32(1 << bitOffset)
 			switch intOffset {
 			case 0: set.fds_bits.0 = set.fds_bits.0 | mask
 			case 1: set.fds_bits.1 = set.fds_bits.1 | mask
@@ -444,7 +444,7 @@ public extension sockaddr_un {
 		public static func CLR(fd: Int32, set: inout fd_set) {
 			let intOffset = Int(fd / 32)
 			let bitOffset = fd % 32
-			let mask = ~(1 << bitOffset)
+			let mask = Int32(~(1 << bitOffset))
 			switch intOffset {
 			case 0: set.fds_bits.0 = set.fds_bits.0 & mask
 			case 1: set.fds_bits.1 = set.fds_bits.1 & mask
@@ -488,7 +488,7 @@ public extension sockaddr_un {
 		public static func ISSET(fd: Int32, set: inout fd_set) -> Bool {
 			let intOffset = Int(fd / 32)
 			let bitOffset = fd % 32
-			let mask = 1 << bitOffset
+			let mask = Int32(1 << bitOffset)
 			switch intOffset {
 			case 0: return set.fds_bits.0 & mask != 0
 			case 1: return set.fds_bits.1 & mask != 0
