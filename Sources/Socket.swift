@@ -2488,7 +2488,7 @@ public class Socket: SocketReader, SocketWriter {
 
 				if truncate {
 
-					memcpy(buffer, self.readStorage.bytes, self.readStorage.length)
+					memcpy(buffer, self.readStorage.bytes, bufSize)
 
 					#if os(Linux)
 						// Workaround for apparent bug in NSMutableData
