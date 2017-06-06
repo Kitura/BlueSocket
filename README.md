@@ -20,16 +20,19 @@ Socket framework for Swift using the Swift Package Manager. Works on iOS, macOS,
 
 * Swift Open Source `swift-3.0.1-RELEASE` toolchain (**Minimum REQUIRED for latest release**)
 * Swift Open Source `swift-3.1.1-RELEASE` toolchain (**Recommended**)
+* Swift toolchain included in *Xcode Version 9.0 beta (9M136h) or higher*.
 
 ### macOS
 
 * macOS 10.11.6 (*El Capitan*) or higher
 * Xcode Version 8.3.2 (8E2002) or higher using one of the above toolchains (*Recommended*)
+* Xcode Version 9.0 beta (9M136h) or higher using the included toolchain.
 
 ### iOS
 
 * iOS 10.0 or higher
 * Xcode Version 8.3.2 (8E2002) or higher using one of the above toolchains (*Recommended*)
+* Xcode Version 9.0 beta (9M136h) or higher using the included toolchain.
 
 ### Linux
 
