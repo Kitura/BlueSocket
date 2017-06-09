@@ -137,6 +137,26 @@ public protocol SSLServiceDelegate {
 	///
 	func recv(buffer: UnsafeMutableRawPointer, bufSize: Int) throws -> Int
 	
+	#if os(Linux)
+
+		// MARK: ALPN
+		
+		///
+		/// Add a protocol to the list of supported ALPN protocol names. E.g. 'http/1.1' and 'h2'.
+		///
+		/// - Parameters:
+		///		- proto:		The protocol name to be added (e.g. 'h2').
+		///
+		func addSupportedAlpnProtocol(proto: String)
+		
+		///
+		/// The negotiated ALPN protocol that has been agreed upon during the handshaking phase.
+		/// Will be nil if ALPN hasn't been used or requestsed protocol is not available.
+		///
+		var negotiatedAlpnProtocol: String? { get }
+		
+	#endif
+	
 }
 
 // MARK: SSLError
