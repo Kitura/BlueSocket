@@ -546,12 +546,12 @@ public class Socket: SocketReader, SocketWriter {
 				throw Error(code: Socket.SOCKET_ERR_BAD_SIGNATURE_PARAMETERS, reason: "Pathname supplied is too long.")
 			}
 
-      _ = withUnsafeMutablePointer(to: &remoteAddr.sun_path.0) { ptr in
+			_ = withUnsafeMutablePointer(to: &remoteAddr.sun_path.0) { ptr in
 
-        let buf = UnsafeMutableBufferPointer(start: ptr, count: MemoryLayout.size(ofValue: remoteAddr.sun_path))
-        for (i, b) in path.utf8.enumerated() {
-          buf[i] = Int8(b)
-        }
+				let buf = UnsafeMutableBufferPointer(start: ptr, count: MemoryLayout.size(ofValue: remoteAddr.sun_path))
+				for (i, b) in path.utf8.enumerated() {
+					buf[i] = Int8(b)
+				}
 			}
 
 			#if !os(Linux)
