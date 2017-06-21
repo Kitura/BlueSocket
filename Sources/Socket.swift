@@ -507,7 +507,7 @@ public class Socket: SocketReader, SocketWriter {
 		public init?(socketType: SocketType, proto: SocketProtocol, path: String?) throws {
 
 			// Make sure we have what we need...
-			guard let _ = path else {
+			guard let path = path, !path.isEmpty else {
 
 				throw Error(code: Socket.SOCKET_ERR_BAD_SIGNATURE_PARAMETERS, reason: "Missing pathname.")
 			}
@@ -534,16 +534,11 @@ public class Socket: SocketReader, SocketWriter {
 
 			self.path = path
 
-			if path!.utf8.count == 0 {
-
-				throw Error(code: Socket.SOCKET_ERR_BAD_SIGNATURE_PARAMETERS, reason: "Specified path contains zero (0) bytes.")
-			}
-
 			// Create the address...
 			var remoteAddr = sockaddr_un()
 			remoteAddr.sun_family = sa_family_t(AF_UNIX)
 
-			let lengthOfPath = path!.utf8.count
+			let lengthOfPath = path.utf8.count
 
 			// Validate the length...
 			guard lengthOfPath < MemoryLayout.size(ofValue: remoteAddr.sun_path) else {
@@ -554,13 +549,13 @@ public class Socket: SocketReader, SocketWriter {
       _ = withUnsafeMutablePointer(to: &remoteAddr.sun_path.0) { ptr in
 
         let buf = UnsafeMutableBufferPointer(start: ptr, count: MemoryLayout.size(ofValue: remoteAddr.sun_path))
-        for (i, b) in path!.utf8.enumerated() {
+        for (i, b) in path.utf8.enumerated() {
           buf[i] = Int8(b)
         }
 			}
 
 			#if !os(Linux)
-			    remoteAddr.sun_len = UInt8(MemoryLayout<UInt8>.size + MemoryLayout<sa_family_t>.size + path!.utf8.count + 1)
+			    remoteAddr.sun_len = UInt8(MemoryLayout<UInt8>.size + MemoryLayout<sa_family_t>.size + path.utf8.count + 1)
 			#endif
 
 			self.address = .unix(remoteAddr)
