@@ -1165,7 +1165,7 @@ class SocketTests: XCTestCase {
 
 			print("Wrote '\(hello)' to socket...")
 
-			let buf = UnsafeMutablePointer<CChar>.allocate(capacity: 19);
+			let buf = UnsafeMutablePointer<CChar>.allocate(capacity: 19)
 			buf.initialize(to: 0, count: 19)
 
 			defer {
@@ -1259,7 +1259,7 @@ class SocketTests: XCTestCase {
 
 			try socket.write(from: "Hello again".data(using: .utf8)!, to: addr!)
 
-			let buf = UnsafeMutablePointer<CChar>.allocate(capacity: 10);
+			let buf = UnsafeMutablePointer<CChar>.allocate(capacity: 10)
 			buf.initialize(to: 0, count: 10)
 
 			// Save room for a null character...
