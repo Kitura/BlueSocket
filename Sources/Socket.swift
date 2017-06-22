@@ -592,7 +592,7 @@ public class Socket: SocketReader, SocketWriter {
 
 			// Validate the parameters...
 			if type == .stream {
-				guard (pro == .tcp || pro == .unix) else {
+				guard pro == .tcp || pro == .unix else {
 
 					throw Error(code: Socket.SOCKET_ERR_BAD_SIGNATURE_PARAMETERS, reason: "Stream socket must use either .tcp or .unix for the protocol.")
 				}
@@ -1872,7 +1872,8 @@ public class Socket: SocketReader, SocketWriter {
 		}
 
 		let rc = addrPtr.withMemoryRebound(to: sockaddr.self, capacity: 1) {
-			(p:UnsafeMutablePointer<sockaddr>) -> Int32 in
+			
+			(p: UnsafeMutablePointer<sockaddr>) -> Int32 in
 
 			#if os(Linux)
 				return Glibc.connect(self.socketfd, p, socklen_t(addrLen))
@@ -1909,7 +1910,7 @@ public class Socket: SocketReader, SocketWriter {
 			return
 		}
 
-		if signature.hostname == nil || signature.port == Socket.SOCKET_INVALID_PORT  {
+		if signature.hostname == nil || signature.port == Socket.SOCKET_INVALID_PORT {
 
 			guard let _ = signature.address else {
 
@@ -2273,7 +2274,8 @@ public class Socket: SocketReader, SocketWriter {
 		}
 
 		let rc = addrPtr.withMemoryRebound(to: sockaddr.self, capacity: 1) {
-			(p:UnsafeMutablePointer<sockaddr>) -> Int32 in
+			
+			(p: UnsafeMutablePointer<sockaddr>) -> Int32 in
 
 			#if os(Linux)
 				return Glibc.bind(self.socketfd, p, socklen_t(addrLen))
@@ -3367,7 +3369,7 @@ public class Socket: SocketReader, SocketWriter {
 		self.readBuffer.initialize(to: 0x0)
 
 		var recvFlags: Int32 = 0
-		if (self.readStorage.length > 0) {
+		if self.readStorage.length > 0 {
 			recvFlags |= Int32(MSG_DONTWAIT)
 		}
 
@@ -3480,7 +3482,7 @@ public class Socket: SocketReader, SocketWriter {
 		var address: Address? = nil
 
 		var recvFlags: Int32 = 0
-		if (self.readStorage.length > 0) {
+		if self.readStorage.length > 0 {
 			recvFlags |= Int32(MSG_DONTWAIT)
 		}
 
