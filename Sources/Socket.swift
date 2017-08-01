@@ -2023,7 +2023,12 @@ public class Socket: SocketReader, SocketWriter {
         // instances of a program to each receive UDP/IP multicast or broadcast datagrams
         // destined for the bound port.
         if setsockopt(self.socketfd, SOL_SOCKET, SO_REUSEPORT, &on, socklen_t(MemoryLayout<Int32>.size)) < 0 {
-            throw Error(code: Socket.SOCKET_ERR_SETSOCKOPT_FAILED, reason: self.lastError())
+			
+			// Setting of this option on WSL (Windows Subsytem for Linux) is not supported.  Check for
+			// the appropriate errno value and if set, ignore the error...
+			if errno != ENOPROTOOPT {
+	            throw Error(code: Socket.SOCKET_ERR_SETSOCKOPT_FAILED, reason: self.lastError())
+			}
         }
 
 		// Get the signature for the socket...
