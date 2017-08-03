@@ -222,6 +222,7 @@ The read and write APIs above that use either `NSData` or `NSMutableData` will *
 - `setBlocking(shouldBlock: Bool)` - This *instance function* allows you control whether or not this `Socket` instance should be placed in blocking mode or not. **Note:** All `Socket` instances are, by *default*, created in *blocking mode*.
 - `setReadTimeout(value: UInt = 0)` - This *instance function* allows you to set a timeout for read operations. `value` is a `UInt` the specifies the time for the read operation to wait before returning.  In the event of a timeout, the read operation will return `0` bytes read and `errno` will be set to `EAGAIN`.
 - `setWriteTimeout(value: UInt = 0)` - This *instance function* allows you to set a timeout for write operations. `value` is a `UInt` the specifies the time for the write operation to wait before returning.  In the event of a timeout, the write operation will return `0` bytes written and `errno` will be set to `EAGAIN` for *TCP* and *UNIX* sockets, for *UDP*, the write operation will *succeed* regardless of the timeout value.
+- `udpBroadcast(enable: Bool)` - This *instance function* is used to enable broadcast mode on a UDP socket.  Pass `true` to enable broadcast, `false` to disable.  This function will throw an exception if the `Socket` instance is not a UDP socket.
 
 ### Complete Example
 
