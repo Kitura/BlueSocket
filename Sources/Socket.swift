@@ -3305,6 +3305,34 @@ public class Socket: SocketReader, SocketWriter {
 			throw Error(code: Socket.SOCKET_ERR_SET_WRITE_TIMEOUT_FAILED, reason: self.lastError())
 		}
 	}
+	
+	///
+	/// Enable/disable broadcast on a UDP socket.
+	///
+	/// - Parameters:
+	///		- enable:		`true` to enable broadcast, `false` otherwise.
+	///
+	public func udpBroadcast(enable: Bool) throws {
+		
+		// The socket must've been created and valid...
+		if self.socketfd == Socket.SOCKET_INVALID_DESCRIPTOR {
+			
+			throw Error(code: Socket.SOCKET_ERR_BAD_DESCRIPTOR, reason: nil)
+		}
+		
+		// The socket must've been created for UDP...
+		guard let sig = self.signature,
+			sig.socketType == .datagram else {
+				
+				throw Error(code: Socket.SOCKET_ERR_WRONG_PROTOCOL, reason: "This is not a UDP socket.")
+		}
+		
+		// Turn on or off UDP broadcasting...
+		var on: Int32 = enable ? 0 : 1
+		if setsockopt(self.socketfd, SOL_SOCKET, SO_BROADCAST, &on, socklen_t(MemoryLayout<Int32>.size)) < 0 {
+			throw Error(code: Socket.SOCKET_ERR_SETSOCKOPT_FAILED, reason: self.lastError())
+		}
+	}
 
 	// MARK: Private Functions
 
