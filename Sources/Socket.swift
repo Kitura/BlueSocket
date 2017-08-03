@@ -3328,7 +3328,7 @@ public class Socket: SocketReader, SocketWriter {
 		}
 		
 		// Turn on or off UDP broadcasting...
-		var on: Int32 = enable ? 0 : 1
+		var on: Int32 = enable ? 1 : 0
 		if setsockopt(self.socketfd, SOL_SOCKET, SO_BROADCAST, &on, socklen_t(MemoryLayout<Int32>.size)) < 0 {
 			throw Error(code: Socket.SOCKET_ERR_SETSOCKOPT_FAILED, reason: self.lastError())
 		}
