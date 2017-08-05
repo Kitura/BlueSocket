@@ -88,6 +88,8 @@ public class Socket: SocketReader, SocketWriter {
 	public static let SOCKET_ERR_CONNECTION_RESET			= -9971
 	public static let SOCKET_ERR_SET_RECV_TIMEOUT_FAILED	= -9970
 	public static let SOCKET_ERR_SET_WRITE_TIMEOUT_FAILED	= -9969
+	public static let SOCKET_ERR_CONNECT_TIMEOUT			= -9968
+	public static let SOCKET_ERR_GETSOCKOPT_FAILED			= -9967
 
 
 	///
@@ -1644,10 +1646,12 @@ public class Socket: SocketReader, SocketWriter {
 	/// Connects to the named host on the specified port.
 	///
 	/// - Parameters:
-	///		- host:	The host name to connect to.
-	///		- port:	The port to be used.
+	///		- host:		The host name to connect to.
+	///		- port:		The port to be used.
+	///		- timeout:	Timeout to use (in msec). *Note: Socket must be set to non-blocking mode or this
+	///					parameter is ignored.*
 	///
-	public func connect(to host: String, port: Int32) throws {
+	public func connect(to host: String, port: Int32, timeout: UInt = 0) throws {
 
 		// The socket must've been created and must not be connected...
 		if self.socketfd == Socket.SOCKET_INVALID_DESCRIPTOR {
@@ -1669,7 +1673,7 @@ public class Socket: SocketReader, SocketWriter {
 
 			throw Error(code: Socket.SOCKET_ERR_INVALID_PORT, reason: "The port specified is invalid. Must be in the range of 1-65535.")
 		}
-
+		
 		// Tell the delegate to initialize as a client...
 		do {
 
@@ -1745,6 +1749,22 @@ public class Socket: SocketReader, SocketWriter {
 			if socketDescriptor == -1 {
 				continue
 			}
+			
+			// Check to see if the socket is in non-blocking mode and if it is, set our trial socket to be non-blocking as well...
+			if !self.isBlocking {
+				
+				let flags = fcntl(socketDescriptor!, F_GETFL)
+				if flags < 0 {
+					
+					throw Error(code: Socket.SOCKET_ERR_GET_FCNTL_FAILED, reason: self.lastError())
+				}
+				
+				let result = fcntl(socketDescriptor!, F_SETFL, flags | O_NONBLOCK)
+				if result < 0 {
+					
+					throw Error(code: Socket.SOCKET_ERR_SET_FCNTL_FAILED, reason: self.lastError())
+				}
+			}
 
 			// Connect to the server...
 			#if os(Linux)
@@ -1756,6 +1776,68 @@ public class Socket: SocketReader, SocketWriter {
 			// Break if successful...
 			if status == 0 {
 				break
+			}
+			
+			// If this is a non-blocking socket, check errno for EINPROGRESS and if set we've got a timeout, wait the appropriate time...
+			if errno == EINPROGRESS {
+				
+				if timeout > 0 {
+					
+					// Set up for the select call...
+					var writefds = fd_set()
+					FD.ZERO(set: &writefds)
+					FD.SET(fd: socketDescriptor!, set: &writefds)
+					
+					var timer = timeval()
+					
+					// First get seconds...
+					let secs = Int(Double(timeout / 1000))
+					timer.tv_sec = secs
+					
+					// Now get the leftover millisecs...
+					let msecs = Int32(Double(timeout % 1000))
+					
+					// Note: timeval expects microseconds, convert now...
+					let uSecs = msecs * 1000
+					
+					// Now the leftover microseconds...
+					#if os(Linux)
+						timer.tv_usec = Int(uSecs)
+					#else
+						timer.tv_usec = Int32(uSecs)
+					#endif
+					
+					let count = select(socketDescriptor! + Int32(1), nil, &writefds, nil, &timer)
+					if count < 0 {
+						
+						throw Error(code: Socket.SOCKET_ERR_SELECT_FAILED, reason: self.lastError())
+					}
+					
+					// If the socket is writable, we're probably connected, but check anyway to be sure...
+					//	Otherwise, we've timed out waiting to connect.
+					if FD.ISSET(fd: socketDescriptor!, set: &writefds) {
+						
+						// Check the socket...
+						var result: Int = 0
+						var resultLength = socklen_t(MemoryLayout<Int>.size)
+						if getsockopt(socketDescriptor!, SOL_SOCKET, SO_ERROR, &result, &resultLength) < 0 {
+							
+							throw Error(code: Socket.SOCKET_ERR_GETSOCKOPT_FAILED, reason: self.lastError())
+						}
+						
+						// Check the result of the socket connect...
+						if result == 0 {
+							
+							// Success, we're connected, clear status and break out of the loop...
+							status = 0
+							break
+						}
+					
+					} else {
+						
+						throw Error(code: Socket.SOCKET_ERR_CONNECT_TIMEOUT, reason: self.lastError())
+					}
+				}
 			}
 
 			// Close the socket that was opened... Protocol family may have changed...
