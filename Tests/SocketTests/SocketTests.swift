@@ -757,6 +757,48 @@ class SocketTests: XCTestCase {
 		}
 	}
 	
+	func testConnectToWithTimeout() {
+		
+		do {
+			
+			// Create the socket..
+			let socket = try createHelper()
+			
+			// Listen on the port...
+			try socket.listen(on: Int(port), maxBacklogSize: 10)
+			XCTAssertTrue(socket.isListening)
+			XCTAssertEqual(socket.listeningPort, port)
+			
+			// Create a second socket...
+			let socket2 = try createHelper()
+			XCTAssertNotNil(socket2)
+			
+			// Now attempt to connect to the listening socket...
+			try socket2.setBlocking(mode: false)
+			try socket2.connect(to: host, port: port, timeout: 1)
+			XCTAssertTrue(socket2.isConnected)
+			
+			// Close the socket...
+			socket.close()
+			XCTAssertFalse(socket.isActive)
+			socket2.close()
+			XCTAssertFalse(socket2.isActive)
+			
+		} catch let error {
+			
+			// See if it's a socket error or something else...
+			guard let socketError = error as? Socket.Error else {
+				
+				print("Unexpected error...")
+				XCTFail()
+				return
+			}
+			
+			print("testConnectTo Error reported: \(socketError.description)")
+			XCTFail()
+		}
+	}
+	
 	func testConnectToPath() {
 		
 		do {
@@ -1383,6 +1425,7 @@ class SocketTests: XCTestCase {
 		("testListenPort0UDP", testListenPort0UDP),
 		("testConnect", testConnect),
 		("testConnectTo", testConnectTo),
+		("testConnectToWithTimeout", testConnectToWithTimeout),
 		("testConnectToPath", testConnectToPath),
 		("testConnectPort0", testConnectPort0),
 		("testHostnameAndPort", testHostnameAndPort),
