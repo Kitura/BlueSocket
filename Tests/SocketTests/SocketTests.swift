@@ -774,7 +774,6 @@ class SocketTests: XCTestCase {
 			XCTAssertNotNil(socket2)
 			
 			// Now attempt to connect to the listening socket...
-			try socket2.setBlocking(mode: false)
 			try socket2.connect(to: host, port: port, timeout: 1)
 			XCTAssertTrue(socket2.isConnected)
 			
