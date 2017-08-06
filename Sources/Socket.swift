@@ -1648,8 +1648,10 @@ public class Socket: SocketReader, SocketWriter {
 	/// - Parameters:
 	///		- host:		The host name to connect to.
 	///		- port:		The port to be used.
-	///		- timeout:	Timeout to use (in msec). *Note: Socket must be set to non-blocking mode or this
-	///					parameter is ignored.*
+	///		- timeout:	Timeout to use (in msec). *Note: If the socket is in blocking mode it
+	///					will be changed to non-blocking mode temporarily if a timeout greater
+	///					than zero (0) is provided. The returned socket will be set back to its
+	///					original setting (blocking or non-blocking).*
 	///
 	public func connect(to host: String, port: Int32, timeout: UInt = 0) throws {
 
@@ -1750,8 +1752,9 @@ public class Socket: SocketReader, SocketWriter {
 				continue
 			}
 			
-			// Check to see if the socket is in non-blocking mode and if it is, set our trial socket to be non-blocking as well...
-			if !self.isBlocking {
+			// Check to see if the socket is in non-blocking mode or if a timeout is provided
+			// 	If either is the case, set our trial socket to be non-blocking as well...
+			if !self.isBlocking || timeout > 0 {
 				
 				let flags = fcntl(socketDescriptor!, F_GETFL)
 				if flags < 0 {
@@ -1896,6 +1899,24 @@ public class Socket: SocketReader, SocketWriter {
 			address: address,
 			hostname: host,
 			port: port)
+		
+		// Check to see if the socket is supposed to be blocking or non-blocking and adjust the new socket...
+		if self.isBlocking && timeout > 0 {
+			
+			// Socket supposed to be blocking but we've changed it to non-blocking because
+			//	a timeout was requested...  Got to change it back before proceeding...
+			let flags = fcntl(socketDescriptor!, F_GETFL)
+			if flags < 0 {
+				
+				throw Error(code: Socket.SOCKET_ERR_GET_FCNTL_FAILED, reason: self.lastError())
+			}
+			
+			let result = fcntl(self.socketfd, F_SETFL, flags & ~O_NONBLOCK)
+			if result < 0 {
+				
+				throw Error(code: Socket.SOCKET_ERR_SET_FCNTL_FAILED, reason: self.lastError())
+			}
+		}
 
 		// Let the delegate do post connect handling and verification...
 		do {
