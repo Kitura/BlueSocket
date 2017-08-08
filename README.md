@@ -72,7 +72,7 @@ To run the supplied unit tests for **Socket** from the command line:
 To include BlueSocket into a Swift Package Manager package, add it to the `dependencies` attribute defined in your `Package.swift` file. You can select the version using the `majorVersion` and `minor` parameters. For example:
 ```
 	dependencies: [
-		.Package(url: "https://github.com/IBM-Swift/BlueSocket", majorVersion: <majorVersion>, minor: <minor>)
+		.Package(url: "https://github.com/IBM-Swift/BlueSocket.git", majorVersion: <majorVersion>, minor: <minor>)
 	]
 ```
 
