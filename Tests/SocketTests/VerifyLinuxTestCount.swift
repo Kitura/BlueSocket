@@ -14,20 +14,18 @@
  * limitations under the License.
  **/
 
-// Does not work on Swift 4.0
-//#if os(macOS)
-//    import XCTest
-//
-//    class VerifyLinuxTestCount: XCTestCase {
-//
-//        func testVerifyLinuxTestCount() {
-//            var linuxCount: Int
-//            var darwinCount: Int
-//
-//            // SocketTests
-//            linuxCount = SocketTests.allTests.count
-//            darwinCount = Int(SocketTests.defaultTestSuite.testCaseCount)
-//            XCTAssertEqual(linuxCount, darwinCount, "\(darwinCount - linuxCount) tests are missing from SocketTests.allTests")
-//        }
-//    }
-//#endif
+
+#if os(macOS) && !swift(>=4)
+    import XCTest
+
+    class VerifyLinuxTestCount: XCTestCase {
+        func testVerifyLinuxTestCount() {
+            var linuxCount: Int
+            var darwinCount: Int
+
+            linuxCount = SocketTests.allTests.count
+            darwinCount = Int(SocketTests.defaultTestSuite().testCaseCount)
+            XCTAssertEqual(linuxCount, darwinCount, "\(darwinCount - linuxCount) tests are missing from SocketTests.allTests")
+        }
+    }
+#endif
