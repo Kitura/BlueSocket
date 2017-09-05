@@ -39,7 +39,8 @@ let package = Package(
         // Targets can depend on other targets in this package, and on products in packages which this package depends on.
         .target(
             name: "Socket",
-            dependencies: []),
+            dependencies: [],
+            exclude: ["BlueSocket.xcodeproj", "BlueSocket.xcworkspace", "README.md", "Sources/Info.plist", "Sources/Socket.h"]),
         .testTarget(
             name: "SocketTests",
             dependencies: ["Socket"]),
