@@ -15,7 +15,7 @@
  **/
 
 
-#if os(macOS) && !swift(>=4)
+#if os(macOS) && !swift(>=3.2)
     import XCTest
 
     class VerifyLinuxTestCount: XCTestCase {

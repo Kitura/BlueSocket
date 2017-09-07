@@ -7,16 +7,13 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		8C0F4BFA1C4E84CC008B2B0A /* Socket.h in Headers */ = {isa = PBXBuildFile; fileRef = 8C0F4BF91C4E84CC008B2B0A /* Socket.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		8C0F4C051C4E8630008B2B0A /* SocketProtocols.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C0F4C021C4E8630008B2B0A /* SocketProtocols.swift */; };
-		8C0F4C061C4E8630008B2B0A /* Socket.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C0F4C031C4E8630008B2B0A /* Socket.swift */; };
-		8C0F4C071C4E8630008B2B0A /* SocketUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C0F4C041C4E8630008B2B0A /* SocketUtils.swift */; };
+		595218011F61E34E001A94A2 /* SocketUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 595217FC1F61E34E001A94A2 /* SocketUtils.swift */; };
+		595218041F61E34E001A94A2 /* Socket.swift in Sources */ = {isa = PBXBuildFile; fileRef = 595217FF1F61E34E001A94A2 /* Socket.swift */; };
+		595218051F61E34E001A94A2 /* SocketProtocols.swift in Sources */ = {isa = PBXBuildFile; fileRef = 595218001F61E34E001A94A2 /* SocketProtocols.swift */; };
+		5952180B1F61E84E001A94A2 /* Socket.h in Headers */ = {isa = PBXBuildFile; fileRef = 595218091F61E84E001A94A2 /* Socket.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		8C51FD591E7C8C8A00C2FDA6 /* BlueSocket.podspec in Resources */ = {isa = PBXBuildFile; fileRef = 8C51FD581E7C8C8A00C2FDA6 /* BlueSocket.podspec */; };
 		8C5605D21D50D60400958292 /* Socket.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8C0F4BF61C4E84CC008B2B0A /* Socket.framework */; };
 		8C8540B21E9FC1DE00E41C1D /* VerifyLinuxTestCount.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C8540B01E9FC14E00E41C1D /* VerifyLinuxTestCount.swift */; };
-		8CC36DF81C4EA1BE00BAA659 /* SocketProtocols.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C0F4C021C4E8630008B2B0A /* SocketProtocols.swift */; };
-		8CC36DF91C4EA1BE00BAA659 /* Socket.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C0F4C031C4E8630008B2B0A /* Socket.swift */; };
-		8CC36DFA1C4EA1BE00BAA659 /* SocketUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C0F4C041C4E8630008B2B0A /* SocketUtils.swift */; };
 		8CC7217B1D4BCB1D00F5FD19 /* LICENSE in Resources */ = {isa = PBXBuildFile; fileRef = 8CC7217A1D4BCB1D00F5FD19 /* LICENSE */; };
 		8CF04E291D4FCE4A00C27814 /* SocketTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CC721761D4BCA9400F5FD19 /* SocketTests.swift */; };
 /* End PBXBuildFile section */
@@ -32,12 +29,12 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		595217FC1F61E34E001A94A2 /* SocketUtils.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = SocketUtils.swift; path = Socket/SocketUtils.swift; sourceTree = "<group>"; };
+		595217FF1F61E34E001A94A2 /* Socket.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Socket.swift; path = Socket/Socket.swift; sourceTree = "<group>"; };
+		595218001F61E34E001A94A2 /* SocketProtocols.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = SocketProtocols.swift; path = Socket/SocketProtocols.swift; sourceTree = "<group>"; };
+		595218091F61E84E001A94A2 /* Socket.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Socket.h; path = Socket/Socket.h; sourceTree = "<group>"; };
+		5952180C1F61E8A2001A94A2 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = Socket/Info.plist; sourceTree = "<group>"; };
 		8C0F4BF61C4E84CC008B2B0A /* Socket.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Socket.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		8C0F4BF91C4E84CC008B2B0A /* Socket.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Socket.h; sourceTree = "<group>"; };
-		8C0F4BFB1C4E84CC008B2B0A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		8C0F4C021C4E8630008B2B0A /* SocketProtocols.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SocketProtocols.swift; sourceTree = "<group>"; };
-		8C0F4C031C4E8630008B2B0A /* Socket.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Socket.swift; sourceTree = "<group>"; };
-		8C0F4C041C4E8630008B2B0A /* SocketUtils.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SocketUtils.swift; sourceTree = "<group>"; };
 		8C0F4C081C4E866E008B2B0A /* Package.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Package.swift; sourceTree = "<group>"; };
 		8C51FD581E7C8C8A00C2FDA6 /* BlueSocket.podspec */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = BlueSocket.podspec; sourceTree = "<group>"; };
 		8C8540B01E9FC14E00E41C1D /* VerifyLinuxTestCount.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = VerifyLinuxTestCount.swift; path = Tests/SocketTests/VerifyLinuxTestCount.swift; sourceTree = "<group>"; };
@@ -103,9 +100,9 @@
 		8C0F4BF81C4E84CC008B2B0A /* Sources */ = {
 			isa = PBXGroup;
 			children = (
-				8C0F4C031C4E8630008B2B0A /* Socket.swift */,
-				8C0F4C021C4E8630008B2B0A /* SocketProtocols.swift */,
-				8C0F4C041C4E8630008B2B0A /* SocketUtils.swift */,
+				595217FF1F61E34E001A94A2 /* Socket.swift */,
+				595218001F61E34E001A94A2 /* SocketProtocols.swift */,
+				595217FC1F61E34E001A94A2 /* SocketUtils.swift */,
 				8C0F4C011C4E85F7008B2B0A /* Supporting Files */,
 			);
 			path = Sources;
@@ -114,8 +111,8 @@
 		8C0F4C011C4E85F7008B2B0A /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
-				8C0F4BF91C4E84CC008B2B0A /* Socket.h */,
-				8C0F4BFB1C4E84CC008B2B0A /* Info.plist */,
+				595218091F61E84E001A94A2 /* Socket.h */,
+				5952180C1F61E8A2001A94A2 /* Info.plist */,
 			);
 			name = "Supporting Files";
 			sourceTree = "<group>";
@@ -146,7 +143,7 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				8C0F4BFA1C4E84CC008B2B0A /* Socket.h in Headers */,
+				5952180B1F61E84E001A94A2 /* Socket.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -287,9 +284,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				8C0F4C051C4E8630008B2B0A /* SocketProtocols.swift in Sources */,
-				8C0F4C061C4E8630008B2B0A /* Socket.swift in Sources */,
-				8C0F4C071C4E8630008B2B0A /* SocketUtils.swift in Sources */,
+				595218041F61E34E001A94A2 /* Socket.swift in Sources */,
+				595218011F61E34E001A94A2 /* SocketUtils.swift in Sources */,
+				595218051F61E34E001A94A2 /* SocketProtocols.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -306,9 +303,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				8CC36DF81C4EA1BE00BAA659 /* SocketProtocols.swift in Sources */,
-				8CC36DF91C4EA1BE00BAA659 /* Socket.swift in Sources */,
-				8CC36DFA1C4EA1BE00BAA659 /* SocketUtils.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -440,7 +434,7 @@
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				FRAMEWORK_VERSION = A;
-				INFOPLIST_FILE = "$(SRCROOT)/Sources/Info.plist";
+				INFOPLIST_FILE = "$(SRCROOT)/Sources/Socket/Info.plist";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/Frameworks";
@@ -462,7 +456,7 @@
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				FRAMEWORK_VERSION = A;
-				INFOPLIST_FILE = "$(SRCROOT)/Sources/Info.plist";
+				INFOPLIST_FILE = "$(SRCROOT)/Sources/Socket/Info.plist";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/Frameworks";
