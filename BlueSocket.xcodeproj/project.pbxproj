@@ -13,6 +13,10 @@
 		5952180B1F61E84E001A94A2 /* Socket.h in Headers */ = {isa = PBXBuildFile; fileRef = 595218091F61E84E001A94A2 /* Socket.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		8C51FD591E7C8C8A00C2FDA6 /* BlueSocket.podspec in Resources */ = {isa = PBXBuildFile; fileRef = 8C51FD581E7C8C8A00C2FDA6 /* BlueSocket.podspec */; };
 		8C5605D21D50D60400958292 /* Socket.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8C0F4BF61C4E84CC008B2B0A /* Socket.framework */; };
+		8C62D4BD1F66D99300F2B7A7 /* Socket.swift in Sources */ = {isa = PBXBuildFile; fileRef = 595217FF1F61E34E001A94A2 /* Socket.swift */; };
+		8C62D4BE1F66D99300F2B7A7 /* SocketProtocols.swift in Sources */ = {isa = PBXBuildFile; fileRef = 595218001F61E34E001A94A2 /* SocketProtocols.swift */; };
+		8C62D4BF1F66D99300F2B7A7 /* SocketUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 595217FC1F61E34E001A94A2 /* SocketUtils.swift */; };
+		8C62D4C01F66D9B000F2B7A7 /* Socket.h in Headers */ = {isa = PBXBuildFile; fileRef = 595218091F61E84E001A94A2 /* Socket.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		8C8540B21E9FC1DE00E41C1D /* VerifyLinuxTestCount.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C8540B01E9FC14E00E41C1D /* VerifyLinuxTestCount.swift */; };
 		8CC7217B1D4BCB1D00F5FD19 /* LICENSE in Resources */ = {isa = PBXBuildFile; fileRef = 8CC7217A1D4BCB1D00F5FD19 /* LICENSE */; };
 		8CF04E291D4FCE4A00C27814 /* SocketTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CC721761D4BCA9400F5FD19 /* SocketTests.swift */; };
@@ -151,6 +155,7 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8C62D4C01F66D9B000F2B7A7 /* Socket.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -303,6 +308,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8C62D4BD1F66D99300F2B7A7 /* Socket.swift in Sources */,
+				8C62D4BE1F66D99300F2B7A7 /* SocketProtocols.swift in Sources */,
+				8C62D4BF1F66D99300F2B7A7 /* SocketUtils.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
