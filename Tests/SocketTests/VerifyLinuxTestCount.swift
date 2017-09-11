@@ -14,16 +14,15 @@
  * limitations under the License.
  **/
 
-#if os(macOS)
+
+#if os(macOS) && !swift(>=3.2)
     import XCTest
-    
+
     class VerifyLinuxTestCount: XCTestCase {
-		
         func testVerifyLinuxTestCount() {
             var linuxCount: Int
             var darwinCount: Int
-            
-            // SocketTests
+
             linuxCount = SocketTests.allTests.count
             darwinCount = Int(SocketTests.defaultTestSuite().testCaseCount)
             XCTAssertEqual(linuxCount, darwinCount, "\(darwinCount - linuxCount) tests are missing from SocketTests.allTests")
