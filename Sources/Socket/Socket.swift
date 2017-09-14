@@ -1466,16 +1466,16 @@ public class Socket: SocketReader, SocketWriter {
 		// Create the new socket...
 		//	Note: The current socket continues to listen.
 		let newSocket = try Socket(fd: socketfd2, remoteAddress: address!, path: self.signature?.path)
+		
+		// If there's a delegate, turn on the needs accept flag...
+		if self.delegate != nil {
+			newSocket.needsAcceptDelegateCall = true
+		}
 
         // Let the delegate do post accept handling and verification...
         if invokeDelegate, self.delegate != nil {
             try invokeDelegateOnAccept(for: newSocket)
         }
-		
-		if !invokeDelegate, self.delegate != nil {
-			
-			newSocket.needsAcceptDelegateCall = true
-		}
 		
         // Return the new socket...
         return newSocket
