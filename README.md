@@ -156,7 +156,8 @@ try socket.listen(on: 1337)
 ### Accepting a connection from a listening socket (TCP/UNIX).
 
 When a listening socket detects an incoming connection request, control is returned to your program.  You can then either accept the connection or continue listening or both if your application is multi-threaded. **BlueSocket** supports two distinct ways of accepting an incoming connection. They are:
-- `acceptClientConnection()` - This function accepts the connection and returns a *new* `Socket` instance based on the newly connected socket. The instance that was listening in unaffected.
+- `acceptClientConnection(invokeDelegate: Bool = true)` - This function accepts the connection and returns a *new* `Socket` instance based on the newly connected socket. The instance that was listening in unaffected.  If `invokeDelegate` is `false` and the `Socket` has an `SSLService` delegate attached, you **MUST** call the `invokeDelegateOnAccept` method using the `Socket` instance that is returned by this function.
+- `invokeDelegateOnAccept(for newSocket: Socket)` - If the `Socket` instance has a `SSLService` delegate, this will invoke the delegates accept function to perform SSL negotiation.  It should be called with the `Socket` instance returned by `acceptClientConnection`.  This function will throw an exception if called with the wrong `Socket` instance, called multiple times, or if the `Socket` instance does **NOT** have a `SSLService` delegate.
 - `acceptConnection()` - This function accepts the incoming connection, *replacing and closing* the existing listening socket. The properties that were formerly associated with the listening socket are replaced by the properties that are relevant to the newly connected socket.
 
 ### Connecting a socket to a server (TCP/UNIX).
