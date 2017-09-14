@@ -90,6 +90,7 @@ public class Socket: SocketReader, SocketWriter {
 	public static let SOCKET_ERR_SET_WRITE_TIMEOUT_FAILED	= -9969
 	public static let SOCKET_ERR_CONNECT_TIMEOUT			= -9968
 	public static let SOCKET_ERR_GETSOCKOPT_FAILED			= -9967
+	public static let SOCKET_ERR_INVALID_DELEGATE_CALL		= -9966
 
 
 	///
@@ -760,6 +761,11 @@ public class Socket: SocketReader, SocketWriter {
 	/// Internal Storage Buffer initially created with `Socket.SOCKET_DEFAULT_READ_BUFFER_SIZE`.
 	///
 	var readStorage: NSMutableData = NSMutableData(capacity: Socket.SOCKET_DEFAULT_READ_BUFFER_SIZE)!
+	
+	///
+	/// True if a delegate accept is pending.
+	///
+	var needsAcceptDelegateCall: Bool = false
 
 
 	// MARK: -- Public
@@ -1463,29 +1469,47 @@ public class Socket: SocketReader, SocketWriter {
 
         // Let the delegate do post accept handling and verification...
         if invokeDelegate, self.delegate != nil {
-            try invokeDelegateOnAccept(socket: newSocket)
+            try invokeDelegateOnAccept(for: newSocket)
         }
-        
+		
+		if !invokeDelegate, self.delegate != nil {
+			
+			newSocket.needsAcceptDelegateCall = true
+		}
+		
         // Return the new socket...
         return newSocket
     }
-    
+	
+	///
     /// Invokes the delegate's `onAccept()` function for a client socket. This should be performed
     /// only with a Socket obtained by calling `acceptClientConnection(invokeDelegate: false)`.
     ///
     /// - Parameters:
-    ///		- socket: 		The newly accepted Socket that requires further processing by our delegate
+    ///		- newSocket: 		The newly accepted Socket that requires further processing by our delegate
     ///
-    public func invokeDelegateOnAccept(socket newSocket: Socket) throws {
+    public func invokeDelegateOnAccept(for newSocket: Socket) throws {
+		
+		// Only allow this if the socket needs it, otherwise it's a error...
+		if !newSocket.needsAcceptDelegateCall {
+			
+			throw Error(code: Socket.SOCKET_ERR_INVALID_DELEGATE_CALL, reason: nil)
+		}
+		
 		do {
+			
 			if self.delegate != nil {
 				try self.delegate?.onAccept(socket: newSocket)
 				newSocket.signature?.isSecure = true
+				self.needsAcceptDelegateCall = false
             }
+			
         } catch let error {
+			
 			guard let sslError = error as? SSLError else {
 				throw error
 			}
+			
 			throw Error(with: sslError)
 		}
 	}
