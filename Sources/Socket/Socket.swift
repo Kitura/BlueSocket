@@ -1339,10 +1339,14 @@ public class Socket: SocketReader, SocketWriter {
 
 	///
 	/// Accepts an incoming client connection request on the current instance, leaving the current instance still listening.
+    ///
+    /// - Parameters:
+    ///		- invokeDelegate: 		Whether to invoke the delegate's `onAccept()` function after accepting
+    ///                             a new connection. Defaults to `true`
 	///
 	/// - Returns: New Socket instance representing the newly accepted socket.
 	///
-	public func acceptClientConnection() throws -> Socket {
+    public func acceptClientConnection(invokeDelegate: Bool = true) throws -> Socket {
 
 		// The socket must've been created, not connected and listening...
 		if self.socketfd == Socket.SOCKET_INVALID_DESCRIPTOR {
@@ -1457,26 +1461,33 @@ public class Socket: SocketReader, SocketWriter {
 		//	Note: The current socket continues to listen.
 		let newSocket = try Socket(fd: socketfd2, remoteAddress: address!, path: self.signature?.path)
 
-		// Let the delegate do post accept handling and verification...
+        // Let the delegate do post accept handling and verification...
+        if invokeDelegate, self.delegate != nil {
+            try invokeDelegateOnAccept(socket: newSocket)
+        }
+        
+        // Return the new socket...
+        return newSocket
+    }
+    
+    /// Invokes the delegate's `onAccept()` function for a client socket. This should be performed
+    /// only with a Socket obtained by calling `acceptClientConnection(invokeDelegate: false)`.
+    ///
+    /// - Parameters:
+    ///		- socket: 		The newly accepted Socket that requires further processing by our delegate
+    ///
+    public func invokeDelegateOnAccept(socket newSocket: Socket) throws {
 		do {
-
 			if self.delegate != nil {
 				try self.delegate?.onAccept(socket: newSocket)
 				newSocket.signature?.isSecure = true
-			}
-
-		} catch let error {
-
+            }
+        } catch let error {
 			guard let sslError = error as? SSLError else {
-
 				throw error
 			}
-
 			throw Error(with: sslError)
 		}
-
-		// Return the new socket...
-		return newSocket
 	}
 
 	///
