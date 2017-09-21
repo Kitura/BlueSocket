@@ -39,6 +39,11 @@ Socket framework for Swift using the Swift Package Manager. Works on iOS, macOS,
 * Ubuntu 16.04 (or 16.10 but only tested on 16.04)
 * One of the Swift Open Source toolchains listed above
 
+### Other Platforms
+
+* **BlueSocket** is **NOT** supported on *watchOS* since POSIX/BSD/Darwin sockets are not supported on the actual device although they are supported in the simulator.
+* **BlueSocket** should work on *tvOS* but has **NOT** been tested.
+
 ### Add-ins
 
 * [BlueSSLService](https://github.com/IBM-Swift/BlueSSLService.git) can be used to add **SSL/TLS** support.

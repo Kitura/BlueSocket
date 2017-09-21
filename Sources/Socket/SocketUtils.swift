@@ -18,7 +18,7 @@
 // 	limitations under the License.
 //
 
-#if os(macOS) || os(iOS) || os(tvOS) || os(watchOS)
+#if os(macOS) || os(iOS) || os(tvOS)
 	import Darwin
 #elseif os(Linux)
 	import Glibc

@@ -18,7 +18,7 @@
 // 	limitations under the License.
 //
 
-#if os(macOS) || os(iOS) || os(tvOS) || os(watchOS)
+#if os(macOS) || os(iOS) || os(tvOS)
 	import Darwin
 #elseif os(Linux)
 	import Glibc
@@ -42,7 +42,7 @@ public class Socket: SocketReader, SocketWriter {
 	public static let SOCKET_DEFAULT_SSL_READ_BUFFER_SIZE	= 32768
 	public static let SOCKET_MAXIMUM_SSL_READ_BUFFER_SIZE	= 8000000
 	public static let SOCKET_DEFAULT_MAX_BACKLOG			= 50
-	#if os(macOS) || os(iOS) || os(tvOS) || os(watchOS)
+	#if os(macOS) || os(iOS) || os(tvOS)
 	public static let SOCKET_MAX_DARWIN_BACKLOG				= 128
 	#endif
 
