@@ -3,6 +3,7 @@
 ![Linux](https://img.shields.io/badge/os-linux-green.svg?style=flat)
 ![Apache 2](https://img.shields.io/badge/license-Apache2-blue.svg?style=flat)
 ![](https://img.shields.io/badge/Swift-3.0-orange.svg?style=flat)
+![](https://img.shields.io/badge/Swift-4.0-orange.svg?style=flat)
 [![Build Status - Master](https://travis-ci.org/IBM-Swift/BlueSocket.svg?branch=master)](https://travis-ci.org/IBM-Swift/BlueSocket)
 
 # BlueSocket
@@ -19,25 +20,25 @@ Socket framework for Swift using the Swift Package Manager. Works on iOS, macOS,
 ### Swift
 
 * Swift Open Source `swift-3.0.1-RELEASE` toolchain (**Minimum REQUIRED for latest release**)
-* Swift Open Source `swift-3.1.1-RELEASE` toolchain (**Recommended**)
-* Swift toolchain included in *Xcode Version 9.0 beta (9M136h) or higher*.
+* Swift Open Source `swift-4.0.0-RELEASE` toolchain (**Recommended**)
+* Swift toolchain included in *Xcode Version 9.0 (9A325) or higher*.
 
 ### macOS
 
 * macOS 10.11.6 (*El Capitan*) or higher
 * Xcode Version 8.3.2 (8E2002) or higher using one of the above toolchains (*Recommended*)
-* Xcode Version 9.0 beta (9M136h) or higher using the included toolchain.
+* Xcode Version 9.0  (9A325) or higher using the included toolchain.
 
 ### iOS
 
 * iOS 10.0 or higher
 * Xcode Version 8.3.2 (8E2002) or higher using one of the above toolchains (*Recommended*)
-* Xcode Version 9.0 beta (9M136h) or higher using the included toolchain.
+* Xcode Version 9.0  (9A325) or higher using the included toolchain.
 
 ### Linux
 
 * Ubuntu 16.04 (or 16.10 but only tested on 16.04)
-* One of the Swift Open Source toolchains listed above
+* One of the Swift Open Source toolchain listed above
 
 ### Other Platforms
 
