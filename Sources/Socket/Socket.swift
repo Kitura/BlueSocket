@@ -1927,6 +1927,16 @@ public class Socket: SocketReader, SocketWriter {
 			throw Error(code: Socket.SOCKET_ERR_WRONG_PROTOCOL, reason: "Unable to determine connected socket protocol family.")
 		}
 
+		#if !os(Linux)
+			// Set the new socket to ignore SIGPIPE to avoid dying on interrupted connections...
+			// Note: Linux does not support the SO_NOSIGPIPE option. Instead, we use the
+			// MSG_NOSIGNAL flags passed to send.  See the write() functions below.
+			var on: Int32 = 1
+			if setsockopt(self.socketfd, SOL_SOCKET, SO_NOSIGPIPE, &on, socklen_t(MemoryLayout<Int32>.size)) < 0 {
+				throw Error(code: Socket.SOCKET_ERR_SETSOCKOPT_FAILED, reason: self.lastError())
+			}
+		#endif
+
 		try self.signature = Signature(
 			protocolFamily: Int32(info!.pointee.ai_family),
 			socketType: info!.pointee.ai_socktype,
