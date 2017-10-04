@@ -1091,10 +1091,6 @@ public class Socket: SocketReader, SocketWriter {
 
 				throw Error(code: Socket.SOCKET_ERR_BAD_DESCRIPTOR, reason: nil)
 			}
-			if !socket.isActive {
-
-				throw Error(code: Socket.SOCKET_ERR_NOT_ACTIVE, reason: nil)
-			}
 		}
 
 		// Setup the timeout...
