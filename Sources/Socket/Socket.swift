@@ -1091,7 +1091,7 @@ public class Socket: SocketReader, SocketWriter {
 
 				throw Error(code: Socket.SOCKET_ERR_BAD_DESCRIPTOR, reason: nil)
 			}
-			if !socket.isActive || (socket.signature != nil && !socket.signature!.isBound) {
+			if !socket.isActive && (socket.signature != nil && !socket.signature!.isBound) {
 
 				throw Error(code: Socket.SOCKET_ERR_NOT_ACTIVE, reason: nil)
 			}
