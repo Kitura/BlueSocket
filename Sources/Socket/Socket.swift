@@ -91,6 +91,7 @@ public class Socket: SocketReader, SocketWriter {
 	public static let SOCKET_ERR_CONNECT_TIMEOUT			= -9968
 	public static let SOCKET_ERR_GETSOCKOPT_FAILED			= -9967
 	public static let SOCKET_ERR_INVALID_DELEGATE_CALL		= -9966
+	public static let SOCKET_ERR_MISSING_SIGNATURE			= -9965
 
 
 	///
@@ -1091,7 +1092,11 @@ public class Socket: SocketReader, SocketWriter {
 
 				throw Error(code: Socket.SOCKET_ERR_BAD_DESCRIPTOR, reason: nil)
 			}
-			if !socket.isActive && (socket.signature != nil && !socket.signature!.isBound) {
+			if socket.signature == nil {
+				
+				throw Error(code: Socket.SOCKET_ERR_MISSING_SIGNATURE, reason: nil)
+			}
+			if !socket.isActive && !socket.signature!.isBound {
 
 				throw Error(code: Socket.SOCKET_ERR_NOT_ACTIVE, reason: nil)
 			}
