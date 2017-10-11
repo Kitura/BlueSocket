@@ -326,25 +326,17 @@ public class Socket: SocketReader, SocketWriter {
 				return MemoryLayout<(sockaddr_un)>.size
 			}
 		}
-
-		///
-		/// Cast as sockaddr. (Readonly)
-		///
-		public var addr: sockaddr {
-
+		
+		public var family: ProtocolFamily {
 			switch self {
-
-			case .ipv4(let addr):
-				return addr.asAddr()
-
-			case .ipv6(let addr):
-				return addr.asAddr()
-
-			case .unix(let addr):
-				return addr.asAddr()
+			case .ipv4(_):
+				return ProtocolFamily.inet
+			case .ipv6(_):
+				return ProtocolFamily.inet6
+			case .unix(_):
+				return ProtocolFamily.unix
 			}
 		}
-
 	}
 
 	// MARK: Structs
@@ -1013,10 +1005,9 @@ public class Socket: SocketReader, SocketWriter {
 
 		case .ipv4(let address_in):
 			var addr_in = address_in
-			let addr = addr_in.asAddr()
 			bufLen = Int(INET_ADDRSTRLEN)
 			buf = [CChar](repeating: 0, count: bufLen)
-			inet_ntop(Int32(addr.sa_family), &addr_in.sin_addr, &buf, socklen_t(bufLen))
+			inet_ntop(Int32(addr_in.sin_family), &addr_in.sin_addr, &buf, socklen_t(bufLen))
 			if isLittleEndian {
 				port = Int32(UInt16(addr_in.sin_port).byteSwapped)
 			} else {
@@ -1025,10 +1016,9 @@ public class Socket: SocketReader, SocketWriter {
 
 		case .ipv6(let address_in):
 			var addr_in = address_in
-			let addr = addr_in.asAddr()
 			bufLen = Int(INET6_ADDRSTRLEN)
 			buf = [CChar](repeating: 0, count: bufLen)
-			inet_ntop(Int32(addr.sa_family), &addr_in.sin6_addr, &buf, socklen_t(bufLen))
+			inet_ntop(Int32(addr_in.sin6_family), &addr_in.sin6_addr, &buf, socklen_t(bufLen))
 			if isLittleEndian {
 				port = Int32(UInt16(addr_in.sin6_port).byteSwapped)
 			} else {
@@ -1313,7 +1303,7 @@ public class Socket: SocketReader, SocketWriter {
 		} else {
 			if let (hostname, port) = Socket.hostnameAndPort(from: remoteAddress) {
 				try self.signature = Signature(
-					protocolFamily: Int32(remoteAddress.addr.sa_family),
+					protocolFamily: remoteAddress.family.value,
 					socketType: type,
 					proto: Int32(IPPROTO_TCP),
 					address: remoteAddress,
@@ -1321,7 +1311,7 @@ public class Socket: SocketReader, SocketWriter {
 					port: port)
 			} else {
 				try self.signature = Signature(
-					protocolFamily: Int32(remoteAddress.addr.sa_family),
+					protocolFamily: remoteAddress.family.value,
 					socketType: type,
 					proto: Int32(IPPROTO_TCP),
 					address: remoteAddress)
@@ -1381,87 +1371,35 @@ public class Socket: SocketReader, SocketWriter {
 
 		var keepRunning: Bool = true
 		repeat {
-
-			switch self.signature!.protocolFamily {
-
-			case .inet:
-				var acceptAddr = sockaddr_in()
-				var addrSize = socklen_t(MemoryLayout<sockaddr_in>.size)
-
-				#if os(Linux)
-					let fd = withUnsafeMutablePointer(to: &acceptAddr) {
-						Glibc.accept(self.socketfd, UnsafeMutableRawPointer($0).assumingMemoryBound(to: sockaddr.self), &addrSize)
+			enum NotAnError: Swift.Error {
+				case nope
+			}
+			do {
+				guard let acceptAddress = try Address(addressProvider: { (addressPointer, addressLengthPointer) in
+					#if os(Linux)
+						let fd = Glibc.accept(self.socketfd, addressPointer, addressLengthPointer)
+					#else
+						let fd = Darwin.accept(self.socketfd, addressPointer, addressLengthPointer)
+					#endif
+					
+					if fd < 0 {
+						
+						if errno == EINTR {
+							throw NotAnError.nope
+						}
+						
+						// Note: if you're running tests inside Xcode and the tests stop on this line
+						//  and the tests fail, but they work if you run `swift test` on the
+						//  command line, Hit `Deactivate Breakpoints` in Xcode and try again
+						throw Error(code: Socket.SOCKET_ERR_ACCEPT_FAILED, reason: self.lastError())
 					}
-				#else
-					let fd = withUnsafeMutablePointer(to: &acceptAddr) {
-						Darwin.accept(self.socketfd, UnsafeMutableRawPointer($0).assumingMemoryBound(to: sockaddr.self), &addrSize)
-					}
-				#endif
-				if fd < 0 {
-
-					if errno == EINTR {
-						continue
-					}
-
-                    // Note: if you're running tests inside Xcode and the tests stop on this line
-                    //  and the tests fail, but they work if you run `swift test` on the
-                    //  command line, Hit `Deactivate Breakpoints` in Xcode and try again
-					throw Error(code: Socket.SOCKET_ERR_ACCEPT_FAILED, reason: self.lastError())
+					socketfd2 = fd
+				}) else {
+					throw Error(code: Socket.SOCKET_ERR_WRONG_PROTOCOL, reason: "Unable to determine incoming socket protocol family.")
 				}
-				socketfd2 = fd
-				address = .ipv4(acceptAddr)
-
-			case .inet6:
-				var acceptAddr = sockaddr_in6()
-				var addrSize = socklen_t(MemoryLayout<sockaddr_in6>.size)
-
-				#if os(Linux)
-					let fd = withUnsafeMutablePointer(to: &acceptAddr) {
-						Glibc.accept(self.socketfd, UnsafeMutableRawPointer($0).assumingMemoryBound(to: sockaddr.self), &addrSize)
-					}
-				#else
-					let fd = withUnsafeMutablePointer(to: &acceptAddr) {
-						Darwin.accept(self.socketfd, UnsafeMutableRawPointer($0).assumingMemoryBound(to: sockaddr.self), &addrSize)
-					}
-				#endif
-				if fd < 0 {
-
-					if errno == EINTR {
-						continue
-					}
-
-					// Note: if you're running tests inside Xcode and the tests stop on this line
-					//  and the tests fail, but they work if you run `swift test` on the
-					//  command line, Hit `Deactivate Breakpoints` in Xcode and try again
-					throw Error(code: Socket.SOCKET_ERR_ACCEPT_FAILED, reason: self.lastError())
-				}
-				socketfd2 = fd
-				address = .ipv6(acceptAddr)
-
-			case .unix:
-				var acceptAddr = sockaddr_un()
-				var addrSize = socklen_t(MemoryLayout<sockaddr_un>.size)
-
-				#if os(Linux)
-					let fd = withUnsafeMutablePointer(to: &acceptAddr) {
-						Glibc.accept(self.socketfd, UnsafeMutableRawPointer($0).assumingMemoryBound(to: sockaddr.self), &addrSize)
-					}
-				#else
-					let fd = withUnsafeMutablePointer(to: &acceptAddr) {
-						Darwin.accept(self.socketfd, UnsafeMutableRawPointer($0).assumingMemoryBound(to: sockaddr.self), &addrSize)
-					}
-				#endif
-				if fd < 0 {
-
-					if errno == EINTR {
-						continue
-					}
-
-					throw Error(code: Socket.SOCKET_ERR_ACCEPT_FAILED, reason: self.lastError())
-				}
-				socketfd2 = fd
-				address = .unix(acceptAddr)
-
+				address = acceptAddress
+			} catch NotAnError.nope {
+				continue
 			}
 
 			keepRunning = false
@@ -1546,89 +1484,37 @@ public class Socket: SocketReader, SocketWriter {
 
 		var keepRunning: Bool = true
 		repeat {
-
-			switch self.signature!.protocolFamily {
-
-			case .inet:
-				var acceptAddr = sockaddr_in()
-				var addrSize = socklen_t(MemoryLayout<sockaddr_in>.size)
-
-				#if os(Linux)
-					let fd = withUnsafeMutablePointer(to: &acceptAddr) {
-						Glibc.accept(self.socketfd, UnsafeMutableRawPointer($0).assumingMemoryBound(to: sockaddr.self), &addrSize)
-					}
-				#else
-					let fd = withUnsafeMutablePointer(to: &acceptAddr) {
-						Darwin.accept(self.socketfd, UnsafeMutableRawPointer($0).assumingMemoryBound(to: sockaddr.self), &addrSize)
-					}
-				#endif
-				if fd < 0 {
-
-					if errno == EINTR {
-						continue
-					}
-
-					// Note: if you're running tests inside Xcode and the tests stop on this line
-					//  and the tests fail, but they work if you run `swift test` on the
-					//  command line, Hit `Deactivate Breakpoints` in Xcode and try again
-					throw Error(code: Socket.SOCKET_ERR_ACCEPT_FAILED, reason: self.lastError())
-				}
-				socketfd2 = fd
-				address = .ipv4(acceptAddr)
-
-			case .inet6:
-				var acceptAddr = sockaddr_in6()
-				var addrSize = socklen_t(MemoryLayout<sockaddr_in6>.size)
-
-				#if os(Linux)
-					let fd = withUnsafeMutablePointer(to: &acceptAddr) {
-						Glibc.accept(self.socketfd, UnsafeMutableRawPointer($0).assumingMemoryBound(to: sockaddr.self), &addrSize)
-					}
-				#else
-					let fd = withUnsafeMutablePointer(to: &acceptAddr) {
-						Darwin.accept(self.socketfd, UnsafeMutableRawPointer($0).assumingMemoryBound(to: sockaddr.self), &addrSize)
-					}
-				#endif
-				if fd < 0 {
-
-					if errno == EINTR {
-						continue
-					}
-
-					// Note: if you're running tests inside Xcode and the tests stop on this line
-					//  and the tests fail, but they work if you run `swift test` on the
-					//  command line, Hit `Deactivate Breakpoints` in Xcode and try again
-					throw Error(code: Socket.SOCKET_ERR_ACCEPT_FAILED, reason: self.lastError())
-				}
-				socketfd2 = fd
-				address = .ipv6(acceptAddr)
-
-			case .unix:
-				var acceptAddr = sockaddr_un()
-				var addrSize = socklen_t(MemoryLayout<sockaddr_un>.size)
-
-				#if os(Linux)
-					let fd = withUnsafeMutablePointer(to: &acceptAddr) {
-						Glibc.accept(self.socketfd, UnsafeMutableRawPointer($0).assumingMemoryBound(to: sockaddr.self), &addrSize)
-					}
-				#else
-					let fd = withUnsafeMutablePointer(to: &acceptAddr) {
-						Darwin.accept(self.socketfd, UnsafeMutableRawPointer($0).assumingMemoryBound(to: sockaddr.self), &addrSize)
-					}
-				#endif
-				if fd < 0 {
-
-					if errno == EINTR {
-						continue
-					}
-
-					throw Error(code: Socket.SOCKET_ERR_ACCEPT_FAILED, reason: self.lastError())
-				}
-				socketfd2 = fd
-				address = .unix(acceptAddr)
-
+			enum NotAnError: Swift.Error {
+				case nope
 			}
-
+			do {
+				guard let acceptAddress = try Address(addressProvider: { (addressPointer, addressLengthPointer) in
+					#if os(Linux)
+						let fd = Glibc.accept(self.socketfd, addressPointer, addressLengthPointer)
+					#else
+						let fd = Darwin.accept(self.socketfd, addressPointer, addressLengthPointer)
+					#endif
+					
+					if fd < 0 {
+						
+						if errno == EINTR {
+							throw NotAnError.nope
+						}
+						
+						// Note: if you're running tests inside Xcode and the tests stop on this line
+						//  and the tests fail, but they work if you run `swift test` on the
+						//  command line, Hit `Deactivate Breakpoints` in Xcode and try again
+						throw Error(code: Socket.SOCKET_ERR_ACCEPT_FAILED, reason: self.lastError())
+					}
+					socketfd2 = fd
+				}) else {
+					throw Error(code: Socket.SOCKET_ERR_WRONG_PROTOCOL, reason: "Unable to determine incoming socket protocol family.")
+				}
+				address = acceptAddress
+			} catch NotAnError.nope {
+				continue
+			}
+			
 			keepRunning = false
 
 		} while keepRunning
@@ -2100,17 +1986,14 @@ public class Socket: SocketReader, SocketWriter {
 		}
 
 		// Now, do the connection using the supplied address...
-		var remoteAddr = signature.address!.addr
-
-		#if os(Linux)
-			let rc = withUnsafeMutablePointer(to: &remoteAddr) {
-				Glibc.connect(self.socketfd, UnsafeMutablePointer($0), socklen_t(signature.address!.size))
-			}
-		#else
-			let rc = withUnsafeMutablePointer(to: &remoteAddr) {
-				Darwin.connect(self.socketfd, UnsafeMutablePointer($0), socklen_t(signature.address!.size))
-			}
-		#endif
+		let rc = signature.address!.withSockAddrPointer { sockaddr, length -> Int32 in
+			#if os(Linux)
+				return Glibc.connect(self.socketfd, sockaddr, length)
+			#else
+				return Darwin.connect(self.socketfd, sockaddr, length)
+			#endif
+		}
+		
 		if rc < 0 {
 
 			throw Error(code: Socket.SOCKET_ERR_CONNECT_FAILED, reason: self.lastError())
@@ -2265,6 +2148,7 @@ public class Socket: SocketReader, SocketWriter {
 
 		var info = targetInfo
 		var bound = false
+		
 		while info != nil {
 
 			// Try to bind the socket to the address...
@@ -2299,34 +2183,14 @@ public class Socket: SocketReader, SocketWriter {
 
 		// If the port was set to zero, we need to retrieve the port that assigned by the OS...
 		if port == 0 {
-
-			let addr = sockaddr_storage()
-			var length = socklen_t(MemoryLayout<sockaddr_storage>.size)
-			var addrPtr = addr.asAddr()
-			if getsockname(self.socketfd, &addrPtr, &length) == 0 {
-
-				if addrPtr.sa_family == sa_family_t(AF_INET6) {
-
-					var addr = sockaddr_in6()
-					memcpy(&addr, &addrPtr, Int(MemoryLayout<sockaddr_in6>.size))
-					address = .ipv6(addr)
-
-				} else if addrPtr.sa_family == sa_family_t(AF_INET) {
-
-					var addr = sockaddr_in()
-					memcpy(&addr, &addrPtr, Int(MemoryLayout<sockaddr_in>.size))
-					address = .ipv4(addr)
-
-				} else {
-
-					throw Error(code: Socket.SOCKET_ERR_WRONG_PROTOCOL, reason: "Unable to determine listening socket protocol family.")
+			guard let addressFromSockName = try Address(addressProvider: { (sockaddr, length) in
+				if getsockname(self.socketfd, sockaddr, length) != 0 {
+					throw Error(code: Socket.SOCKET_ERR_BIND_FAILED, reason: "Unable to determine listening socket address after bind.")
 				}
-
-			} else {
-
-				throw Error(code: Socket.SOCKET_ERR_BIND_FAILED, reason: "Unable to determine listening socket address after bind.")
+			}) else {
+				throw Error(code: Socket.SOCKET_ERR_WRONG_PROTOCOL, reason: "Unable to determine listening socket protocol family.")
 			}
-
+			address = addressFromSockName
 		} else {
 
 			if info!.pointee.ai_family == Int32(AF_INET6) {
@@ -3175,46 +3039,45 @@ public class Socket: SocketReader, SocketWriter {
 			throw Error(code: Socket.SOCKET_ERR_WRONG_PROTOCOL, reason: "This is not a UDP socket.")
 		}
 
-		var sent = 0
-		var sendFlags: Int32 = 0
-		#if os(Linux)
-			// Ignore SIGPIPE to avoid process termination if the reader has closed the connection.
-			// On Linux, we set the MSG_NOSIGNAL send flag. On OSX, we set SO_NOSIGPIPE during init().
-			sendFlags = Int32(MSG_NOSIGNAL)
-		#endif
-
-		var addr = address.addr
-		let size = address.size
-
-		while sent < bufSize {
-
-			var s = 0
+		return try address.withSockAddrPointer { addressPointer, addressLength -> Int in
+			var sent = 0
+			var sendFlags: Int32 = 0
 			#if os(Linux)
-				s = Glibc.sendto(self.socketfd, buffer.advanced(by: sent), Int(bufSize - sent), sendFlags, &addr, socklen_t(size))
-			#else
-				s = Darwin.sendto(self.socketfd, buffer.advanced(by: sent), Int(bufSize - sent), sendFlags, &addr, socklen_t(size))
+				// Ignore SIGPIPE to avoid process termination if the reader has closed the connection.
+				// On Linux, we set the MSG_NOSIGNAL send flag. On OSX, we set SO_NOSIGPIPE during init().
+				sendFlags = Int32(MSG_NOSIGNAL)
 			#endif
-
-			if s <= 0 {
-
-				if errno == EAGAIN && !isBlocking {
-
-					// We have written out as much as we can...
-					return sent
+			
+			while sent < bufSize {
+				
+				var s = 0
+				#if os(Linux)
+					s = Glibc.sendto(self.socketfd, buffer.advanced(by: sent), Int(bufSize - sent), sendFlags, addressPointer, addressLength)
+				#else
+					s = Darwin.sendto(self.socketfd, buffer.advanced(by: sent), Int(bufSize - sent), sendFlags, addressPointer, addressLength)
+				#endif
+				
+				if s <= 0 {
+					
+					if errno == EAGAIN && !isBlocking {
+						
+						// We have written out as much as we can...
+						return sent
+					}
+					
+					// - Handle a connection reset by peer (ECONNRESET) and throw a different exception...
+					if errno == ECONNRESET {
+						
+						throw Error(code: Socket.SOCKET_ERR_CONNECTION_RESET, reason: self.lastError())
+					}
+					
+					throw Error(code: Socket.SOCKET_ERR_WRITE_FAILED, reason: self.lastError())
 				}
-
-				// - Handle a connection reset by peer (ECONNRESET) and throw a different exception...
-				if errno == ECONNRESET {
-
-					throw Error(code: Socket.SOCKET_ERR_CONNECTION_RESET, reason: self.lastError())
-				}
-
-				throw Error(code: Socket.SOCKET_ERR_WRITE_FAILED, reason: self.lastError())
+				sent += s
 			}
-			sent += s
+			
+			return sent
 		}
-
-		return sent
 	}
 
 	///
@@ -3665,74 +3528,60 @@ public class Socket: SocketReader, SocketWriter {
 
 		// Clear the buffer...
 		self.readBuffer.initialize(to: 0x0)
-		var address: Address? = nil
-
 		var recvFlags: Int32 = 0
 		if self.readStorage.length > 0 {
 			recvFlags |= Int32(MSG_DONTWAIT)
 		}
-
-		let addr = sockaddr_storage()
-		var length = socklen_t(MemoryLayout<sockaddr_storage>.size)
-		var addrPtr = addr.asAddr()
-
-		// Read all the available data...
-		#if os(Linux)
-			let count = Glibc.recvfrom(self.socketfd, self.readBuffer, self.readBufferSize, recvFlags, &addrPtr, &length)
-		#else
-			let count = Darwin.recvfrom(self.socketfd, self.readBuffer, self.readBufferSize, recvFlags, &addrPtr, &length)
-		#endif
-
-		// Check for error...
-		if count < 0 {
-
-			// - Could be an error, but if errno is EAGAIN or EWOULDBLOCK (if a non-blocking socket),
-			//		it means there was NO data to read...
-			if errno == EAGAIN || errno == EWOULDBLOCK {
-
-				// FIXME: If we reach this point because data is available in the internal buffer, we will be *unable* to associate it with an address...
-				return (self.readStorage.length, nil)
+		
+		enum NotAnError: Swift.Error {
+			case nope(length: Int)
+		}
+		
+		do {
+			guard let address = try Address(addressProvider: { (addresssPointer, addressLengthPointer) in
+				// Read all the available data...
+				#if os(Linux)
+					let count = Glibc.recvfrom(self.socketfd, self.readBuffer, self.readBufferSize, recvFlags, addresssPointer, addressLengthPointer)
+				#else
+					let count = Darwin.recvfrom(self.socketfd, self.readBuffer, self.readBufferSize, recvFlags, addresssPointer, addressLengthPointer)
+				#endif
+				
+				// Check for error...
+				if count < 0 {
+					
+					// - Could be an error, but if errno is EAGAIN or EWOULDBLOCK (if a non-blocking socket),
+					//		it means there was NO data to read...
+					if errno == EAGAIN || errno == EWOULDBLOCK {
+						
+						// FIXME: If we reach this point because data is available in the internal buffer, we will be *unable* to associate it with an address...
+						throw NotAnError.nope(length: self.readStorage.length)
+					}
+					
+					// - Handle a connection reset by peer (ECONNRESET) and throw a different exception...
+					if errno == ECONNRESET {
+						
+						throw Error(code: Socket.SOCKET_ERR_CONNECTION_RESET, reason: self.lastError())
+					}
+					
+					// - Something went wrong...
+					throw Error(code: Socket.SOCKET_ERR_RECV_FAILED, reason: self.lastError())
+				}
+				
+				if count == 0 {
+					self.remoteConnectionClosed = true
+					throw NotAnError.nope(length: 0)
+				}
+				
+				// Save the data in the buffer...
+				self.readStorage.append(self.readBuffer, length: count)
+			}) else {
+				throw Error(code: Socket.SOCKET_ERR_WRONG_PROTOCOL, reason: "Unable to determine receiving socket protocol family.")
 			}
-
-			// - Handle a connection reset by peer (ECONNRESET) and throw a different exception...
-			if errno == ECONNRESET {
-
-				throw Error(code: Socket.SOCKET_ERR_CONNECTION_RESET, reason: self.lastError())
-			}
-
-			// - Something went wrong...
-			throw Error(code: Socket.SOCKET_ERR_RECV_FAILED, reason: self.lastError())
+			
+			return (self.readStorage.length, address)
+		} catch NotAnError.nope(let length) {
+			return (length, nil)
 		}
-
-		if count == 0 {
-
-			self.remoteConnectionClosed = true
-			return (0, nil)
-		}
-
-		// Save the data in the buffer...
-		self.readStorage.append(self.readBuffer, length: count)
-
-		// Retrieve the address...
-		if addrPtr.sa_family == sa_family_t(AF_INET6) {
-
-			var addr = sockaddr_in6()
-			memcpy(&addr, &addrPtr, Int(MemoryLayout<sockaddr_in6>.size))
-			address = .ipv6(addr)
-
-		} else if addrPtr.sa_family == sa_family_t(AF_INET) {
-
-			var addr = sockaddr_in()
-			memcpy(&addr, &addrPtr, Int(MemoryLayout<sockaddr_in>.size))
-			address = .ipv4(addr)
-
-		} else {
-
-			throw Error(code: Socket.SOCKET_ERR_WRONG_PROTOCOL, reason: "Unable to determine receiving socket protocol family.")
-		}
-
-
-		return (self.readStorage.length, address)
 	}
 
 	///
