@@ -2155,7 +2155,7 @@ public class Socket: SocketReader, SocketWriter {
 	///		- port: 				The port to listen on.
 	/// 	- maxBacklogSize: 		The maximum size of the queue containing pending connections. Default is *Socket.SOCKET_DEFAULT_MAX_BACKLOG*.
 	///
-	public func listen(on port: Int, maxBacklogSize: Int = Socket.SOCKET_DEFAULT_MAX_BACKLOG) throws {
+	public func listen(on port: Int, maxBacklogSize: Int = Socket.SOCKET_DEFAULT_MAX_BACKLOG, allowPortReuse: Bool = true) throws {
 
 		// Make sure we've got a valid socket...
 		if self.socketfd == Socket.SOCKET_INVALID_DESCRIPTOR {
@@ -2171,18 +2171,22 @@ public class Socket: SocketReader, SocketWriter {
 			throw Error(code: Socket.SOCKET_ERR_SETSOCKOPT_FAILED, reason: self.lastError())
 		}
 
-        // SO_REUSEPORT allows completely duplicate bindings by multiple processes if they
-        // all set SO_REUSEPORT before binding the port.  This option permits multiple
-        // instances of a program to each receive UDP/IP multicast or broadcast datagrams
-        // destined for the bound port.
-        if setsockopt(self.socketfd, SOL_SOCKET, SO_REUSEPORT, &on, socklen_t(MemoryLayout<Int32>.size)) < 0 {
+		// Allow port reuse if the caller desires...
+		if allowPortReuse {
 			
-			// Setting of this option on WSL (Windows Subsytem for Linux) is not supported.  Check for
-			// the appropriate errno value and if set, ignore the error...
-			if errno != ENOPROTOOPT {
-	            throw Error(code: Socket.SOCKET_ERR_SETSOCKOPT_FAILED, reason: self.lastError())
+			// SO_REUSEPORT allows completely duplicate bindings by multiple processes if they
+			// all set SO_REUSEPORT before binding the port.  This option permits multiple
+			// instances of a program to each receive UDP/IP multicast or broadcast datagrams
+			// destined for the bound port.
+			if setsockopt(self.socketfd, SOL_SOCKET, SO_REUSEPORT, &on, socklen_t(MemoryLayout<Int32>.size)) < 0 {
+				
+				// Setting of this option on WSL (Windows Subsytem for Linux) is not supported.  Check for
+				// the appropriate errno value and if set, ignore the error...
+				if errno != ENOPROTOOPT {
+					throw Error(code: Socket.SOCKET_ERR_SETSOCKOPT_FAILED, reason: self.lastError())
+				}
 			}
-        }
+		}
 
 		// Get the signature for the socket...
 		guard let sig = self.signature else {
