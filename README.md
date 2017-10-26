@@ -101,7 +101,7 @@ To include BlueSocket in a project using CocoaPods, you just add `BlueSocket` to
 
 ### Before starting
 
-The first you need to do is import the Socket framework.  This is done by the following:
+The first thing you need to do is import the Socket framework.  This is done by the following:
 ```
 import Socket
 ```
@@ -110,16 +110,16 @@ import Socket
 
 **BlueSocket** supports the following families, types and protocols:
 - *Families:*
-	- IPV4:		`Socket.ProtocolFamily.inet`
-	- IPV6:		`Socket.ProtocolFamily.inet6`
-	- UNIX:		`Socket.ProtocolFamily.unix`
+	- IPV4: `Socket.ProtocolFamily.inet`
+	- IPV6: `Socket.ProtocolFamily.inet6`
+	- UNIX: `Socket.ProtocolFamily.unix`
 - *Types:*
-	- Stream:	`Socket.SocketType.stream`
-	- Datagram:	`Socket.SocketType.datagram`
+	- Stream: `Socket.SocketType.stream`
+	- Datagram: `Socket.SocketType.datagram`
 - *Protocols:*
-	- TCP:		`Socket.SocketProtocol.tcp`
-	- UDP:		`Socket.SocketProtocol.udp`
-	- UNIX:		`Socket.SocketProtocol.unix`
+	- TCP: `Socket.SocketProtocol.tcp`
+	- UDP: `Socket.SocketProtocol.udp`
+	- UNIX: `Socket.SocketProtocol.unix`
 
 ### Creating a socket.
 
@@ -233,7 +233,7 @@ The read and write APIs above that use either `NSData` or `NSMutableData` will *
 
 ### Complete Example
 
-The following example shows how to create a relatively simple multi-threaded echo server using the new `GCD based` **Dispatch** API. What follows is code for a simple echo server that once running, can be accessed via `telnet 127.0.0.1 1337`.
+The following example shows how to create a relatively simple multi-threaded echo server using the new `GCD based` **Dispatch** API. What follows is code for a simple echo server that once running, can be accessed via `telnet ::1 1337`.
 ```swift
 
 import Foundation
@@ -421,18 +421,31 @@ print("Connect with a command line window by entering 'telnet 127.0.0.1 \(port)'
 
 server.run()
 ```
-This server can be built by specifying the following `Package.swift` file.
+This server can be built by specifying the following `Package.swift` file using Swift 4.
 ```swift
 import PackageDescription
 
 let package = Package(
     name: "EchoServer",
 	dependencies: [
-		.Package(url: "https://github.com/IBM-Swift/BlueSocket.git", majorVersion: 0, minor: 10),
+		.package(url: "https://github.com/IBM-Swift/BlueSocket.git", .upToNextMinor(from: "0.12.75")),
 		],
 	exclude: ["EchoServer.xcodeproj"]
 )
 ```
+Or if you are still using Swift 3, by specifying the following `Package.swift` file.
+```swift
+import PackageDescription
+
+let package = Package(
+	name: "EchoServer",
+	dependencies: [
+	.Package(url: "https://github.com/IBM-Swift/BlueSocket.git", majorVersion: 0, minor: 12),
+	],
+	exclude: ["EchoServer.xcodeproj"]
+)
+```
+
 The following command sequence will build and run the echo server on Linux.  If running on macOS or with any toolchain **NEWER** than the 8/18 toolchain, you can omit the `-Xcc -fblocks` switch as it's no longer needed.
 ```
 $ swift build -Xcc -fblocks
