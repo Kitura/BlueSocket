@@ -26,122 +26,67 @@
 
 import Foundation
 
-// MARK: sockaddr_storage Extension
-
-public extension sockaddr_storage {
-	
-	///
-	/// Cast to sockaddr
-	///
-	/// - Returns: sockaddr
-	///
-	public func asAddr() -> sockaddr {
-		
-		var temp = self
-		let addr = withUnsafePointer(to: &temp) {
-			return UnsafeRawPointer($0)
+//
+// Great help with this from
+// https://blog.obdev.at/representing-socket-addresses-in-swift-using-enums/
+//
+extension Socket.Address {
+	func withSockAddrPointer<Result>(body: (UnsafePointer<sockaddr>, socklen_t) throws -> Result) rethrows -> Result {
+		func castAndCall<T>(_ address: T, _ body: (UnsafePointer<sockaddr>, socklen_t) throws -> Result) rethrows -> Result {
+			var localAddress = address // We need a `var` here for the `&`.
+			return try withUnsafePointer(to: &localAddress) {
+				return try $0.withMemoryRebound(to: sockaddr.self, capacity: 1, {
+					return try body($0, socklen_t(MemoryLayout<T>.size))
+				})
+			}
 		}
-		return addr.assumingMemoryBound(to: sockaddr.self).pointee
 		
-	}
-	
-	///
-	/// Cast to sockaddr_in
-	///
-	/// - Returns: sockaddr_in
-	///
-	public func asIPV4() -> sockaddr_in {
-		
-		var temp = self
-		let addr = withUnsafePointer(to: &temp) {
-			return UnsafeRawPointer($0)
+		switch self {
+		case .ipv4(let address):
+			return try castAndCall(address, body)
+		case .ipv6(let address):
+			return try castAndCall(address, body)
+		case .unix(let address):
+			return try castAndCall(address, body)
 		}
-		return addr.assumingMemoryBound(to: sockaddr_in.self).pointee
-	}
-	
-	///
-	/// Cast to sockaddr_in6
-	///
-	/// - Returns: sockaddr_in6
-	///
-	public func asIPV6() -> sockaddr_in6 {
-		
-		var temp = self
-		let addr = withUnsafePointer(to: &temp) {
-			return UnsafeRawPointer($0)
-		}
-		return addr.assumingMemoryBound(to: sockaddr_in6.self).pointee
-	}
-
-	///
-	/// Cast to sockaddr_un
-	///
-	/// - Returns: sockaddr_un
-	///
-	public func asUnix() -> sockaddr_un {
-		
-		var temp = self
-		let addr = withUnsafePointer(to: &temp) {
-			return UnsafeRawPointer($0)
-		}
-		return addr.assumingMemoryBound(to: sockaddr_un.self).pointee
 	}
 }
 
-// MARK: sockaddr_in Extension
-
-public extension sockaddr_in {
-	
-	///
-	/// Cast to sockaddr
-	///
-	/// - Returns: sockaddr
-	///
-	public func asAddr() -> sockaddr {
+extension Socket.Address {
+	init?(addressProvider: (UnsafeMutablePointer<sockaddr>, UnsafeMutablePointer<socklen_t>) throws -> Void) rethrows {
 		
-		var temp = self
-		let addr = withUnsafePointer(to: &temp) {
-			return UnsafeRawPointer($0)
+		var addressStorage = sockaddr_storage()
+		var addressStorageLength = socklen_t(MemoryLayout.size(ofValue: addressStorage))
+		try withUnsafeMutablePointer(to: &addressStorage) {
+			try $0.withMemoryRebound(to: sockaddr.self, capacity: 1) { addressPointer in
+				try withUnsafeMutablePointer(to: &addressStorageLength) { addressLengthPointer in
+					try addressProvider(addressPointer, addressLengthPointer)
+				}
+			}
 		}
-		return addr.assumingMemoryBound(to: sockaddr.self).pointee
-	}
-}
-
-// MARK: sockaddr_in6 Extension
-
-public extension sockaddr_in6 {
-	
-	///
-	/// Cast to sockaddr
-	///
-	/// - Returns: sockaddr
-	///
-	public func asAddr() -> sockaddr {
 		
-		var temp = self
-		let addr = withUnsafePointer(to: &temp) {
-			return UnsafeRawPointer($0)
+		switch Int32(addressStorage.ss_family) {
+		case AF_INET:
+			self = withUnsafePointer(to: &addressStorage) {
+				return $0.withMemoryRebound(to: sockaddr_in.self, capacity: 1) {
+					return Socket.Address.ipv4($0.pointee)
+				}
+			}
+		case AF_INET6:
+			self = withUnsafePointer(to: &addressStorage) {
+				return $0.withMemoryRebound(to: sockaddr_in6.self, capacity: 1) {
+					return Socket.Address.ipv6($0.pointee)
+				}
+			}
+		case AF_UNIX:
+			self = withUnsafePointer(to: &addressStorage) {
+				return $0.withMemoryRebound(to: sockaddr_un.self, capacity: 1) {
+					return Socket.Address.unix($0.pointee)
+				}
+			}
+		default:
+			return nil
 		}
-		return addr.assumingMemoryBound(to: sockaddr.self).pointee
-	}
-}
-
-// MARK: sockaddr_un Extension
-
-public extension sockaddr_un {
-	
-	///
-	/// Cast to sockaddr
-	///
-	/// - Returns: sockaddr
-	///
-	public func asAddr() -> sockaddr {
-		
-		var temp = self
-		let addr = withUnsafePointer(to: &temp) {
-			return UnsafeRawPointer($0)
-		}
-		return addr.assumingMemoryBound(to: sockaddr.self).pointee
 	}
 }
 
