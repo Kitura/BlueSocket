@@ -2046,6 +2046,7 @@ public class Socket: SocketReader, SocketWriter {
 	/// - Parameters:
 	///		- port: 				The port to listen on.
 	/// 	- maxBacklogSize: 		The maximum size of the queue containing pending connections. Default is *Socket.SOCKET_DEFAULT_MAX_BACKLOG*.
+	///		- allowPortReuse:		Set to `true` to allow the port to be reused. `false` otherwise. Default is `true`.
 	///
 	public func listen(on port: Int, maxBacklogSize: Int = Socket.SOCKET_DEFAULT_MAX_BACKLOG, allowPortReuse: Bool = true) throws {
 
