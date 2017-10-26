@@ -31,7 +31,20 @@ import Foundation
 // https://blog.obdev.at/representing-socket-addresses-in-swift-using-enums/
 //
 extension Socket.Address {
+	
+	///
+	/// Call a low level socket function using the specified socket address pointer.
+	///
+	/// - Parameters:
+	///		- body:		The closure containing the call to the low level function.
+	///
+	///	- Returns:		The result of executing the closure.
+	///
 	func withSockAddrPointer<Result>(body: (UnsafePointer<sockaddr>, socklen_t) throws -> Result) rethrows -> Result {
+		
+		///
+		/// Internal function to call do the cast and call to the closure.
+		///
 		func castAndCall<T>(_ address: T, _ body: (UnsafePointer<sockaddr>, socklen_t) throws -> Result) rethrows -> Result {
 			var localAddress = address // We need a `var` here for the `&`.
 			return try withUnsafePointer(to: &localAddress) {
@@ -53,6 +66,15 @@ extension Socket.Address {
 }
 
 extension Socket.Address {
+	
+	///
+	/// Creates a Socket.Address
+	///
+	/// - Parameters:
+	///		- addressProvider:	Tuple containing pointers to the sockaddr and its length.
+	///
+	///	- Returns:				Newly initialized Socket.Address.
+	///
 	init?(addressProvider: (UnsafeMutablePointer<sockaddr>, UnsafeMutablePointer<socklen_t>) throws -> Void) rethrows {
 		
 		var addressStorage = sockaddr_storage()
