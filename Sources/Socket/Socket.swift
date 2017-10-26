@@ -92,8 +92,17 @@ public class Socket: SocketReader, SocketWriter {
 	public static let SOCKET_ERR_GETSOCKOPT_FAILED			= -9967
 	public static let SOCKET_ERR_INVALID_DELEGATE_CALL		= -9966
 	public static let SOCKET_ERR_MISSING_SIGNATURE			= -9965
-
-
+	
+	///
+	/// Specialized Operation Exception
+	///
+	enum OperationInterrupted: Swift.Error {
+	
+		/// Low level socket accept was interrupted.
+		/// - **Note:** This is typically _NOT_ an error.
+		case accept
+	}
+	
 	///
 	/// Flag to indicate the endian-ness of the host. (Readonly)
 	///
@@ -1371,9 +1380,6 @@ public class Socket: SocketReader, SocketWriter {
 
 		var keepRunning: Bool = true
 		repeat {
-			enum NotAnError: Swift.Error {
-				case nope
-			}
 			do {
 				guard let acceptAddress = try Address(addressProvider: { (addressPointer, addressLengthPointer) in
 					#if os(Linux)
@@ -1384,8 +1390,9 @@ public class Socket: SocketReader, SocketWriter {
 					
 					if fd < 0 {
 						
+						// The operation was interrupted, continue the loop...
 						if errno == EINTR {
-							throw NotAnError.nope
+							throw OperationInterrupted.accept
 						}
 						
 						// Note: if you're running tests inside Xcode and the tests stop on this line
@@ -1398,7 +1405,9 @@ public class Socket: SocketReader, SocketWriter {
 					throw Error(code: Socket.SOCKET_ERR_WRONG_PROTOCOL, reason: "Unable to determine incoming socket protocol family.")
 				}
 				address = acceptAddress
-			} catch NotAnError.nope {
+				
+			} catch OperationInterrupted.accept {
+				
 				continue
 			}
 
@@ -1484,9 +1493,6 @@ public class Socket: SocketReader, SocketWriter {
 
 		var keepRunning: Bool = true
 		repeat {
-			enum NotAnError: Swift.Error {
-				case nope
-			}
 			do {
 				guard let acceptAddress = try Address(addressProvider: { (addressPointer, addressLengthPointer) in
 					#if os(Linux)
@@ -1497,8 +1503,9 @@ public class Socket: SocketReader, SocketWriter {
 					
 					if fd < 0 {
 						
+						// The operation was interrupted, continue the loop...
 						if errno == EINTR {
-							throw NotAnError.nope
+							throw OperationInterrupted.accept
 						}
 						
 						// Note: if you're running tests inside Xcode and the tests stop on this line
@@ -1511,7 +1518,9 @@ public class Socket: SocketReader, SocketWriter {
 					throw Error(code: Socket.SOCKET_ERR_WRONG_PROTOCOL, reason: "Unable to determine incoming socket protocol family.")
 				}
 				address = acceptAddress
-			} catch NotAnError.nope {
+				
+			} catch OperationInterrupted.accept {
+				
 				continue
 			}
 			
