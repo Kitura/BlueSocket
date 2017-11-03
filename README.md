@@ -417,7 +417,7 @@ class EchoServer {
 let port = 1337
 let server = EchoServer(port: port)
 print("Swift Echo Server Sample")
-print("Connect with a command line window by entering 'telnet 127.0.0.1 \(port)'")
+print("Connect with a command line window by entering 'telnet ::1 \(port)'")
 
 server.run()
 ```
@@ -428,7 +428,7 @@ import PackageDescription
 let package = Package(
     name: "EchoServer",
 	dependencies: [
-		.package(url: "https://github.com/IBM-Swift/BlueSocket.git", .upToNextMinor(from: "0.12.75")),
+		.package(url: "https://github.com/IBM-Swift/BlueSocket.git", .upToNextMinor(from: "0.12.76")),
 		],
 	exclude: ["EchoServer.xcodeproj"]
 )
@@ -451,6 +451,6 @@ The following command sequence will build and run the echo server on Linux.  If 
 $ swift build -Xcc -fblocks
 $ .build/debug/EchoServer
 Swift Echo Server Sample
-Connect with a command line window by entering 'telnet 127.0.0.1 1337'
+Connect with a command line window by entering 'telnet ::1 1337'
 Listening on port: 1337
 ```
