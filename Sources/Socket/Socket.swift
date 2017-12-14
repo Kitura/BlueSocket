@@ -101,6 +101,10 @@ public class Socket: SocketReader, SocketWriter {
 		/// Low level socket accept was interrupted.
 		/// - **Note:** This is typically _NOT_ an error.
 		case accept
+		
+		/// Low level datagram read was interrupted.
+		/// - **Note:** This is typically _NOT_ an error.
+		case readDatagram(length: Int)
 	}
 	
 	///
@@ -3547,12 +3551,9 @@ public class Socket: SocketReader, SocketWriter {
 			recvFlags |= Int32(MSG_DONTWAIT)
 		}
 		
-		enum NotAnError: Swift.Error {
-			case nope(length: Int)
-		}
-		
 		do {
 			guard let address = try Address(addressProvider: { (addresssPointer, addressLengthPointer) in
+				
 				// Read all the available data...
 				#if os(Linux)
 					let count = Glibc.recvfrom(self.socketfd, self.readBuffer, self.readBufferSize, recvFlags, addresssPointer, addressLengthPointer)
@@ -3566,9 +3567,8 @@ public class Socket: SocketReader, SocketWriter {
 					// - Could be an error, but if errno is EAGAIN or EWOULDBLOCK (if a non-blocking socket),
 					//		it means there was NO data to read...
 					if errno == EAGAIN || errno == EWOULDBLOCK {
-						
-						// FIXME: If we reach this point because data is available in the internal buffer, we will be *unable* to associate it with an address...
-						throw NotAnError.nope(length: self.readStorage.length)
+
+						throw OperationInterrupted.readDatagram(length: self.readStorage.length)
 					}
 					
 					// - Handle a connection reset by peer (ECONNRESET) and throw a different exception...
@@ -3583,17 +3583,20 @@ public class Socket: SocketReader, SocketWriter {
 				
 				if count == 0 {
 					self.remoteConnectionClosed = true
-					throw NotAnError.nope(length: 0)
+					throw OperationInterrupted.readDatagram(length: 0)
 				}
 				
 				// Save the data in the buffer...
 				self.readStorage.append(self.readBuffer, length: count)
 			}) else {
+				
 				throw Error(code: Socket.SOCKET_ERR_WRONG_PROTOCOL, reason: "Unable to determine receiving socket protocol family.")
 			}
 			
 			return (self.readStorage.length, address)
-		} catch NotAnError.nope(let length) {
+			
+		} catch OperationInterrupted.readDatagram(let length) {
+			
 			return (length, nil)
 		}
 	}
