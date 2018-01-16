@@ -825,7 +825,7 @@ public class Socket: SocketReader, SocketWriter {
 				readBuffer.deinitialize()
 				readBuffer.deallocate(capacity: oldValue)
 				readBuffer = UnsafeMutablePointer<CChar>.allocate(capacity: readBufferSize)
-				readBuffer.initialize(to:0)
+				readBuffer.initialize(to: 0, count: readBufferSize)
 			}
 		}
 	}
@@ -1129,7 +1129,7 @@ public class Socket: SocketReader, SocketWriter {
 
 		// Setup the array of readfds...
 		var readfds = fd_set()
-		FD.ZERO(set: &readfds)
+		readfds.zero()
 
 		var highSocketfd: Int32 = 0
 		for socket in sockets {
@@ -1137,7 +1137,7 @@ public class Socket: SocketReader, SocketWriter {
 			if socket.socketfd > highSocketfd {
 				highSocketfd = socket.socketfd
 			}
-			FD.SET(fd: socket.socketfd, set: &readfds)
+			readfds.set(socket.socketfd)
 		}
 
 		// Issue the select...
@@ -1160,15 +1160,7 @@ public class Socket: SocketReader, SocketWriter {
 		}
 
 		// Build the array of returned sockets...
-		var dataSockets = [Socket]()
-		for socket in sockets {
-
-			if FD.ISSET(fd: socket.socketfd, set: &readfds) {
-				dataSockets.append(socket)
-			}
-		}
-
-		return dataSockets
+		return sockets.filter { readfds.isSet($0.socketfd) }
 	}
 
 	///
@@ -1237,7 +1229,7 @@ public class Socket: SocketReader, SocketWriter {
 	private init(family: ProtocolFamily, type: SocketType, proto: SocketProtocol) throws {
 
 		// Initialize the read buffer...
-		self.readBuffer.initialize(to: 0)
+		self.readBuffer.initialize(to: 0, count: readBufferSize)
 
 		// If the family is .unix, set the protocol to .unix as well...
 		var sockProto = proto
@@ -1259,15 +1251,7 @@ public class Socket: SocketReader, SocketWriter {
 			throw Error(code: Socket.SOCKET_ERR_UNABLE_TO_CREATE_SOCKET, reason: self.lastError())
 		}
 
-		#if !os(Linux)
-			// Set the socket to ignore SIGPIPE to avoid dying on interrupted connections...
-			// Note: Linux does not support the SO_NOSIGPIPE option. Instead, we use the
-			// MSG_NOSIGNAL flags passed to send.  See the write() functions below.
-			var on: Int32 = 1
-			if setsockopt(self.socketfd, SOL_SOCKET, SO_NOSIGPIPE, &on, socklen_t(MemoryLayout<Int32>.size)) < 0 {
-				throw Error(code: Socket.SOCKET_ERR_SETSOCKOPT_FAILED, reason: self.lastError())
-			}
-		#endif
+		try disableSIGPIPE(on: self.socketfd)
 
 		// Create the signature...
 		try self.signature = Signature(
@@ -1290,7 +1274,7 @@ public class Socket: SocketReader, SocketWriter {
 
 		self.isConnected = true
 		self.isListening = false
-		self.readBuffer.initialize(to: 0)
+		self.readBuffer.initialize(to: 0, count: readBufferSize)
 
 		self.socketfd = fd
 
@@ -1299,15 +1283,9 @@ public class Socket: SocketReader, SocketWriter {
 			let type = Int32(SOCK_STREAM.rawValue)
 		#else
 			let type = SOCK_STREAM
-
-			// Set the socket to ignore SIGPIPE to avoid dying on interrupted connections...
-			// Note: Linux does not support the SO_NOSIGPIPE option. Instead, we use the
-			// MSG_NOSIGNAL flags passed to send.  See the write() functions below.
-			var on: Int32 = 1
-			if setsockopt(self.socketfd, SOL_SOCKET, SO_NOSIGPIPE, &on, socklen_t(MemoryLayout<Int32>.size)) < 0 {
-				throw Error(code: Socket.SOCKET_ERR_SETSOCKOPT_FAILED, reason: self.lastError())
-			}
 		#endif
+		
+		try disableSIGPIPE(on: self.socketfd)
 
 		if path != nil {
 
@@ -1664,7 +1642,7 @@ public class Socket: SocketReader, SocketWriter {
 			if status == EAI_SYSTEM {
 				errorString = String(validatingUTF8: strerror(errno)) ?? "Unknown error code."
 			} else {
-				errorString = String(validatingUTF8: gai_strerror(errno)) ?? "Unknown error code."
+				errorString = String(validatingUTF8: gai_strerror(status)) ?? "Unknown error code."
 			}
 			throw Error(code: Socket.SOCKET_ERR_GETADDRINFO_FAILED, reason: errorString)
 		}
@@ -1727,8 +1705,8 @@ public class Socket: SocketReader, SocketWriter {
 					
 					// Set up for the select call...
 					var writefds = fd_set()
-					FD.ZERO(set: &writefds)
-					FD.SET(fd: socketDescriptor!, set: &writefds)
+					writefds.zero()
+					writefds.set(socketDescriptor!)
 					
 					var timer = timeval()
 					
@@ -1757,7 +1735,7 @@ public class Socket: SocketReader, SocketWriter {
 					
 					// If the socket is writable, we're probably connected, but check anyway to be sure...
 					//	Otherwise, we've timed out waiting to connect.
-					if FD.ISSET(fd: socketDescriptor!, set: &writefds) {
+					if writefds.isSet(socketDescriptor!) {
 						
 						// Check the socket...
 						var result: Int = 0
@@ -1831,15 +1809,7 @@ public class Socket: SocketReader, SocketWriter {
 			throw Error(code: Socket.SOCKET_ERR_WRONG_PROTOCOL, reason: "Unable to determine connected socket protocol family.")
 		}
 
-		#if !os(Linux)
-			// Set the new socket to ignore SIGPIPE to avoid dying on interrupted connections...
-			// Note: Linux does not support the SO_NOSIGPIPE option. Instead, we use the
-			// MSG_NOSIGNAL flags passed to send.  See the write() functions below.
-			var on: Int32 = 1
-			if setsockopt(self.socketfd, SOL_SOCKET, SO_NOSIGPIPE, &on, socklen_t(MemoryLayout<Int32>.size)) < 0 {
-				throw Error(code: Socket.SOCKET_ERR_SETSOCKOPT_FAILED, reason: self.lastError())
-			}
-		#endif
+		try disableSIGPIPE(on: self.socketfd)
 
 		try self.signature = Signature(
 			protocolFamily: Int32(info!.pointee.ai_family),
@@ -3175,12 +3145,12 @@ public class Socket: SocketReader, SocketWriter {
 
 		// Create a read and write file descriptor set for this socket...
 		var readfds = fd_set()
-		FD.ZERO(set: &readfds)
-		FD.SET(fd: self.socketfd, set: &readfds)
+		readfds.zero()
+		readfds.set(self.socketfd)
 
 		var writefds = fd_set()
-		FD.ZERO(set: &writefds)
-		FD.SET(fd: self.socketfd, set: &writefds)
+		writefds.zero()
+		writefds.set(self.socketfd)
 
 		// Do the wait...
 		var count: Int32 = 0
@@ -3226,7 +3196,7 @@ public class Socket: SocketReader, SocketWriter {
 		}
 
 		// Return a tuple containing whether or not this socket is readable and/or writable...
-		return (FD.ISSET(fd: self.socketfd, set: &readfds), FD.ISSET(fd: self.socketfd, set: &writefds))
+		return (readfds.isSet(self.socketfd), writefds.isSet(self.socketfd))
 	}
 
 	///
@@ -3433,7 +3403,7 @@ public class Socket: SocketReader, SocketWriter {
 	private func readDataIntoStorage() throws -> Int {
 
 		// Clear the buffer...
-		self.readBuffer.initialize(to: 0x0)
+		self.readBuffer.initialize(to: 0x0, count: readBufferSize)
 
 		var recvFlags: Int32 = 0
 		if self.readStorage.length > 0 {
@@ -3545,7 +3515,7 @@ public class Socket: SocketReader, SocketWriter {
 	private func readDatagramIntoStorage() throws -> (bytesRead: Int, fromAddress: Address?) {
 
 		// Clear the buffer...
-		self.readBuffer.initialize(to: 0x0)
+		self.readBuffer.initialize(to: 0x0, count: readBufferSize)
 		var recvFlags: Int32 = 0
 		if self.readStorage.length > 0 {
 			recvFlags |= Int32(MSG_DONTWAIT)
@@ -3640,6 +3610,23 @@ public class Socket: SocketReader, SocketWriter {
 	private func lastError() -> String {
 
 		return String(validatingUTF8: strerror(errno)) ?? "Error: \(errno)"
+	}
+	
+	///
+	/// Private function to set no-SIGPIPE on a socket. No-op on Linux.
+	///
+	/// - Parameter fd: The socket file descriptor upon which to act.
+	///
+	private func disableSIGPIPE(on fd: Int32) throws {
+		#if !os(Linux)
+			// Set the new socket to ignore SIGPIPE to avoid dying on interrupted connections...
+			// Note: Linux does not support the SO_NOSIGPIPE option. Instead, we use the
+			// MSG_NOSIGNAL flags passed to send.  See the write() functions below.
+			var on: Int32 = 1
+			if setsockopt(self.socketfd, SOL_SOCKET, SO_NOSIGPIPE, &on, socklen_t(MemoryLayout<Int32>.size)) < 0 {
+				throw Error(code: Socket.SOCKET_ERR_SETSOCKOPT_FAILED, reason: self.lastError())
+			}
+		#endif
 	}
 
 }
