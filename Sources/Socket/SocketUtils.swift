@@ -120,8 +120,8 @@ extension Socket.Address {
 		let __fd_set_count = 32
 	#endif
 	
-	extension fd_set
-	{
+	extension fd_set {
+	
 		@inline(__always)
 		mutating func withCArrayAccess<T>(block: (UnsafeMutablePointer<Int32>) throws -> T) rethrows -> T {
 			return try withUnsafeMutablePointer(to: &__fds_bits) {
@@ -134,8 +134,8 @@ extension Socket.Address {
 	
 	let __fd_set_count = Int(__DARWIN_FD_SETSIZE) / MemoryLayout<Int32>.stride
 	
-	extension fd_set
-	{
+	extension fd_set {
+	
 		@inline(__always)
 		mutating func withCArrayAccess<T>(block: (UnsafeMutablePointer<Int32>) throws -> T) rethrows -> T {
 			return try withUnsafeMutablePointer(to: &fds_bits) {
@@ -146,8 +146,8 @@ extension Socket.Address {
 	
 #endif
 
-public extension fd_set
-{
+public extension fd_set {
+
 	@inline(__always)
 	private static func address(for fd: Int32) -> (Int, Int32) {
 		let intOffset = Int(fd) / __fd_set_count
