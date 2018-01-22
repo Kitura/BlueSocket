@@ -1042,7 +1042,7 @@ class SocketTests: XCTestCase {
 		}
 	}
 	
-	func testIsReadableWritable() {
+	func testIsReadableWritableFail() {
 		
 		do {
 			
@@ -1069,8 +1069,55 @@ class SocketTests: XCTestCase {
 				return
 			}
 			
-			print("testIsReadableWritable Error reported: \(socketError.description)")
+			print("testIsReadableWritableFail Error reported: \(socketError.description)")
 			XCTAssertEqual(socketError.errorCode, Int32(Socket.SOCKET_ERR_NOT_CONNECTED))
+		}
+	}
+	
+	func testIsReadableWritable() {
+		
+		do {
+			
+			// Create the socket..
+			let socket = try createHelper()
+			
+			// Listen on the port...
+			try socket.listen(on: Int(port), maxBacklogSize: 10)
+			XCTAssertTrue(socket.isListening)
+			XCTAssertEqual(socket.listeningPort, port)
+			
+			// Create a second socket...
+			let socket2 = try createHelper()
+			XCTAssertNotNil(socket2)
+			
+			// Now attempt to connect to the listening socket...
+			try socket2.connect(to: host, port: port)
+			XCTAssertTrue(socket2.isConnected)
+			
+			// Test to see if it's readable or writable...
+			var readable: Bool = false
+			var writable: Bool = false
+			(readable, writable) = try socket2.isReadableOrWritable()
+			print("Socket2 is readable: \(readable), writable: \(writable)")
+
+			// Close the socket...
+			socket.close()
+			XCTAssertFalse(socket.isActive)
+			socket2.close()
+			XCTAssertFalse(socket2.isActive)
+			
+		} catch let error {
+			
+			// See if it's a socket error or something else...
+			guard let socketError = error as? Socket.Error else {
+				
+				print("Unexpected error...")
+				XCTFail()
+				return
+			}
+			
+			print("testConnectTo Error reported: \(socketError.description)")
+			XCTFail()
 		}
 	}
 	
@@ -1431,6 +1478,7 @@ class SocketTests: XCTestCase {
 		("testBlocking", testBlocking),
 		("testSetReadTimeout", testSetReadTimeout),
 		("testSetWriteTimeout", testSetWriteTimeout),
+		("testIsReadableWritableFail", testIsReadableWritableFail),
 		("testIsReadableWritable", testIsReadableWritable),
 		("testReadWrite", testReadWrite),
 		("testTruncateTCP", testTruncateTCP),
