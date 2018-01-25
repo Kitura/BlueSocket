@@ -1099,6 +1099,10 @@ class SocketTests: XCTestCase {
 			var writable: Bool = false
 			(readable, writable) = try socket2.isReadableOrWritable()
 			print("Socket2 is readable: \(readable), writable: \(writable)")
+			
+			// Socket should be writable but NOT readable...
+			XCTAssertTrue(writable, "Socket 2 is not writable but should be...")
+			XCTAssertFalse(readable, "Socket 2 is readable and shouldn't be...")
 
 			// Close the socket...
 			socket.close()
