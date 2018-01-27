@@ -120,8 +120,8 @@ extension Socket.Address {
         let __fd_set_count = 32
     #endif
     
-    extension fd_set
-    {
+	extension fd_set {
+		
         @inline(__always)
         mutating func withCArrayAccess<T>(block: (UnsafeMutablePointer<Int32>) throws -> T) rethrows -> T {
             return try withUnsafeMutablePointer(to: &__fds_bits) {
@@ -136,8 +136,8 @@ extension Socket.Address {
 	// at present this is 1024 / 32 == 32
     let __fd_set_count = Int(__DARWIN_FD_SETSIZE) / 32
     
-    extension fd_set
-    {
+	extension fd_set {
+		
         @inline(__always)
         mutating func withCArrayAccess<T>(block: (UnsafeMutablePointer<Int32>) throws -> T) rethrows -> T {
             return try withUnsafeMutablePointer(to: &fds_bits) {
@@ -148,8 +148,8 @@ extension Socket.Address {
     
 #endif
 
-public extension fd_set
-{
+public extension fd_set {
+
     @inline(__always)
     private static func address(for fd: Int32) -> (Int, Int32) {
         let intOffset = Int(fd) / __fd_set_count
@@ -157,21 +157,41 @@ public extension fd_set
         let mask = Int32(1 << bitOffset)
         return (intOffset, mask)
     }
-    
+	
+	///
+	/// Zero the fd_set
+	///
     public mutating func zero() {
         withCArrayAccess { $0.initialize(to: 0, count: __fd_set_count) }
     }
-    
+	
+	///
+	/// Set an fd in an fd_set
+	///
+	/// - Parameter fd:	The fd to add to the fd_set
+	///
     public mutating func set(_ fd: Int32) {
         let (index, mask) = fd_set.address(for: fd)
         withCArrayAccess { $0[index] |= mask }
     }
-    
+	
+	///
+	/// Clear an fd from an fd_set
+	///
+	/// - Parameter fd:	The fd to clear from the fd_set
+	///
     public mutating func clear(_ fd: Int32) {
         let (index, mask) = fd_set.address(for: fd)
         withCArrayAccess { $0[index] &= ~mask }
     }
     
+	///
+	/// Check if an fd is present in an fd_set
+	///
+	/// - Parameter fd:	The fd to check
+	///
+	///	- Returns:	True if present, false otherwise.
+	///
     public mutating func isSet(_ fd: Int32) -> Bool {
         let (index, mask) = fd_set.address(for: fd)
         return withCArrayAccess { $0[index] & mask != 0 }
