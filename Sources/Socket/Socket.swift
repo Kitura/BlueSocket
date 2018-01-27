@@ -1129,7 +1129,7 @@ public class Socket: SocketReader, SocketWriter {
 
 		// Setup the array of readfds...
 		var readfds = fd_set()
-		FD.ZERO(set: &readfds)
+		readfds.zero()
 
 		var highSocketfd: Int32 = 0
 		for socket in sockets {
@@ -1137,7 +1137,7 @@ public class Socket: SocketReader, SocketWriter {
 			if socket.socketfd > highSocketfd {
 				highSocketfd = socket.socketfd
 			}
-			FD.SET(fd: socket.socketfd, set: &readfds)
+			readfds.set(socket.socketfd)
 		}
 
 		// Issue the select...
@@ -1160,15 +1160,7 @@ public class Socket: SocketReader, SocketWriter {
 		}
 
 		// Build the array of returned sockets...
-		var dataSockets = [Socket]()
-		for socket in sockets {
-
-			if FD.ISSET(fd: socket.socketfd, set: &readfds) {
-				dataSockets.append(socket)
-			}
-		}
-
-		return dataSockets
+		return sockets.filter { readfds.isSet($0.socketfd) }
 	}
 
 	///
@@ -1713,8 +1705,8 @@ public class Socket: SocketReader, SocketWriter {
 					
 					// Set up for the select call...
 					var writefds = fd_set()
-					FD.ZERO(set: &writefds)
-					FD.SET(fd: socketDescriptor!, set: &writefds)
+					writefds.zero()
+					writefds.set(socketDescriptor!)
 					
 					var timer = timeval()
 					
@@ -1742,8 +1734,8 @@ public class Socket: SocketReader, SocketWriter {
 					}
 					
 					// If the socket is writable, we're probably connected, but check anyway to be sure...
-					//	Otherwise, we've timed out waiting to connect.
-					if FD.ISSET(fd: socketDescriptor!, set: &writefds) {
+					//	  Otherwise, we've timed out waiting to connect.
+					if writefds.isSet(socketDescriptor!) {
 						
 						// Check the socket...
 						var result: Int = 0
@@ -3153,12 +3145,12 @@ public class Socket: SocketReader, SocketWriter {
 
 		// Create a read and write file descriptor set for this socket...
 		var readfds = fd_set()
-		FD.ZERO(set: &readfds)
-		FD.SET(fd: self.socketfd, set: &readfds)
+		readfds.zero()
+		readfds.set(self.socketfd)
 
 		var writefds = fd_set()
-		FD.ZERO(set: &writefds)
-		FD.SET(fd: self.socketfd, set: &writefds)
+		writefds.zero()
+		writefds.set(self.socketfd)
 
 		// Do the wait...
 		var count: Int32 = 0
@@ -3204,7 +3196,7 @@ public class Socket: SocketReader, SocketWriter {
 		}
 
 		// Return a tuple containing whether or not this socket is readable and/or writable...
-		return (FD.ISSET(fd: self.socketfd, set: &readfds), FD.ISSET(fd: self.socketfd, set: &writefds))
+		return (readfds.isSet(self.socketfd), writefds.isSet(self.socketfd))
 	}
 
 	///
