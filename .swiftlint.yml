@@ -16,6 +16,17 @@ disabled_rules:
     - mark
     - function_parameter_count
     - cyclomatic_complexity
+    - colon
+    - fallthrough
+    - empty_enum_arguments
+    - unused_optional_binding
+    - empty_parentheses_with_trailing_closure
+    - closure_parameter_position
+    - vertical_whitespace
+    - trailing_comma
+    - xctfail_message
+    - class_delegate_protocol
+    - redundant_optional_initialization
 custom_rules:
   double_space:
     include: "*.swift"
