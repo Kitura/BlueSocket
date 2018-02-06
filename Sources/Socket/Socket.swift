@@ -555,7 +555,8 @@ public class Socket: SocketReader, SocketWriter {
 				throw Error(code: Socket.SOCKET_ERR_BAD_SIGNATURE_PARAMETERS, reason: "Pathname supplied is too long.")
 			}
 
-			_ = withUnsafeMutablePointer(to: &remoteAddr.sun_path.0) { ptr in
+			var remote = remoteAddr.sun_path.0
+			_ = withUnsafeMutablePointer(to: &remote) { ptr in
 
 				let buf = UnsafeMutableBufferPointer(start: ptr, count: MemoryLayout.size(ofValue: remoteAddr.sun_path))
 				for (i, b) in path.utf8.enumerated() {
@@ -822,10 +823,10 @@ public class Socket: SocketReader, SocketWriter {
 
 			if readBufferSize != oldValue {
 
-				readBuffer.deinitialize()
-				readBuffer.deallocate(capacity: oldValue)
+				readBuffer.deinitialize(count: readBufferSize)
+				readBuffer.deallocate()
 				readBuffer = UnsafeMutablePointer<CChar>.allocate(capacity: readBufferSize)
-				readBuffer.initialize(to: 0, count: readBufferSize)
+				readBuffer.initialize(repeating: 0, count: readBufferSize)
 			}
 		}
 	}
@@ -1229,7 +1230,7 @@ public class Socket: SocketReader, SocketWriter {
 	private init(family: ProtocolFamily, type: SocketType, proto: SocketProtocol) throws {
 
 		// Initialize the read buffer...
-		self.readBuffer.initialize(to: 0, count: readBufferSize)
+		self.readBuffer.initialize(repeating: 0, count: readBufferSize)
 
 		// If the family is .unix, set the protocol to .unix as well...
 		var sockProto = proto
@@ -1274,7 +1275,7 @@ public class Socket: SocketReader, SocketWriter {
 
 		self.isConnected = true
 		self.isListening = false
-		self.readBuffer.initialize(to: 0, count: readBufferSize)
+		self.readBuffer.initialize(repeating: 0, count: readBufferSize)
 
 		self.socketfd = fd
 
@@ -1321,8 +1322,8 @@ public class Socket: SocketReader, SocketWriter {
         }
 
         // Destroy and free the readBuffer...
-        self.readBuffer.deinitialize()
-        self.readBuffer.deallocate(capacity: self.readBufferSize)
+        self.readBuffer.deinitialize(count: 0)
+        self.readBuffer.deallocate()
     }
 
 	// MARK: Public Functions
@@ -1890,7 +1891,7 @@ public class Socket: SocketReader, SocketWriter {
 		// Now, do the connection using the supplied address...
 		let (addrPtr, addrLen) = try signature.unixAddress()
 		defer {
-			addrPtr.deallocate(capacity: addrLen)
+			addrPtr.deallocate()
 		}
 
 		let rc = addrPtr.withMemoryRebound(to: sockaddr.self, capacity: 1) {
@@ -2280,7 +2281,7 @@ public class Socket: SocketReader, SocketWriter {
 		// Now, do the connection using the supplied address from the signature...
 		let (addrPtr, addrLen) = try signature.unixAddress()
 		defer {
-			addrPtr.deallocate(capacity: addrLen)
+			addrPtr.deallocate()
 		}
 
 		let rc = addrPtr.withMemoryRebound(to: sockaddr.self, capacity: 1) {
@@ -3403,7 +3404,7 @@ public class Socket: SocketReader, SocketWriter {
 	private func readDataIntoStorage() throws -> Int {
 
 		// Clear the buffer...
-		self.readBuffer.initialize(to: 0x0, count: readBufferSize)
+		self.readBuffer.initialize(repeating: 0x0, count: readBufferSize)
 
 		var recvFlags: Int32 = 0
 		if self.readStorage.length > 0 {
@@ -3515,7 +3516,7 @@ public class Socket: SocketReader, SocketWriter {
 	private func readDatagramIntoStorage() throws -> (bytesRead: Int, fromAddress: Address?) {
 
 		// Clear the buffer...
-		self.readBuffer.initialize(to: 0x0, count: readBufferSize)
+		self.readBuffer.initialize(repeating: 0x0, count: readBufferSize)
 		var recvFlags: Int32 = 0
 		if self.readStorage.length > 0 {
 			recvFlags |= Int32(MSG_DONTWAIT)
