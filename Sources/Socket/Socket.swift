@@ -92,6 +92,7 @@ public class Socket: SocketReader, SocketWriter {
 	public static let SOCKET_ERR_GETSOCKOPT_FAILED			= -9967
 	public static let SOCKET_ERR_INVALID_DELEGATE_CALL		= -9966
 	public static let SOCKET_ERR_MISSING_SIGNATURE			= -9965
+	public static let SOCKET_ERR_PARAMETER_ERROR			= -9964
 	
 	///
 	/// Specialized Operation Exception
@@ -1586,6 +1587,11 @@ public class Socket: SocketReader, SocketWriter {
 		if host.utf8.count == 0 {
 
 			throw Error(code: Socket.SOCKET_ERR_INVALID_HOSTNAME, reason: nil)
+		}
+		
+		if !self.isBlocking && timeout == 0 {
+			
+			throw Error(code: Socket.SOCKET_ERR_PARAMETER_ERROR, reason: "No timeout set on call for non-blocking socket.")
 		}
 
 		if port == 0 || port > 65535 {
