@@ -162,7 +162,11 @@ public extension fd_set {
 	/// Zero the fd_set
 	///
     public mutating func zero() {
-        withCArrayAccess { $0.initialize(to: 0, count: __fd_set_count) }
+		#if swift(>=4.1)
+			withCArrayAccess { $0.initialize(repeating: 0, count: __fd_set_count) }
+		#else
+			withCArrayAccess { $0.initialize(to: 0, count: __fd_set_count) }
+		#endif
     }
 	
 	///
