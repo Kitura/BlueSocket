@@ -176,7 +176,7 @@ public enum SSLError: Swift.Error, CustomStringConvertible {
 	case fail(Int, String)
 	
 	/// The error code itself
-	public var code: Int {
+	public var errCode: Int {
 		
 		switch self {
 			
@@ -186,8 +186,8 @@ public enum SSLError: Swift.Error, CustomStringConvertible {
 		case .retryNeeded:
 			return -1
 			
-		case .fail(let (code, _)):
-			return Int(code)
+		case .fail(let (errCode, _)):
+			return Int(errCode)
 		}
 	}
 	
