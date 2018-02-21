@@ -750,7 +750,7 @@ public class Socket: SocketReader, SocketWriter {
 		/// - Returns: Error Instance
 		init(with error: SSLError) {
 
-			self.init(code: error.code, reason: error.description)
+			self.init(code: error.errCode, reason: error.description)
 		}
 	}
 
