@@ -154,7 +154,7 @@ public extension fd_set {
     private static func address(for fd: Int32) -> (Int, Int32) {
         let intOffset = Int(fd) / __fd_set_count
         let bitOffset = Int(fd) % __fd_set_count
-        let mask = Int32(1 << bitOffset)
+        let mask = Int32(bitPattern: UInt32(1 << bitOffset))
         return (intOffset, mask)
     }
 	
