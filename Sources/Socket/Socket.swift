@@ -1683,6 +1683,17 @@ public class Socket: SocketReader, SocketWriter {
 		}
 
 		var socketDescriptor: Int32?
+		defer {
+			// if we throw an error, be sure we clean up any dangling socket properly.
+			// note that we set this variable to nil when we assign the socket to `self.socketfd`.
+			if let sock = socketDescriptor, sock != Socket.SOCKET_INVALID_DESCRIPTOR {
+				#if os(Linux)
+					_ = Glibc.close(socketDescriptor!)
+				#else
+					_ = Darwin.close(socketDescriptor!)
+				#endif
+			}
+		}
 
 		var info = targetInfo
 		while info != nil {
@@ -1817,6 +1828,8 @@ public class Socket: SocketReader, SocketWriter {
 		}
 
 		self.socketfd = socketDescriptor!
+		socketDescriptor = nil		// clear out the temporary value -- our defer() can check for that alone
+		
 		self.isConnected = true
 		var address: Address
 		if info!.pointee.ai_family == Int32(AF_INET6) {
@@ -1851,7 +1864,7 @@ public class Socket: SocketReader, SocketWriter {
 			
 			// Socket supposed to be blocking but we've changed it to non-blocking because
 			//	a timeout was requested...  Got to change it back before proceeding...
-			let flags = fcntl(socketDescriptor!, F_GETFL)
+			let flags = fcntl(self.socketfd, F_GETFL)
 			if flags < 0 {
 				
 				throw Error(code: Socket.SOCKET_ERR_GET_FCNTL_FAILED, reason: self.lastError())
