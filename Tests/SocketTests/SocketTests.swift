@@ -1519,6 +1519,7 @@ class SocketTests: XCTestCase {
 		("testSetWriteTimeout", testSetWriteTimeout),
 		("testIsReadableWritableFail", testIsReadableWritableFail),
 		("testIsReadableWritable", testIsReadableWritable),
+		("testFDSetBitFields", testFDSetBitFields),
 		("testReadWrite", testReadWrite),
 		("testTruncateTCP", testTruncateTCP),
 		("testReadWriteUDP", testReadWriteUDP),
