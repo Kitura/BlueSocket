@@ -1125,6 +1125,18 @@ class SocketTests: XCTestCase {
 		}
 	}
 	
+	func testFDSetBitFields() {
+		var fdSet = fd_set()
+		fdSet.zero()
+		
+		for i: Int32 in 0...128 {
+			fdSet.set(i)
+			XCTAssertTrue(fdSet.isSet(i))
+			fdSet.clear(i)
+			XCTAssertFalse(fdSet.isSet(i))
+		}
+	}
+	
 	func testReadWrite() {
 		
 		let hostname = "127.0.0.1"
@@ -1507,6 +1519,7 @@ class SocketTests: XCTestCase {
 		("testSetWriteTimeout", testSetWriteTimeout),
 		("testIsReadableWritableFail", testIsReadableWritableFail),
 		("testIsReadableWritable", testIsReadableWritable),
+		("testFDSetBitFields", testFDSetBitFields),
 		("testReadWrite", testReadWrite),
 		("testTruncateTCP", testTruncateTCP),
 		("testReadWriteUDP", testReadWriteUDP),
