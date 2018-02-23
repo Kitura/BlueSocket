@@ -1129,7 +1129,9 @@ class SocketTests: XCTestCase {
 		var fdSet = fd_set()
 		fdSet.zero()
 		
-		for i: Int32 in 0...128 {
+		// The default number of max open file descriptors on Linux is 1024. On macOS,
+		//	the default is unlimited.  I think checking for 1024 should be enough...
+		for i: Int32 in 0...1024 {
 			fdSet.set(i)
 			XCTAssertTrue(fdSet.isSet(i))
 			fdSet.clear(i)
