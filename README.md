@@ -11,34 +11,30 @@
 ## Overview
 Socket framework for Swift using the Swift Package Manager. Works on iOS, macOS, and Linux.
 
-## Contents
-
-* Socket: Generic low level socket framework. Pure Swift.
-
 ## Prerequisites
 
 ### Swift
 
-* Swift Open Source `swift-3.0.1-RELEASE` toolchain (**Minimum REQUIRED for latest release**)
-* Swift Open Source `swift-4.0.0-RELEASE` toolchain (**Recommended**)
-* Swift toolchain included in *Xcode Version 9.0 (9A325) or higher*.
+* Swift Open Source `swift-4.0.0-RELEASE` toolchain (**Minimum REQUIRED for latest release**)
+* Swift Open Source `swift-4.0.3-RELEASE` toolchain (**Recommended**)
+* Swift toolchain included in *Xcode Version 9.2 (9C40b) or higher*.
 
 ### macOS
 
-* macOS 10.11.6 (*El Capitan*) or higher
-* Xcode Version 8.3.2 (8E2002) or higher using one of the above toolchains (*Recommended*)
-* Xcode Version 9.0  (9A325) or higher using the included toolchain.
+* macOS 10.11.6 (*El Capitan*) or higher.
+* Xcode Version 9.0  (9A325) or higher using one of the above toolchains.
+* Xcode Version 9.2 (9C40b) or higher using the included toolchain (*Recommended*).
 
 ### iOS
 
 * iOS 10.0 or higher
-* Xcode Version 8.3.2 (8E2002) or higher using one of the above toolchains (*Recommended*)
-* Xcode Version 9.0  (9A325) or higher using the included toolchain.
+* Xcode Version 9.0  (9A325) or higher using one of the above toolchains.
+* Xcode Version 9.2 (9C40b) or higher using the included toolchain (*Recommended*).
 
 ### Linux
 
-* Ubuntu 16.04 (or 16.10 but only tested on 16.04)
-* One of the Swift Open Source toolchain listed above
+* Ubuntu 16.04 (or 16.10 but only tested on 16.04).
+* One of the Swift Open Source toolchain listed above.
 
 ### Other Platforms
 
