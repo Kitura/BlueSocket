@@ -21,7 +21,7 @@
 
 import PackageDescription
 
-#if os(Linux) || os(macOS) || os(iOS) || os(tvOS) || os(watchOS)
+#if os(Linux) || os(macOS) || os(iOS) || os(tvOS)
 let package = Package(
     name: "Socket",
     products: [
