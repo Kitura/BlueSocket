@@ -1640,7 +1640,7 @@ public class Socket: SocketReader, SocketWriter {
 		#if os(Linux)
 			var hints = addrinfo(
 				ai_flags: AI_PASSIVE,
-				ai_family: AF_UNSPEC,
+				ai_family: signature?.protocolFamily.value ?? AF_UNSPEC,
 				ai_socktype: socketType.value,
 				ai_protocol: 0,
 				ai_addrlen: 0,
@@ -1650,7 +1650,7 @@ public class Socket: SocketReader, SocketWriter {
 		#else
 			var hints = addrinfo(
 				ai_flags: AI_PASSIVE,
-				ai_family: AF_UNSPEC,
+				ai_family: signature?.protocolFamily.value ?? AF_UNSPEC,
 				ai_socktype: socketType.value,
 				ai_protocol: 0,
 				ai_addrlen: 0,
