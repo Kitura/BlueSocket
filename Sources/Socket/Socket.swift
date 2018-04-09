@@ -1585,14 +1585,17 @@ public class Socket: SocketReader, SocketWriter {
 	/// Connects to the named host on the specified port.
 	///
 	/// - Parameters:
-	///		- host:		The host name to connect to.
-	///		- port:		The port to be used.
-	///		- timeout:	Timeout to use (in msec). *Note: If the socket is in blocking mode it
-	///					will be changed to non-blocking mode temporarily if a timeout greater
-	///					than zero (0) is provided. The returned socket will be set back to its
-	///					original setting (blocking or non-blocking).*
+	///		- host:			The host name to connect to.
+	///		- port:			The port to be used.
+	///		- timeout:		Timeout to use (in msec). *Note: If the socket is in blocking mode it
+	///						will be changed to non-blocking mode temporarily if a timeout greater
+	///						than zero (0) is provided. The returned socket will be set back to its
+	///						original setting (blocking or non-blocking).*
+	///		- familyOnly:	Setting this to true will only connect to a socket of the family of the
+	///						current instance of *Socket*.  Setting it to false, will allow connection
+	///						to foreign sockets of a different family.  Default is *false*.
 	///
-	public func connect(to host: String, port: Int32, timeout: UInt = 0) throws {
+	public func connect(to host: String, port: Int32, timeout: UInt = 0, familyOnly: Bool = false) throws {
 
 		// The socket must've been created and must not be connected...
 		if self.socketfd == Socket.SOCKET_INVALID_DESCRIPTOR {
@@ -1640,7 +1643,7 @@ public class Socket: SocketReader, SocketWriter {
 		#if os(Linux)
 			var hints = addrinfo(
 				ai_flags: AI_PASSIVE,
-				ai_family: signature?.protocolFamily.value ?? AF_UNSPEC,
+				ai_family: familyOnly ? signature?.protocolFamily.value ?? AF_UNSPEC : AF_UNSPEC,
 				ai_socktype: socketType.value,
 				ai_protocol: 0,
 				ai_addrlen: 0,
@@ -1650,7 +1653,7 @@ public class Socket: SocketReader, SocketWriter {
 		#else
 			var hints = addrinfo(
 				ai_flags: AI_PASSIVE,
-				ai_family: signature?.protocolFamily.value ?? AF_UNSPEC,
+				ai_family: familyOnly ? signature?.protocolFamily.value ?? AF_UNSPEC : AF_UNSPEC,
 				ai_socktype: socketType.value,
 				ai_protocol: 0,
 				ai_addrlen: 0,
