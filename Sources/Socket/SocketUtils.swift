@@ -154,7 +154,7 @@ public extension fd_set {
     private static func address(for fd: Int32) -> (Int, Int32) {
         var intOffset = Int(fd) / __fd_set_count
 		#if _endian(big)
-		    if (intOffset % 2 == 0) {
+		    if intOffset % 2 == 0 {
 			    intOffset += 1
 		    } else {
 			    intOffset -= 1
