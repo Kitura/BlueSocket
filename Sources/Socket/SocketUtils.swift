@@ -153,7 +153,7 @@ public extension fd_set {
     @inline(__always)
     private static func address(for fd: Int32) -> (Int, Int32) {
         var intOffset = Int(fd) / __fd_set_count
-		#if arch(s390x)
+		#if _endian(big)
 		    if (intOffset % 2 == 0) {
 			    intOffset += 1
 		    } else {
