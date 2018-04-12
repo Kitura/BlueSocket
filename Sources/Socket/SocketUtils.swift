@@ -152,7 +152,14 @@ public extension fd_set {
 
     @inline(__always)
     private static func address(for fd: Int32) -> (Int, Int32) {
-        let intOffset = Int(fd) / __fd_set_count
+        var intOffset = Int(fd) / __fd_set_count
+		#if _endian(big)
+		    if intOffset % 2 == 0 {
+			    intOffset += 1
+		    } else {
+			    intOffset -= 1
+		    }
+        #endif
         let bitOffset = Int(fd) % __fd_set_count
         let mask = Int32(bitPattern: UInt32(1 << bitOffset))
         return (intOffset, mask)
