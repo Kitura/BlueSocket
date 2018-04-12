@@ -738,7 +738,7 @@ public class Socket: SocketReader, SocketWriter {
 		///
 		init(bufferSize: Int) {
 
-			self.init(code: Socket.SOCKET_ERR_RECV_BUFFER_TOO_SMALL, reason: nil)
+			self.init(code: Socket.SOCKET_ERR_RECV_BUFFER_TOO_SMALL, reason: "Socket has an invalid buffer, the size is too small")
 			self.bufferSizeNeeded = Int32(bufferSize)
 		}
 
@@ -1102,15 +1102,15 @@ public class Socket: SocketReader, SocketWriter {
 
 			if socket.socketfd == Socket.SOCKET_INVALID_DESCRIPTOR {
 
-				throw Error(code: Socket.SOCKET_ERR_BAD_DESCRIPTOR, reason: nil)
+				throw Error(code: Socket.SOCKET_ERR_BAD_DESCRIPTOR, reason: "The socket has an invalid descriptor")
 			}
 			if socket.signature == nil {
 				
-				throw Error(code: Socket.SOCKET_ERR_MISSING_SIGNATURE, reason: nil)
+				throw Error(code: Socket.SOCKET_ERR_MISSING_SIGNATURE, reason: "The socket is missing a signature")
 			}
 			if !socket.isActive && !socket.signature!.isBound {
 
-				throw Error(code: Socket.SOCKET_ERR_NOT_ACTIVE, reason: nil)
+				throw Error(code: Socket.SOCKET_ERR_NOT_ACTIVE, reason: "The socket is not active")
 			}
 		}
 
@@ -1365,17 +1365,17 @@ public class Socket: SocketReader, SocketWriter {
 		// The socket must've been created, not connected and listening...
 		if self.socketfd == Socket.SOCKET_INVALID_DESCRIPTOR {
 
-			throw Error(code: Socket.SOCKET_ERR_BAD_DESCRIPTOR, reason: nil)
+			throw Error(code: Socket.SOCKET_ERR_BAD_DESCRIPTOR, reason: "The socket has an invalid descriptor")
 		}
 
 		if self.isConnected {
 
-			throw Error(code: Socket.SOCKET_ERR_ALREADY_CONNECTED, reason: nil)
+			throw Error(code: Socket.SOCKET_ERR_ALREADY_CONNECTED, reason: "The socket is not connected")
 		}
 
 		if !self.isListening {
 
-			throw Error(code: Socket.SOCKET_ERR_NOT_LISTENING, reason: nil)
+			throw Error(code: Socket.SOCKET_ERR_NOT_LISTENING, reason: "The socket is not listening")
 		}
 
 		// Accept the remote connection...
@@ -1449,7 +1449,7 @@ public class Socket: SocketReader, SocketWriter {
 		// Only allow this if the socket needs it, otherwise it's a error...
 		if !newSocket.needsAcceptDelegateCall {
 			
-			throw Error(code: Socket.SOCKET_ERR_INVALID_DELEGATE_CALL, reason: nil)
+			throw Error(code: Socket.SOCKET_ERR_INVALID_DELEGATE_CALL, reason: "Socket does not need a delegate accept call")
 		}
 		
 		do {
@@ -1478,17 +1478,17 @@ public class Socket: SocketReader, SocketWriter {
 		// The socket must've been created, not connected and listening...
 		if self.socketfd == Socket.SOCKET_INVALID_DESCRIPTOR {
 
-			throw Error(code: Socket.SOCKET_ERR_BAD_DESCRIPTOR, reason: nil)
+			throw Error(code: Socket.SOCKET_ERR_BAD_DESCRIPTOR, reason: "Socket has an invalid descriptor")
 		}
 
 		if self.isConnected {
 
-			throw Error(code: Socket.SOCKET_ERR_ALREADY_CONNECTED, reason: nil)
+			throw Error(code: Socket.SOCKET_ERR_ALREADY_CONNECTED, reason: "Socket is not connected")
 		}
 
 		if !self.isListening {
 
-			throw Error(code: Socket.SOCKET_ERR_NOT_LISTENING, reason: nil)
+			throw Error(code: Socket.SOCKET_ERR_NOT_LISTENING, reason: "Socket is not listening")
 		}
 
 		// Accept the remote connection...
@@ -1600,17 +1600,17 @@ public class Socket: SocketReader, SocketWriter {
 		// The socket must've been created and must not be connected...
 		if self.socketfd == Socket.SOCKET_INVALID_DESCRIPTOR {
 
-			throw Error(code: Socket.SOCKET_ERR_BAD_DESCRIPTOR, reason: nil)
+			throw Error(code: Socket.SOCKET_ERR_BAD_DESCRIPTOR, reason: "Socket has an invalid descriptor")
 		}
 
 		if self.isConnected {
 
-			throw Error(code: Socket.SOCKET_ERR_ALREADY_CONNECTED, reason: nil)
+			throw Error(code: Socket.SOCKET_ERR_ALREADY_CONNECTED, reason: "Socket is not connected")
 		}
 
 		if host.utf8.count == 0 {
 
-			throw Error(code: Socket.SOCKET_ERR_INVALID_HOSTNAME, reason: nil)
+			throw Error(code: Socket.SOCKET_ERR_INVALID_HOSTNAME, reason: "Socket has an invalid hostname")
 		}
 		
 		if !self.isBlocking && timeout == 0 {
@@ -1909,18 +1909,18 @@ public class Socket: SocketReader, SocketWriter {
 		// Make sure this is a UNIX socket...
 		guard let sig = self.signature, sig.protocolFamily == .unix else {
 
-			throw Error(code: Socket.SOCKET_ERR_WRONG_PROTOCOL, reason: nil)
+			throw Error(code: Socket.SOCKET_ERR_WRONG_PROTOCOL, reason: "Socket has the wrong protocol, it must be UNIX socket")
 		}
 
 		// The socket must've been created and must not be connected...
 		if self.socketfd == Socket.SOCKET_INVALID_DESCRIPTOR {
 
-			throw Error(code: Socket.SOCKET_ERR_BAD_DESCRIPTOR, reason: nil)
+			throw Error(code: Socket.SOCKET_ERR_BAD_DESCRIPTOR, reason: "Socket has an invalid descriptor")
 		}
 
 		if self.isConnected {
 
-			throw Error(code: Socket.SOCKET_ERR_ALREADY_CONNECTED, reason: nil)
+			throw Error(code: Socket.SOCKET_ERR_ALREADY_CONNECTED, reason: "Socket is not connected")
 		}
 
 		// Create the signature...
@@ -1968,7 +1968,7 @@ public class Socket: SocketReader, SocketWriter {
 		// Make sure we've got a valid socket...
 		if self.socketfd == Socket.SOCKET_INVALID_DESCRIPTOR {
 
-			throw Error(code: Socket.SOCKET_ERR_BAD_DESCRIPTOR, reason: nil)
+			throw Error(code: Socket.SOCKET_ERR_BAD_DESCRIPTOR, reason: "Socket has an invalid descriptor")
 		}
 
 		// Ensure we've got a proper address...
@@ -2074,7 +2074,7 @@ public class Socket: SocketReader, SocketWriter {
 		// Make sure we've got a valid socket...
 		if self.socketfd == Socket.SOCKET_INVALID_DESCRIPTOR {
 
-			throw Error(code: Socket.SOCKET_ERR_BAD_DESCRIPTOR, reason: nil)
+			throw Error(code: Socket.SOCKET_ERR_BAD_DESCRIPTOR, reason: "Socket has an invalid descriptor")
 		}
 
 		// Set a flag so that this address can be re-used immediately after the connection
@@ -2292,13 +2292,13 @@ public class Socket: SocketReader, SocketWriter {
 		// Make sure we've got a valid socket...
 		if self.socketfd == Socket.SOCKET_INVALID_DESCRIPTOR {
 
-			throw Error(code: Socket.SOCKET_ERR_BAD_DESCRIPTOR, reason: nil)
+			throw Error(code: Socket.SOCKET_ERR_BAD_DESCRIPTOR, reason: "Socket has an invalid descriptor")
 		}
 
 		// Make sure this is a UNIX socket...
 		guard let sockSig = self.signature, sockSig.protocolFamily == .unix else {
 
-			throw Error(code: Socket.SOCKET_ERR_WRONG_PROTOCOL, reason: nil)
+			throw Error(code: Socket.SOCKET_ERR_WRONG_PROTOCOL, reason: "Socket has the wrong protocol, it must be a UNIX socket")
 		}
 
 		// Set a flag so that this address can be re-used immediately after the connection
@@ -2313,7 +2313,7 @@ public class Socket: SocketReader, SocketWriter {
 		let sig = try Signature(socketType: .stream, proto: .unix, path: path)
 		guard let signature = sig else {
 
-			throw Error(code:Socket.SOCKET_ERR_BAD_SIGNATURE_PARAMETERS, reason: nil)
+			throw Error(code:Socket.SOCKET_ERR_BAD_SIGNATURE_PARAMETERS, reason: "Socket contains invalid signature parameters")
 		}
 
 		// Ensure the path doesn't exist...
@@ -2388,13 +2388,13 @@ public class Socket: SocketReader, SocketWriter {
 		// Make sure the buffer is valid...
 		if bufSize == 0 {
 
-			throw Error(code: Socket.SOCKET_ERR_INVALID_BUFFER, reason: nil)
+			throw Error(code: Socket.SOCKET_ERR_INVALID_BUFFER, reason: "Socket has an invalid buffer, the size is zero")
 		}
 
 		// The socket must've been created...
 		if self.socketfd == Socket.SOCKET_INVALID_DESCRIPTOR {
 
-			throw Error(code: Socket.SOCKET_ERR_BAD_DESCRIPTOR, reason: nil)
+			throw Error(code: Socket.SOCKET_ERR_BAD_DESCRIPTOR, reason: "Socket has an invalid descriptor")
 		}
 
 		// The socket must've been created for UDP...
@@ -2435,7 +2435,7 @@ public class Socket: SocketReader, SocketWriter {
 		// The socket must've been created...
 		if self.socketfd == Socket.SOCKET_INVALID_DESCRIPTOR {
 
-			throw Error(code: Socket.SOCKET_ERR_BAD_DESCRIPTOR, reason: nil)
+			throw Error(code: Socket.SOCKET_ERR_BAD_DESCRIPTOR, reason: "Socket has an invalid descriptor")
 		}
 
 		// The socket must've been created for UDP...
@@ -2476,7 +2476,7 @@ public class Socket: SocketReader, SocketWriter {
 		// The socket must've been created...
 		if self.socketfd == Socket.SOCKET_INVALID_DESCRIPTOR {
 
-			throw Error(code: Socket.SOCKET_ERR_BAD_DESCRIPTOR, reason: nil)
+			throw Error(code: Socket.SOCKET_ERR_BAD_DESCRIPTOR, reason: "Socket has an invalid descriptor")
 		}
 
 		// The socket must've been created for UDP...
@@ -2526,18 +2526,18 @@ public class Socket: SocketReader, SocketWriter {
 		// Make sure the buffer is valid...
 		if bufSize == 0 {
 
-			throw Error(code: Socket.SOCKET_ERR_INVALID_BUFFER, reason: nil)
+			throw Error(code: Socket.SOCKET_ERR_INVALID_BUFFER, reason: "Socket has an invalid buffer, the size is zero")
 		}
 
 		// The socket must've been created and must be connected...
 		if self.socketfd == Socket.SOCKET_INVALID_DESCRIPTOR {
 
-			throw Error(code: Socket.SOCKET_ERR_BAD_DESCRIPTOR, reason: nil)
+			throw Error(code: Socket.SOCKET_ERR_BAD_DESCRIPTOR, reason: "Socket has an invalid descriptor")
 		}
 
 		if !self.isConnected {
 
-			throw Error(code: Socket.SOCKET_ERR_NOT_CONNECTED, reason: nil)
+			throw Error(code: Socket.SOCKET_ERR_NOT_CONNECTED, reason: "Socket is not connected")
 		}
 
 		// See if we have cached data to send back...
@@ -2660,12 +2660,12 @@ public class Socket: SocketReader, SocketWriter {
 		// The socket must've been created and must be connected...
 		if self.socketfd == Socket.SOCKET_INVALID_DESCRIPTOR {
 
-			throw Error(code: Socket.SOCKET_ERR_BAD_DESCRIPTOR, reason: nil)
+			throw Error(code: Socket.SOCKET_ERR_BAD_DESCRIPTOR, reason: "Socket has an invalid descriptor")
 		}
 
 		if !self.isConnected {
 
-			throw Error(code: Socket.SOCKET_ERR_NOT_CONNECTED, reason: nil)
+			throw Error(code: Socket.SOCKET_ERR_NOT_CONNECTED, reason: "Socket is not connected")
 		}
 
 		// Read all available bytes...
@@ -2698,12 +2698,12 @@ public class Socket: SocketReader, SocketWriter {
 		// The socket must've been created and must be connected...
 		if self.socketfd == Socket.SOCKET_INVALID_DESCRIPTOR {
 
-			throw Error(code: Socket.SOCKET_ERR_BAD_DESCRIPTOR, reason: nil)
+			throw Error(code: Socket.SOCKET_ERR_BAD_DESCRIPTOR, reason: "Socket has an invalid descriptor")
 		}
 
 		if !self.isConnected {
 
-			throw Error(code: Socket.SOCKET_ERR_NOT_CONNECTED, reason: nil)
+			throw Error(code: Socket.SOCKET_ERR_NOT_CONNECTED, reason: "Socket is not connected")
 		}
 
 		// Read all available bytes...
@@ -2742,13 +2742,13 @@ public class Socket: SocketReader, SocketWriter {
 		// Make sure the buffer is valid...
 		if bufSize == 0 {
 
-			throw Error(code: Socket.SOCKET_ERR_INVALID_BUFFER, reason: nil)
+			throw Error(code: Socket.SOCKET_ERR_INVALID_BUFFER, reason: "Socket has an invalid buffer, size is zero")
 		}
 
 		// The socket must've been created...
 		if self.socketfd == Socket.SOCKET_INVALID_DESCRIPTOR {
 
-			throw Error(code: Socket.SOCKET_ERR_BAD_DESCRIPTOR, reason: nil)
+			throw Error(code: Socket.SOCKET_ERR_BAD_DESCRIPTOR, reason: "Socket has an invalid descriptor")
 		}
 
 		// The socket must've been created for UDP...
@@ -2804,7 +2804,7 @@ public class Socket: SocketReader, SocketWriter {
 		// The socket must've been created...
 		if self.socketfd == Socket.SOCKET_INVALID_DESCRIPTOR {
 
-			throw Error(code: Socket.SOCKET_ERR_BAD_DESCRIPTOR, reason: nil)
+			throw Error(code: Socket.SOCKET_ERR_BAD_DESCRIPTOR, reason: "Socket has an invalid descriptor")
 		}
 
 		// The socket must've been created for UDP...
@@ -2846,7 +2846,7 @@ public class Socket: SocketReader, SocketWriter {
 		// The socket must've been created...
 		if self.socketfd == Socket.SOCKET_INVALID_DESCRIPTOR {
 
-			throw Error(code: Socket.SOCKET_ERR_BAD_DESCRIPTOR, reason: nil)
+			throw Error(code: Socket.SOCKET_ERR_BAD_DESCRIPTOR, reason: "Socket has an invalid descriptor")
 		}
 
 		// The socket must've been created for UDP...
@@ -2893,18 +2893,18 @@ public class Socket: SocketReader, SocketWriter {
 		// Make sure the buffer is valid...
 		if bufSize == 0 {
 
-			throw Error(code: Socket.SOCKET_ERR_INVALID_BUFFER, reason: nil)
+			throw Error(code: Socket.SOCKET_ERR_INVALID_BUFFER, reason: "The buffer is not valid, its size is zero")
 		}
 
 		// The socket must've been created and must be connected...
 		if self.socketfd == Socket.SOCKET_INVALID_DESCRIPTOR {
 
-			throw Error(code: Socket.SOCKET_ERR_BAD_DESCRIPTOR, reason: nil)
+			throw Error(code: Socket.SOCKET_ERR_BAD_DESCRIPTOR, reason: "The socket is not valid, it must be created and connected")
 		}
 
 		if !self.isConnected {
 
-			throw Error(code: Socket.SOCKET_ERR_NOT_CONNECTED, reason: nil)
+			throw Error(code: Socket.SOCKET_ERR_NOT_CONNECTED, reason: "The socket is not connected")
 		}
 
 		var sent = 0
@@ -3062,13 +3062,13 @@ public class Socket: SocketReader, SocketWriter {
 		// Make sure the buffer is valid...
 		if bufSize == 0 {
 
-			throw Error(code: Socket.SOCKET_ERR_INVALID_BUFFER, reason: nil)
+			throw Error(code: Socket.SOCKET_ERR_INVALID_BUFFER, reason: "The buffer is not valid, its size is zero")
 		}
 
 		// The socket must've been created and must be connected...
 		if self.socketfd == Socket.SOCKET_INVALID_DESCRIPTOR {
 
-			throw Error(code: Socket.SOCKET_ERR_BAD_DESCRIPTOR, reason: nil)
+			throw Error(code: Socket.SOCKET_ERR_BAD_DESCRIPTOR, reason: "The socket is not valid, it must be created and connected")
 		}
 
 		// The socket must've been created for UDP...
@@ -3186,12 +3186,12 @@ public class Socket: SocketReader, SocketWriter {
 		// The socket must've been created and must be connected...
 		if self.socketfd == Socket.SOCKET_INVALID_DESCRIPTOR {
 
-			throw Error(code: Socket.SOCKET_ERR_BAD_DESCRIPTOR, reason: nil)
+			throw Error(code: Socket.SOCKET_ERR_BAD_DESCRIPTOR, reason: "The socket is not valid, it must be created and connected")
 		}
 
 		if !self.isConnected {
 
-			throw Error(code: Socket.SOCKET_ERR_NOT_CONNECTED, reason: nil)
+			throw Error(code: Socket.SOCKET_ERR_NOT_CONNECTED, reason: "The socket is not connected")
 		}
 
 		// Create a read and write file descriptor set for this socket...
@@ -3372,7 +3372,7 @@ public class Socket: SocketReader, SocketWriter {
 		// The socket must've been created and valid...
 		if self.socketfd == Socket.SOCKET_INVALID_DESCRIPTOR {
 			
-			throw Error(code: Socket.SOCKET_ERR_BAD_DESCRIPTOR, reason: nil)
+			throw Error(code: Socket.SOCKET_ERR_BAD_DESCRIPTOR, reason: "The socket is not valid, it must be created and connected")
 		}
 		
 		// The socket must've been created for UDP...
