@@ -1639,7 +1639,7 @@ public class Socket: SocketReader, SocketWriter {
 		}
 
 		// Create the hints for our search...
-		let socketType: SocketType = .stream
+		let socketType: SocketType = signature?.socketType ?? .stream
 		#if os(Linux)
 			var hints = addrinfo(
 				ai_flags: AI_PASSIVE,
