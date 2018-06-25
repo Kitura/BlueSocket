@@ -284,7 +284,7 @@ class EchoServer {
                     let newSocket = try socket.acceptClientConnection()
 
                     print("Accepted connection from: \(newSocket.remoteHostname) on port \(newSocket.remotePort)")
-                    print("Socket Signature: \(newSocket.signature?.description)")
+                    print("Socket Signature: \(String(describing: newSocket.signature?.description))")
 
                     self.addNewConnection(socket: newSocket)
 
