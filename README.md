@@ -422,11 +422,17 @@ This server can be built by specifying the following `Package.swift` file using 
 import PackageDescription
 
 let package = Package(
-    name: "EchoServer",
+	name: "EchoServer",
 	dependencies: [
-		.package(url: "https://github.com/IBM-Swift/BlueSocket.git", .upToNextMinor(from: "0.12.76")),
-		],
-	exclude: ["EchoServer.xcodeproj"]
+		.package(url: "https://github.com/IBM-Swift/BlueSocket.git", from:"1.0.8"),
+	],
+	targets: [
+	.target(
+		name: "EchoServer",
+		dependencies: [
+			"Socket"
+		]),
+	]
 )
 ```
 Or if you are still using Swift 3, by specifying the following `Package.swift` file.
