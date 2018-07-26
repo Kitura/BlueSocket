@@ -44,6 +44,8 @@ Socket framework for Swift using the Swift Package Manager. Works on iOS, macOS,
 ### Add-ins
 
 * [BlueSSLService](https://github.com/IBM-Swift/BlueSSLService.git) can be used to add **SSL/TLS** support.
+	- If using this package, please note that the  **libssl-dev** package is required to be installed when building on Linux.
+
 
 ## Build
 
