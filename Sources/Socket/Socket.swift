@@ -3453,7 +3453,7 @@ public class Socket: SocketReader, SocketWriter {
 	///
 	private func readDataIntoStorage() throws -> Int {
 
-		// Clear the buffer...
+		// Initialize the buffer...
 		#if swift(>=4.1)
 			self.readBuffer.initialize(to: 0x0)
 		#else
@@ -3569,7 +3569,7 @@ public class Socket: SocketReader, SocketWriter {
 	///
 	private func readDatagramIntoStorage() throws -> (bytesRead: Int, fromAddress: Address?) {
 
-		// Clear the buffer...
+		// Initialize the buffer...
 		#if swift(>=4.1)
 			self.readBuffer.initialize(to: 0x0)
 		#else
