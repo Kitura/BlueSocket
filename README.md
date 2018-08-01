@@ -1,12 +1,5 @@
 <p align="center">
-    <a href="http://kitura.io/">
-        <img src="https://raw.githubusercontent.com/IBM-Swift/Kitura/master/Sources/Kitura/resources/kitura-bird.svg?sanitize=true" height="100" alt="Kitura">
-    </a>
-</p>
-
-
-<p align="center">
-    <a href="http://www.kitura.io/en/api/">
+    <a href="https://www.kitura.io/packages.html#all">
     <img src="https://img.shields.io/badge/docs-kitura.io-1FBCE4.svg" alt="APIDoc">
     </a>
     <a href="https://travis-ci.org/IBM-Swift/BlueSocket">
