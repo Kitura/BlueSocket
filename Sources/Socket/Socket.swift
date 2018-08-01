@@ -828,7 +828,7 @@ public class Socket: SocketReader, SocketWriter {
 					readBuffer.deinitialize(count: readBufferSize)
 					readBuffer.deallocate()
 					readBuffer = UnsafeMutablePointer<CChar>.allocate(capacity: readBufferSize)
-					readBuffer.initialize(repeating: 0, count: readBufferSize)
+					readBuffer.initialize(to: 0)
 				#else
 					readBuffer.deinitialize()
 					readBuffer.deallocate(capacity: oldValue)
@@ -1239,7 +1239,7 @@ public class Socket: SocketReader, SocketWriter {
 
 		// Initialize the read buffer...
 		#if swift(>=4.1)
-			self.readBuffer.initialize(repeating: 0, count: readBufferSize)
+			self.readBuffer.initialize(to: 0)
 		#else
 			self.readBuffer.initialize(to: 0, count: readBufferSize)
 		#endif
@@ -1288,7 +1288,7 @@ public class Socket: SocketReader, SocketWriter {
 		self.isConnected = true
 		self.isListening = false
 		#if swift(>=4.1)
-			self.readBuffer.initialize(repeating: 0, count: readBufferSize)
+			self.readBuffer.initialize(to: 0)
 		#else
 			self.readBuffer.initialize(to: 0, count: readBufferSize)
 		#endif
@@ -3453,9 +3453,9 @@ public class Socket: SocketReader, SocketWriter {
 	///
 	private func readDataIntoStorage() throws -> Int {
 
-		// Clear the buffer...
+		// Initialize the buffer...
 		#if swift(>=4.1)
-			self.readBuffer.initialize(repeating: 0x0, count: readBufferSize)
+			self.readBuffer.initialize(to: 0x0)
 		#else
 			self.readBuffer.initialize(to: 0x0, count: readBufferSize)
 		#endif
@@ -3569,9 +3569,9 @@ public class Socket: SocketReader, SocketWriter {
 	///
 	private func readDatagramIntoStorage() throws -> (bytesRead: Int, fromAddress: Address?) {
 
-		// Clear the buffer...
+		// Initialize the buffer...
 		#if swift(>=4.1)
-			self.readBuffer.initialize(repeating: 0x0, count: readBufferSize)
+			self.readBuffer.initialize(to: 0x0)
 		#else
 			self.readBuffer.initialize(to: 0x0, count: readBufferSize)
 		#endif
