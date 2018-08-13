@@ -1139,6 +1139,26 @@ class SocketTests: XCTestCase {
 		}
 	}
 	
+	func testDomainSocketPath() {
+		
+		do {
+			let okPath = "111111111111111111111111111111111"
+			assert(okPath.utf8.count == 33)
+			var sig = try Socket.Signature(socketType: .stream, proto: .unix, path: okPath)
+			XCTAssertNotNil(sig)
+			
+			let problematicPath = okPath + "1"
+			assert(problematicPath.utf8.count > 33)
+			sig = try Socket.Signature(socketType: .stream, proto: .unix, path: problematicPath)
+			XCTAssertNotNil(sig)
+
+		} catch {
+			
+			print("Unexpected error...")
+			XCTFail()
+		}
+	}
+	
 	func testReadWrite() {
 		
 		let hostname = "127.0.0.1"
@@ -1522,6 +1542,7 @@ class SocketTests: XCTestCase {
 		("testIsReadableWritableFail", testIsReadableWritableFail),
 		("testIsReadableWritable", testIsReadableWritable),
 		("testFDSetBitFields", testFDSetBitFields),
+		("testDomainSocketPath", testDomainSocketPath),
 		("testReadWrite", testReadWrite),
 		("testTruncateTCP", testTruncateTCP),
 		("testReadWriteUDP", testReadWriteUDP),
