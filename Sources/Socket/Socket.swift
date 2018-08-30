@@ -3008,7 +3008,7 @@ public class Socket: SocketReader, SocketWriter {
 
 				// - Handle a connection reset by peer (ECONNRESET) and throw a different exception...
 				if errno == ECONNRESET {
-
+					self.remoteConnectionClosed = true
 					throw Error(code: Socket.SOCKET_ERR_CONNECTION_RESET, reason: self.lastError())
 				}
 
@@ -3139,7 +3139,7 @@ public class Socket: SocketReader, SocketWriter {
 					
 					// - Handle a connection reset by peer (ECONNRESET) and throw a different exception...
 					if errno == ECONNRESET {
-						
+						self.remoteConnectionClosed = true
 						throw Error(code: Socket.SOCKET_ERR_CONNECTION_RESET, reason: self.lastError())
 					}
 					
@@ -3566,6 +3566,7 @@ public class Socket: SocketReader, SocketWriter {
 
 				case ECONNRESET:
 					// - Handle a connection reset by peer (ECONNRESET) and throw a different exception...
+					self.remoteConnectionClosed = true
 					throw Error(code: Socket.SOCKET_ERR_CONNECTION_RESET, reason: self.lastError())
 
 				default:
@@ -3635,7 +3636,7 @@ public class Socket: SocketReader, SocketWriter {
 					
 					// - Handle a connection reset by peer (ECONNRESET) and throw a different exception...
 					if errno == ECONNRESET {
-						
+						self.remoteConnectionClosed = true
 						throw Error(code: Socket.SOCKET_ERR_CONNECTION_RESET, reason: self.lastError())
 					}
 					
