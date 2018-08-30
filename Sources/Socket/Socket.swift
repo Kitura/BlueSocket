@@ -459,6 +459,39 @@ public class Socket: SocketReader, SocketWriter {
 			self.address = address
 
 		}
+		
+		///
+		/// Create a socket signature
+		///
+		///	- Parameters:
+		///		- socketType:		The type of socket to create.
+		///		- proto:			The protocool to use for the socket.
+		/// 	- address:			Address info for the socket.
+		///
+		/// - Returns: New Signature instance
+		///
+		public init?(socketType: SocketType, proto: SocketProtocol, address: Address) throws {
+			
+			// Validate the parameters...
+			if socketType == .stream {
+				guard proto == .tcp || proto == .unix else {
+					
+					throw Error(code: Socket.SOCKET_ERR_BAD_SIGNATURE_PARAMETERS, reason: "Stream socket must use either .tcp or .unix for the protocol.")
+				}
+			}
+			if socketType == .datagram {
+				guard proto == .udp || proto == .unix else {
+					
+					throw Error(code: Socket.SOCKET_ERR_BAD_SIGNATURE_PARAMETERS, reason: "Datagram socket must use .udp or .unix for the protocol.")
+				}
+			}
+			
+			self.protocolFamily = address.family
+			self.socketType = socketType
+			self.proto = proto
+			
+			self.address = address
+		}
 
 		///
 		/// Create a socket signature
