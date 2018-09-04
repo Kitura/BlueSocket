@@ -2019,6 +2019,7 @@ public class Socket: SocketReader, SocketWriter {
 		}
 		
 		if let address = signature.address {
+			
 			// Tell the delegate to initialize as a client...
 			do {
 				
@@ -2037,9 +2038,9 @@ public class Socket: SocketReader, SocketWriter {
 			// Now, do the connection using the supplied address...
 			let rc = address.withSockAddrPointer { sockaddr, length -> Int32 in
 				#if os(Linux)
-				return Glibc.connect(self.socketfd, sockaddr, length)
+					return Glibc.connect(self.socketfd, sockaddr, length)
 				#else
-				return Darwin.connect(self.socketfd, sockaddr, length)
+					return Darwin.connect(self.socketfd, sockaddr, length)
 				#endif
 			}
 			
@@ -2048,9 +2049,12 @@ public class Socket: SocketReader, SocketWriter {
 				throw Error(code: Socket.SOCKET_ERR_CONNECT_FAILED, reason: self.lastError())
 			}
 			
+			// Complete the signature...
 			if signature.hostname != nil, signature.port != Socket.SOCKET_INVALID_PORT {
+				
 				self.signature = signature
 				self.isConnected = true
+				
 			} else if let (hostname, port) = Socket.hostnameAndPort(from: signature.address!) {
 
 				var sig = signature
@@ -2081,12 +2085,14 @@ public class Socket: SocketReader, SocketWriter {
 			return
 		}
 		
+		// If here, we'll check to see if we've got a hostname and port and if so, try to connect using it...
 		if let hostname = signature.hostname, signature.port != Socket.SOCKET_INVALID_PORT {
 			// Connect using hostname and port....
 			try self.connect(to: hostname, port: signature.port)
 			return
 		}
 		
+		// No such luck, don't have enough info to initiate a connection...
 		throw Error(code: Socket.SOCKET_ERR_MISSING_CONNECTION_DATA, reason: "Unable to access connection data.")
 	}
 
