@@ -459,6 +459,45 @@ public class Socket: SocketReader, SocketWriter {
 			self.address = address
 
 		}
+		
+		///
+		/// Create a socket signature
+		///
+		///	- Parameters:
+		///		- socketType:		The type of socket to create.
+		///		- proto:			The protocool to use for the socket.
+		/// 	- address:			Address info for the socket.
+		/// 	- hostname:			Hostname for this signature.
+		/// 	- port:				Port for this signature.
+		///
+		/// - Returns: New Signature instance
+		///
+		public init?(socketType: SocketType, proto: SocketProtocol, address: Address, hostname: String?, port: Int32?) throws {
+			
+			// Validate the parameters...
+			if socketType == .stream {
+				guard proto == .tcp || proto == .unix else {
+					
+					throw Error(code: Socket.SOCKET_ERR_BAD_SIGNATURE_PARAMETERS, reason: "Stream socket must use either .tcp or .unix for the protocol.")
+				}
+			}
+			if socketType == .datagram {
+				guard proto == .udp || proto == .unix else {
+					
+					throw Error(code: Socket.SOCKET_ERR_BAD_SIGNATURE_PARAMETERS, reason: "Datagram socket must use .udp or .unix for the protocol.")
+				}
+			}
+			
+			self.protocolFamily = address.family
+			self.socketType = socketType
+			self.proto = proto
+			
+			self.address = address
+			self.hostname = hostname
+			if let port = port {
+				self.port = port
+			}
+		}
 
 		///
 		/// Create a socket signature
@@ -1978,83 +2017,77 @@ public class Socket: SocketReader, SocketWriter {
 			try self.connect(to: path)
 			return
 		}
-
-		if signature.hostname == nil || signature.port == Socket.SOCKET_INVALID_PORT {
-
-			guard let _ = signature.address else {
-
-				throw Error(code: Socket.SOCKET_ERR_MISSING_CONNECTION_DATA, reason: "Unable to access connection data.")
+		
+		if let address = signature.address {
+			// Tell the delegate to initialize as a client...
+			do {
+				
+				try self.delegate?.initialize(asServer: false)
+				
+			} catch let error {
+				
+				guard let sslError = error as? SSLError else {
+					
+					throw error
+				}
+				
+				throw Error(with: sslError)
 			}
-
-		} else {
-
-			// Otherwise, make sure we've got a hostname and port...
-			guard let hostname = signature.hostname,
-				signature.port != Socket.SOCKET_INVALID_PORT else {
-
-					throw Error(code: Socket.SOCKET_ERR_MISSING_CONNECTION_DATA, reason: "Unable to access hostname and port.")
+			
+			// Now, do the connection using the supplied address...
+			let rc = address.withSockAddrPointer { sockaddr, length -> Int32 in
+				#if os(Linux)
+				return Glibc.connect(self.socketfd, sockaddr, length)
+				#else
+				return Darwin.connect(self.socketfd, sockaddr, length)
+				#endif
 			}
+			
+			if rc < 0 {
+				
+				throw Error(code: Socket.SOCKET_ERR_CONNECT_FAILED, reason: self.lastError())
+			}
+			
+			if signature.hostname != nil, signature.port != Socket.SOCKET_INVALID_PORT {
+				self.signature = signature
+				self.isConnected = true
+			} else if let (hostname, port) = Socket.hostnameAndPort(from: signature.address!) {
 
+				var sig = signature
+				sig.hostname = hostname
+				sig.port = Int32(port)
+				self.signature = sig
+				self.isConnected = true
+			}
+			
+			// Let the delegate do post connect handling and verification...
+			do {
+				
+				if self.delegate != nil {
+					try self.delegate?.onConnect(socket: self)
+					self.signature?.isSecure = true
+				}
+				
+			} catch let error {
+				
+				guard let sslError = error as? SSLError else {
+					
+					throw error
+				}
+				
+				throw Error(with: sslError)
+			}
+			
+			return
+		}
+		
+		if let hostname = signature.hostname, signature.port != Socket.SOCKET_INVALID_PORT {
 			// Connect using hostname and port....
 			try self.connect(to: hostname, port: signature.port)
 			return
 		}
-
-		// Tell the delegate to initialize as a client...
-		do {
-
-			try self.delegate?.initialize(asServer: false)
-
-		} catch let error {
-
-			guard let sslError = error as? SSLError else {
-
-				throw error
-			}
-
-			throw Error(with: sslError)
-		}
-
-		// Now, do the connection using the supplied address...
-		let rc = signature.address!.withSockAddrPointer { sockaddr, length -> Int32 in
-			#if os(Linux)
-				return Glibc.connect(self.socketfd, sockaddr, length)
-			#else
-				return Darwin.connect(self.socketfd, sockaddr, length)
-			#endif
-		}
 		
-		if rc < 0 {
-
-			throw Error(code: Socket.SOCKET_ERR_CONNECT_FAILED, reason: self.lastError())
-		}
-
-		if let (hostname, port) = Socket.hostnameAndPort(from: signature.address!) {
-
-			var sig = signature
-			sig.hostname = hostname
-			sig.port = Int32(port)
-			self.signature = sig
-			self.isConnected = true
-		}
-
-		// Let the delegate do post connect handling and verification...
-		do {
-
-			if self.delegate != nil {
-				try self.delegate?.onConnect(socket: self)
-				self.signature?.isSecure = true
-			}
-
-		} catch let error {
-
-			guard let sslError = error as? SSLError else {
-
-				throw error
-			}
-
-			throw Error(with: sslError)
-		}
+		throw Error(code: Socket.SOCKET_ERR_MISSING_CONNECTION_DATA, reason: "Unable to access connection data.")
 	}
 
 	// MARK: -- Listen
@@ -2975,7 +3008,7 @@ public class Socket: SocketReader, SocketWriter {
 
 				// - Handle a connection reset by peer (ECONNRESET) and throw a different exception...
 				if errno == ECONNRESET {
-
+					self.remoteConnectionClosed = true
 					throw Error(code: Socket.SOCKET_ERR_CONNECTION_RESET, reason: self.lastError())
 				}
 
@@ -3106,7 +3139,7 @@ public class Socket: SocketReader, SocketWriter {
 					
 					// - Handle a connection reset by peer (ECONNRESET) and throw a different exception...
 					if errno == ECONNRESET {
-						
+						self.remoteConnectionClosed = true
 						throw Error(code: Socket.SOCKET_ERR_CONNECTION_RESET, reason: self.lastError())
 					}
 					
@@ -3526,13 +3559,12 @@ public class Socket: SocketReader, SocketWriter {
 
 				// - Could be an error, but if errno is EAGAIN or EWOULDBLOCK (if a non-blocking socket),
 				//	it means there was NO data to read...
-				case EAGAIN:
-					fallthrough
-				case EWOULDBLOCK:
+				case EWOULDBLOCK, EAGAIN:
 					return self.readStorage.length
 
 				case ECONNRESET:
 					// - Handle a connection reset by peer (ECONNRESET) and throw a different exception...
+					self.remoteConnectionClosed = true
 					throw Error(code: Socket.SOCKET_ERR_CONNECTION_RESET, reason: self.lastError())
 
 				default:
@@ -3602,7 +3634,7 @@ public class Socket: SocketReader, SocketWriter {
 					
 					// - Handle a connection reset by peer (ECONNRESET) and throw a different exception...
 					if errno == ECONNRESET {
-						
+						self.remoteConnectionClosed = true
 						throw Error(code: Socket.SOCKET_ERR_CONNECTION_RESET, reason: self.lastError())
 					}
 					
