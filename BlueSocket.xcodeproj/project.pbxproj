@@ -267,14 +267,18 @@
 				TargetAttributes = {
 					8C0F4BF51C4E84CC008B2B0A = {
 						CreatedOnToolsVersion = 7.2;
-						LastSwiftMigration = 0900;
+						LastSwiftMigration = 1000;
+					};
+					8C5FEE8F1FC319F7002F4CAA = {
+						LastSwiftMigration = 1000;
 					};
 					8CA9B1621C98A00400E607FB = {
 						CreatedOnToolsVersion = 7.3;
-						LastSwiftMigration = 0900;
+						LastSwiftMigration = 1000;
 					};
 					8CC36DF61C4EA1BE00BAA659 = {
 						DevelopmentTeam = 2ZB889ETZ7;
+						LastSwiftMigration = 1000;
 					};
 				};
 			};
