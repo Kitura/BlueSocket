@@ -4,11 +4,6 @@
 <dict>
 	<key>SchemeUserState</key>
 	<dict>
-		<key>BlueSocket-iOS.xcscheme</key>
-		<dict>
-			<key>orderHint</key>
-			<integer>1</integer>
-		</dict>
 		<key>BlueSocket.xcscheme</key>
 		<dict>
 			<key>orderHint</key>
@@ -29,7 +24,7 @@
 			<key>orderHint</key>
 			<integer>4</integer>
 		</dict>
-		<key>Socket-tvOS.xcscheme</key>
+		<key>Socket-tvOS.xcscheme_^#shared#^_</key>
 		<dict>
 			<key>orderHint</key>
 			<integer>9</integer>
