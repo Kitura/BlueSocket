@@ -11,8 +11,8 @@
 		595218041F61E34E001A94A2 /* Socket.swift in Sources */ = {isa = PBXBuildFile; fileRef = 595217FF1F61E34E001A94A2 /* Socket.swift */; };
 		595218051F61E34E001A94A2 /* SocketProtocols.swift in Sources */ = {isa = PBXBuildFile; fileRef = 595218001F61E34E001A94A2 /* SocketProtocols.swift */; };
 		5952180B1F61E84E001A94A2 /* Socket.h in Headers */ = {isa = PBXBuildFile; fileRef = 595218091F61E84E001A94A2 /* Socket.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		8C46DCEB21834123003FAD91 /* libSocket.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 8C46DCEA21834123003FAD91 /* libSocket.dylib */; };
 		8C51FD591E7C8C8A00C2FDA6 /* BlueSocket.podspec in Resources */ = {isa = PBXBuildFile; fileRef = 8C51FD581E7C8C8A00C2FDA6 /* BlueSocket.podspec */; };
-		8C5605D21D50D60400958292 /* Socket.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8C0F4BF61C4E84CC008B2B0A /* Socket.framework */; };
 		8C5FEE911FC319F7002F4CAA /* Socket.swift in Sources */ = {isa = PBXBuildFile; fileRef = 595217FF1F61E34E001A94A2 /* Socket.swift */; };
 		8C5FEE921FC319F7002F4CAA /* SocketProtocols.swift in Sources */ = {isa = PBXBuildFile; fileRef = 595218001F61E34E001A94A2 /* SocketProtocols.swift */; };
 		8C5FEE931FC319F7002F4CAA /* SocketUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 595217FC1F61E34E001A94A2 /* SocketUtils.swift */; };
@@ -44,6 +44,7 @@
 		5952180C1F61E8A2001A94A2 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = Socket/Info.plist; sourceTree = "<group>"; };
 		8C0F4BF61C4E84CC008B2B0A /* Socket.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Socket.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		8C0F4C081C4E866E008B2B0A /* Package.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Package.swift; sourceTree = "<group>"; };
+		8C46DCEA21834123003FAD91 /* libSocket.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; path = libSocket.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
 		8C51FD581E7C8C8A00C2FDA6 /* BlueSocket.podspec */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = BlueSocket.podspec; sourceTree = "<group>"; };
 		8C5FEE9B1FC319F7002F4CAA /* Socket.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Socket.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		8C8540B01E9FC14E00E41C1D /* VerifyLinuxTestCount.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = VerifyLinuxTestCount.swift; path = Tests/SocketTests/VerifyLinuxTestCount.swift; sourceTree = "<group>"; };
@@ -75,7 +76,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				8C5605D21D50D60400958292 /* Socket.framework in Frameworks */,
+				8C46DCEB21834123003FAD91 /* libSocket.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -99,6 +100,7 @@
 				8C0F4BF81C4E84CC008B2B0A /* Sources */,
 				8CF2D7371C989EE0000A7D2B /* Tests */,
 				8C0F4BF71C4E84CC008B2B0A /* Products */,
+				8C46DCE921834123003FAD91 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 			usesTabs = 1;
@@ -132,6 +134,14 @@
 				5952180C1F61E8A2001A94A2 /* Info.plist */,
 			);
 			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		8C46DCE921834123003FAD91 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				8C46DCEA21834123003FAD91 /* libSocket.dylib */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 		8CC721751D4BCA7D00F5FD19 /* SocketTests */ = {
@@ -603,6 +613,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.ibm.oss.SocketTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 4.2;
 			};
 			name = Debug;
 		};
@@ -616,6 +627,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.ibm.oss.SocketTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
+				SWIFT_VERSION = 4.2;
 			};
 			name = Release;
 		};
