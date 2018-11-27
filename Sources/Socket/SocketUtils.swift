@@ -148,7 +148,7 @@ extension Socket.Address {
 
 #endif
 
-public extension fd_set {
+extension fd_set {
 	
 	@inline(__always)
 	private static func address(for fd: Int32) -> (Int, Int32) {
