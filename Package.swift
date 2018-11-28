@@ -25,12 +25,13 @@ let package = Package(
         .library(
             name: "Socket",
             targets: ["Socket"]),
-        ],
+    ],
     dependencies: [],
     targets: [
         .target(
             name: "Socket",
-            dependencies: []
+            dependencies: [],
+            exclude: ["BlueSocket.xcodeproj", "BlueSocket.xcworkspace", "README.md", "Sources/Info.plist", "Sources/Socket.h"]
         ),
         .testTarget(
             name: "SocketTests",
