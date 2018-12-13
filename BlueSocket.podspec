@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name        = "BlueSocket"
-  s.version     = "1.0.37"
+  s.version     = "1.0.38"
   s.summary     = "Socket framework for Swift using the Swift Package Manager"
   s.homepage    = "https://github.com/IBM-Swift/BlueSocket"
   s.license     = { :type => "Apache License, Version 2.0" }
