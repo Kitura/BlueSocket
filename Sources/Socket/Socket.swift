@@ -2106,8 +2106,9 @@ public class Socket: SocketReader, SocketWriter {
 	///		- port: 				The port to listen on.
 	/// 	- maxBacklogSize: 		The maximum size of the queue containing pending connections. Default is *Socket.SOCKET_DEFAULT_MAX_BACKLOG*.
 	///		- allowPortReuse:		Set to `true` to allow the port to be reused. `false` otherwise. Default is `true`.
+	///		- node:					Set to the specific address (in String format) that should be used.  If `nil`, a suitable address will be used.
 	///
-	public func listen(on port: Int, maxBacklogSize: Int = Socket.SOCKET_DEFAULT_MAX_BACKLOG, allowPortReuse: Bool = true) throws {
+	public func listen(on port: Int, maxBacklogSize: Int = Socket.SOCKET_DEFAULT_MAX_BACKLOG, allowPortReuse: Bool = true, node: String? = nil) throws {
 
 		// Make sure we've got a valid socket...
 		if self.socketfd == Socket.SOCKET_INVALID_DESCRIPTOR {
@@ -2197,9 +2198,9 @@ public class Socket: SocketReader, SocketWriter {
 		#endif
 
 		var targetInfo: UnsafeMutablePointer<addrinfo>?
-
+		
 		// Retrieve the info on our target...
-		let status: Int32 = getaddrinfo(nil, String(port), &hints, &targetInfo)
+		let status: Int32 = getaddrinfo(node != nil ? node! : nil, String(port), &hints, &targetInfo)
 		if status != 0 {
 
 			var errorString: String
