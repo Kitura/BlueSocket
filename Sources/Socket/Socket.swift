@@ -1643,7 +1643,7 @@ public class Socket: SocketReader, SocketWriter {
 
 		if self.isConnected {
 
-			throw Error(code: Socket.SOCKET_ERR_ALREADY_CONNECTED, reason: "Socket is not connected")
+			throw Error(code: Socket.SOCKET_ERR_ALREADY_CONNECTED, reason: "Socket is already connected")
 		}
 
 		if host.utf8.count == 0 {
@@ -1958,7 +1958,7 @@ public class Socket: SocketReader, SocketWriter {
 
 		if self.isConnected {
 
-			throw Error(code: Socket.SOCKET_ERR_ALREADY_CONNECTED, reason: "Socket is not connected")
+			throw Error(code: Socket.SOCKET_ERR_ALREADY_CONNECTED, reason: "Socket is already connected")
 		}
 
 		// Create the signature...
@@ -2106,7 +2106,9 @@ public class Socket: SocketReader, SocketWriter {
 	///		- port: 				The port to listen on.
 	/// 	- maxBacklogSize: 		The maximum size of the queue containing pending connections. Default is *Socket.SOCKET_DEFAULT_MAX_BACKLOG*.
 	///		- allowPortReuse:		Set to `true` to allow the port to be reused. `false` otherwise. Default is `true`.
-	///		- node:					Can be set to listen on a *specific address*. The value passed is an *optional String* containing the numerical network address (for IPv4, numbers and dots notation, for iPv6, hexidecimal strting). If `nil`, a suitable address will be used.
+	///		- node:					Can be set to listen on a *specific address*. The value passed is an *optional String* containing the numerical
+	///								network address (for IPv4, numbers and dots notation, for iPv6, hexidecimal strting). If `nil`, a suitable address
+	///								will be used.
 	///
 	public func listen(on port: Int, maxBacklogSize: Int = Socket.SOCKET_DEFAULT_MAX_BACKLOG, allowPortReuse: Bool = true, node: String? = nil) throws {
 
