@@ -30,23 +30,23 @@ public protocol SocketReader {
 	///
 	/// Reads a string.
 	///
-	/// - Returns: Optional String
+	/// - Returns: Optional **String**
 	///
 	func readString() throws -> String?
 	
 	///
 	/// Reads all available data into an Data object.
 	///
-	/// - Parameter data: Data object to contain read data.
+	/// - Parameter data: **Data** object to contain read data.
 	///
 	/// - Returns: Integer representing the number of bytes read.
 	///
 	func read(into data: inout Data) throws -> Int
 	
 	///
-	/// Reads all available data into an NSMutableData object.
+	/// Reads all available data into an **NSMutableData** object.
 	///
-	/// - Parameter data: NSMutableData object to contain read data.
+	/// - Parameter data: **NSMutableData** object to contain read data.
 	///
 	/// - Returns: Integer representing the number of bytes read.
 	///
@@ -61,23 +61,23 @@ public protocol SocketReader {
 public protocol SocketWriter {
 	
 	///
-	/// Writes data from Data object.
+	/// Writes data from **Data** object.
 	///
-	/// - Parameter data: Data object containing the data to be written.
+	/// - Parameter data: **Data** object containing the data to be written.
 	///
 	@discardableResult func write(from data: Data) throws -> Int
 	
 	///
-	/// Writes data from NSData object.
+	/// Writes data from **NSData** object.
 	///
-	/// - Parameter data: NSData object containing the data to be written.
+	/// - Parameter data: **NSData** object containing the data to be written.
 	///
 	@discardableResult func write(from data: NSData) throws -> Int
 	
 	///
 	/// Writes a string
 	///
-	/// - Parameter string: String data to be written.
+	/// - Parameter string: **String** data to be written.
 	///
 	@discardableResult func write(from string: String) throws -> Int
 }
@@ -92,7 +92,7 @@ public protocol SSLServiceDelegate {
 	///
 	/// Initialize SSL Service
 	///
-	/// - Parameter asServer:	True for initializing a server, otherwise a client.
+	/// - Parameter asServer:	`True` for initializing a server, otherwise a client.
 	///
 	func initialize(asServer: Bool) throws
 	
@@ -151,7 +151,7 @@ public protocol SSLServiceDelegate {
 		
 		///
 		/// The negotiated ALPN protocol that has been agreed upon during the handshaking phase.
-		/// Will be nil if ALPN hasn't been used or requestsed protocol is not available.
+		/// Will be `nil` if ALPN hasn't been used or requestsed protocol is not available.
 		///
 		var negotiatedAlpnProtocol: String? { get }
 		

@@ -111,7 +111,7 @@ public class Socket: SocketReader, SocketWriter {
 	///
 	/// Flag to indicate the endian-ness of the host. (Readonly)
 	///
-	public static let isLittleEndian: Bool 					= Int(littleEndian: 42) == 42
+	public static let isLittleEndian: Bool = Int(littleEndian: 42) == 42
 
 	// MARK: Enums
 
@@ -341,6 +341,9 @@ public class Socket: SocketReader, SocketWriter {
 			}
 		}
 		
+		///
+		/// The protocol family of the address. (Readonly)
+		///
 		public var family: ProtocolFamily {
 			switch self {
 			case .ipv4(_):
@@ -391,6 +394,7 @@ public class Socket: SocketReader, SocketWriter {
 
 		///
 		/// Path for .unix type sockets. (Readonly)
+		///
 		public internal(set) var path: String? = nil
 
 		///
@@ -404,7 +408,7 @@ public class Socket: SocketReader, SocketWriter {
 		public internal(set) var isSecure: Bool = false
 
 		///
-		/// True is socket bound, false otherwise.
+		/// `True` is socket bound, `false` otherwise.
 		///
 		public internal(set) var isBound: Bool = false
 
@@ -662,7 +666,8 @@ public class Socket: SocketReader, SocketWriter {
 		///
 		///	Retrieve the UNIX address as an UnsafeMutablePointer
 		///
-		///	- Returns: Tuple containing the pointer plus the size.  **Needs to be deallocated after use.**
+		///	- Returns: 	Tuple containing the pointer plus the size.
+		///				**IMPORTANT: The pointer returned needs to be deallocated after use.**
 		///
 		internal func unixAddress() throws -> (UnsafeMutablePointer<UInt8>, Int) {
 
@@ -786,6 +791,7 @@ public class Socket: SocketReader, SocketWriter {
 		/// - Parameter error: SSLError instance to be transformed
 		///
 		/// - Returns: Error Instance
+		///
 		init(with error: SSLError) {
 
 			self.init(code: error.errCode, reason: error.description)
@@ -809,7 +815,7 @@ public class Socket: SocketReader, SocketWriter {
 	var readStorage: NSMutableData = NSMutableData(capacity: Socket.SOCKET_DEFAULT_READ_BUFFER_SIZE)!
 	
 	///
-	/// True if a delegate accept is pending.
+	/// `True` if a delegate accept is pending.
 	///
 	var needsAcceptDelegateCall: Bool = false
 
@@ -884,28 +890,28 @@ public class Socket: SocketReader, SocketWriter {
 	public var maxBacklogSize: Int = Socket.SOCKET_DEFAULT_MAX_BACKLOG
 
 	///
-	/// True if this socket is connected. False otherwise. (Readonly)
+	/// `True` if this socket is connected. `False` otherwise. (Readonly)
 	///
 	public internal(set) var isConnected: Bool = false
 
 	///
-	/// True if this socket is blocking. False otherwise. (Readonly)
+	/// `True` if this socket is blocking. `False` otherwise. (Readonly)
 	///
 	public internal(set) var isBlocking: Bool = true
 
 	///
-	/// True if this socket is listening. False otherwise. (Readonly)
+	/// `True` if this socket is listening. `False` otherwise. (Readonly)
 	///
 	public internal(set) var isListening: Bool = false
 
 	///
-	/// True if this socket's remote connection has closed. (Readonly)
+	/// `True` if this socket's remote connection has closed. (Readonly)
 	///		**Note:** This is only valid after a Socket is connected.
 	///
 	public internal(set) var remoteConnectionClosed: Bool = false
 
 	///
-	/// True if the socket is listening or connected. (Readonly)
+	/// `True` if the socket is listening or connected. (Readonly)
 	///
 	public var isActive: Bool {
 
@@ -913,7 +919,7 @@ public class Socket: SocketReader, SocketWriter {
 	}
 
 	///
-	/// True if this a server, false otherwise. (Readonly)
+	/// `True` if this a server, `false` otherwise. (Readonly)
 	///
 	public var isServer: Bool {
 
@@ -921,7 +927,7 @@ public class Socket: SocketReader, SocketWriter {
 	}
 
 	///
-	/// True if this socket is secure, false otherwise. (Readonly)
+	/// `True` if this socket is secure, `false` otherwise. (Readonly)
 	///
 	public var isSecure: Bool {
 
@@ -985,7 +991,7 @@ public class Socket: SocketReader, SocketWriter {
 
 	///
 	/// Create a configured Socket instance.
-	/// **Note:** Calling with no passed parameters will create a default socket: IPV4, stream, TCP.
+	/// 	**Note:** Calling with no parameters will create a default socket: IPV4, stream, TCP.
 	///
 	/// - Parameters:
 	///		- family:	The family of the socket to create.
@@ -1129,7 +1135,7 @@ public class Socket: SocketReader, SocketWriter {
 	/// - Parameters:
 	///		- sockets:		An array of sockets to be monitored.
 	///		- timeout:		Timeout (in msec) before returning.  A timeout value of 0 will return immediately.
-	///		- waitForever:	If true, this function will wait indefinitely regardless of timeout value. Defaults to false.
+	///		- waitForever:	If `true`, this function will wait indefinitely regardless of timeout value. Defaults to `false`.
 	///
 	/// - Returns: An optional array of sockets which have data available or nil if a timeout expires.
 	///
@@ -1217,7 +1223,7 @@ public class Socket: SocketReader, SocketWriter {
 	/// 	- hostname:			Hostname for this signature.
 	/// 	- port:				Port for this signature.
 	///
-	/// - Returns: An Address instance, or nil if the hostname and port are not valid.
+	/// - Returns: An Address instance, or `nil` if the hostname and port are not valid.
 	///
 	public class func createAddress(for host: String, on port: Int32) -> Address? {
 
@@ -1629,8 +1635,8 @@ public class Socket: SocketReader, SocketWriter {
 	///						will be changed to non-blocking mode temporarily if a timeout greater
 	///						than zero (0) is provided. The returned socket will be set back to its
 	///						original setting (blocking or non-blocking).*
-	///		- familyOnly:	Setting this to true will only connect to a socket of the family of the
-	///						current instance of *Socket*.  Setting it to false, will allow connection
+	///		- familyOnly:	Setting this to `true` will only connect to a socket of the family of the
+	///						current instance of *Socket*.  Setting it to `false`, will allow connection
 	///						to foreign sockets of a different family.  Default is *false*.
 	///
 	public func connect(to host: String, port: Int32, timeout: UInt = 0, familyOnly: Bool = false) throws {
@@ -3294,7 +3300,7 @@ public class Socket: SocketReader, SocketWriter {
 	///
 	/// Set blocking mode for socket.
 	///
-	/// - Parameter shouldBlock: True to block, false to not.
+	/// - Parameter shouldBlock: `True` to block, `false` to not.
 	///
 	public func setBlocking(mode shouldBlock: Bool) throws {
 
@@ -3436,7 +3442,7 @@ public class Socket: SocketReader, SocketWriter {
 	/// Closes the current socket.
 	///
 	///	- Parameters:
-	///		- withSSLCleanup:	True to deinitialize the SSLService if present.
+	///		- withSSLCleanup:	`True` to deinitialize the *SSLService* if present.
 	///
 	private func close(withSSLCleanup: Bool) {
 
@@ -3673,7 +3679,7 @@ public class Socket: SocketReader, SocketWriter {
 	///
 	/// Private function to wait for this instance to be either readable or writable.
 	///
-	///	- Parameter forRead:	True to wait for socket to be readable, false waits for it to be writable.
+	///	- Parameter forRead:	`True` to wait for socket to be readable, `false` waits for it to be writable.
 	///
 	private func wait(forRead: Bool) throws {
 
@@ -3712,12 +3718,14 @@ public class Socket: SocketReader, SocketWriter {
 	}
 	
 	///
-	/// Private function to set NOSIGPIPE on a socket. **No-op on Linux.**
+	/// Private function to set **NOSIGPIPE** on a socket. **No-op on Linux.**
 	///
 	/// - Parameter fd: The socket file descriptor upon which to act.
 	///
 	private func ignoreSIGPIPE(on fd: Int32) throws {
+		
 		#if !os(Linux)
+		
 			// Set the new socket to ignore SIGPIPE to avoid dying on interrupted connections...
 			// Note: Linux does not support the SO_NOSIGPIPE option. Instead, we use the
 			// MSG_NOSIGNAL flags passed to send.  See the write() functions below.
@@ -3725,7 +3733,7 @@ public class Socket: SocketReader, SocketWriter {
 			if setsockopt(self.socketfd, SOL_SOCKET, SO_NOSIGPIPE, &on, socklen_t(MemoryLayout<Int32>.size)) < 0 {
 				throw Error(code: Socket.SOCKET_ERR_SETSOCKOPT_FAILED, reason: self.lastError())
 			}
+		
 		#endif
 	}
-
 }
