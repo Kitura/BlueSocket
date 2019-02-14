@@ -822,10 +822,24 @@ public class Socket: SocketReader, SocketWriter {
 
 	// MARK: -- Public
 
-	///
-	/// The file descriptor representing this socket. (Readonly)
-	///
-	public internal(set) var socketfd: Int32 = SOCKET_INVALID_DESCRIPTOR
+    private var _socketfd: Int32 = SOCKET_INVALID_DESCRIPTOR
+    private let stateQueue = DispatchQueue(label: "stateQueue", attributes: .concurrent)
+
+    ///
+    /// The file descriptor representing this socket. (Readonly)
+    ///
+    public internal(set) var socketfd: Int32 {
+        get {
+            return stateQueue.sync {
+                return _socketfd
+            }
+        }
+        set {
+            stateQueue.sync(flags: .barrier) {
+                _socketfd = newValue
+            }
+        }
+    }
 
 	///
 	/// The signature for the socket. (Readonly)
