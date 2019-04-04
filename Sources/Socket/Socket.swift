@@ -3064,11 +3064,17 @@ public class Socket: SocketReader, SocketWriter {
 		if data.count == 0 {
 			return 0
 		}
-
+#if swift(>=5.0)
+		return try data.withUnsafeBytes() { [unowned self] (buffer: UnsafeRawBufferPointer) throws -> Int in
+			return try self.write(from: buffer.baseAddress!, bufSize: data.count)
+		}
+#else
 		return try data.withUnsafeBytes() { [unowned self] (buffer: UnsafePointer<UInt8>) throws -> Int in
 
 			return try self.write(from: buffer, bufSize: data.count)
 		}
+#endif
+
 	}
 
 	///
@@ -3193,10 +3199,16 @@ public class Socket: SocketReader, SocketWriter {
 	@discardableResult public func write(from data: Data, to address: Address) throws -> Int {
 
 		// Send the bytes...
+#if swift(>=5.0)
+		return try data.withUnsafeBytes() { [unowned self] (buffer: UnsafeRawBufferPointer) throws -> Int in
+			return try self.write(from: buffer.baseAddress!, bufSize: data.count, to: address)
+		}
+#else
 		return try data.withUnsafeBytes() { [unowned self] (buffer: UnsafePointer<UInt8>) throws -> Int in
 
 			return try self.write(from: buffer, bufSize: data.count, to: address)
 		}
+#endif
 	}
 
 	///
