@@ -692,10 +692,17 @@ public class Socket: SocketReader, SocketWriter {
 			// macOS uses one byte for sa_family_t, Linux uses two...
 			#if os(Linux)
 				let afUnixShort = UInt16(AF_UNIX)
-				addrPtr[memLoc] = UInt8(afUnixShort & 0xFF)
-				memLoc += 1
-				addrPtr[memLoc] = UInt8((afUnixShort >> 8) & 0xFF)
-				memLoc += 1
+			        if isLittleEndian {
+				  addrPtr[memLoc] = UInt8(afUnixShort & 0xFF)
+				  memLoc += 1
+				  addrPtr[memLoc] = UInt8((afUnixShort >> 8) & 0xFF)
+				  memLoc += 1
+				} else {
+				  addrPtr[memLoc] = UInt8((afUnixShort >> 8) & 0xFF)
+				  memLoc += 1
+				  addrPtr[memLoc] = UInt8(afUnixShort & 0xFF)
+				  memLoc += 1
+				}
 			#else
 				addrPtr[memLoc] = UInt8(addrLen)
 				memLoc += 1
