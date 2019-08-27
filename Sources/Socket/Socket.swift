@@ -690,9 +690,10 @@ public class Socket: SocketReader, SocketWriter {
 			var memLoc = 0
 
 			// macOS uses one byte for sa_family_t, Linux uses two...
+			//	Note: on Linux, account for endianess...
 			#if os(Linux)
 				let afUnixShort = UInt16(AF_UNIX)
-			        if isLittleEndian {
+		        if isLittleEndian {
 				  addrPtr[memLoc] = UInt8(afUnixShort & 0xFF)
 				  memLoc += 1
 				  addrPtr[memLoc] = UInt8((afUnixShort >> 8) & 0xFF)
