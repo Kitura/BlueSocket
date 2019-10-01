@@ -1238,7 +1238,7 @@ public class Socket: SocketReader, SocketWriter {
 		var info: UnsafeMutablePointer<addrinfo>?
 
 		// Retrieve the info on our target...
-		var status: Int32 = getaddrinfo(host, String(port), nil, &info)
+		let status: Int32 = getaddrinfo(host, String(port), nil, &info)
 		if status != 0 {
 
 			return nil

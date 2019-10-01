@@ -1164,7 +1164,6 @@ class SocketTests: XCTestCase {
 		let hostname = "127.0.0.1"
 		let port: Int32 = 1337
 		
-		let bufSize = 4096
 		var data = Data()
 		
 		do {
@@ -1246,7 +1245,6 @@ class SocketTests: XCTestCase {
 		let hostname = "127.0.0.1"
 		let port: Int32 = 1337
 
-		let bufSize = 4096
 		var data = Data()
 
 		do {
@@ -1350,9 +1348,6 @@ class SocketTests: XCTestCase {
 		let hostname = "127.0.0.1"
 		let port: Int32 = 1337
 
-		let bufSize = 4096
-		var data = Data()
-
 		do {
 			
 			self.launchUDPHelper()
@@ -1444,7 +1439,6 @@ class SocketTests: XCTestCase {
 	
 	func testReadWriteUnix() {
 		
-		let bufSize = 4096
 		var data = Data()
 		
 		do {
