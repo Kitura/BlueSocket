@@ -2,8 +2,8 @@
     <a href="https://www.kitura.io/packages.html#all">
     <img src="https://img.shields.io/badge/docs-kitura.io-1FBCE4.svg" alt="APIDoc">
     </a>
-    <a href="https://travis-ci.org/IBM-Swift/BlueSocket">
-    <img src="https://travis-ci.org/IBM-Swift/BlueSocket.svg?branch=master" alt="Build Status - Master">
+    <a href="https://travis-ci.org/Kitura/BlueSocket">
+    <img src="https://travis-ci.org/Kitura/BlueSocket.svg?branch=master" alt="Build Status - Master">
     </a>
     <img src="https://img.shields.io/badge/os-macOS-green.svg?style=flat" alt="macOS">
     <img src="https://img.shields.io/badge/os-iOS-green.svg?style=flat" alt="iOS">
@@ -50,7 +50,7 @@ Socket framework for Swift using the Swift Package Manager. Works on iOS, macOS,
 
 ### Add-ins
 
-* [BlueSSLService](https://github.com/IBM-Swift/BlueSSLService.git) can be used to add **SSL/TLS** support.
+* [BlueSSLService](https://github.com/Kitura/BlueSSLService.git) can be used to add **SSL/TLS** support.
 	- If using this package, please note that the  **libssl-dev** package is required to be installed when building on Linux.
 
 
@@ -83,14 +83,14 @@ To run the supplied unit tests for **Socket** from the command line:
 To include BlueSocket into a Swift Package Manager package, add it to the `dependencies` attribute defined in your `Package.swift` file. You can select the version using the `majorVersion` and `minor` parameters. For example:
 ```
 	dependencies: [
-		.Package(url: "https://github.com/IBM-Swift/BlueSocket.git", majorVersion: <majorVersion>, minor: <minor>)
+		.Package(url: "https://github.com/Kitura/BlueSocket.git", majorVersion: <majorVersion>, minor: <minor>)
 	]
 ```
 
 #### Carthage
 To include BlueSocket in a project using Carthage, add a line to your `Cartfile` with the GitHub organization and project names and version. For example:
 ```
-	github "IBM-Swift/BlueSocket" ~> <majorVersion>.<minor>
+	github "Kitura/BlueSocket" ~> <majorVersion>.<minor>
 ```
 
 #### CocoaPods
@@ -255,7 +255,7 @@ class EchoServer {
 	var listenSocket: Socket? = nil
 	var continueRunningValue = true
 	var connectedSockets = [Int32: Socket]()
-	let socketLockQueue = DispatchQueue(label: "com.ibm.serverSwift.socketLockQueue")
+	let socketLockQueue = DispatchQueue(label: "com.kitura.serverSwift.socketLockQueue")
 	var continueRunning: Bool {
 		set(newValue) {
 			socketLockQueue.sync {
@@ -448,7 +448,7 @@ import PackageDescription
 let package = Package(
 	name: "EchoServer",
 	dependencies: [
-		.package(url: "https://github.com/IBM-Swift/BlueSocket.git", from:"1.0.8"),
+		.package(url: "https://github.com/Kitura/BlueSocket.git", from:"1.0.8"),
 	],
 	targets: [
 	.target(
@@ -466,7 +466,7 @@ import PackageDescription
 let package = Package(
 	name: "EchoServer",
 	dependencies: [
-	.Package(url: "https://github.com/IBM-Swift/BlueSocket.git", majorVersion: 1, minor: 0),
+	.Package(url: "https://github.com/Kitura/BlueSocket.git", majorVersion: 1, minor: 0),
 	],
 	exclude: ["EchoServer.xcodeproj"]
 )
@@ -487,4 +487,4 @@ We love to talk server-side Swift and Kitura. Join our [Slack](http://swift-at-i
 
 ## License
 
-This library is licensed under Apache 2.0. Full license text is available in [LICENSE](https://github.com/IBM-Swift/BlueSocket/blob/master/LICENSE).
+This library is licensed under Apache 2.0. Full license text is available in [LICENSE](https://github.com/Kitura/BlueSocket/blob/master/LICENSE).
