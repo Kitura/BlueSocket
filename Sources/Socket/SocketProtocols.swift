@@ -30,27 +30,36 @@ public protocol SocketReader {
 	///
 	/// Reads a string.
 	///
+	/// In order to deal with slow connection, the function can retry a few times.
+	///
+	/// - Parameter retry: **UInt** the number of time to retry.
+	/// - Parameter wait: **UInt32** the time to wait in-between retry.
+	///
 	/// - Returns: Optional **String**
 	///
-	func readString() throws -> String?
+	func readString(retry: UInt, wait: UInt32) throws -> String?
 	
 	///
 	/// Reads all available data into an Data object.
 	///
 	/// - Parameter data: **Data** object to contain read data.
+	/// - Parameter retry: **UInt** the number of time to retry.
+	/// - Parameter wait: **UInt32** the time to wait in-between retry.
 	///
 	/// - Returns: Integer representing the number of bytes read.
 	///
-	func read(into data: inout Data) throws -> Int
+	func read(into data: inout Data, retry: UInt, wait: UInt32) throws -> Int
 	
 	///
 	/// Reads all available data into an **NSMutableData** object.
 	///
 	/// - Parameter data: **NSMutableData** object to contain read data.
+	/// - Parameter retry: **UInt** the number of time to retry.
+	/// - Parameter wait: **UInt32** the time to wait in-between retry.
 	///
 	/// - Returns: Integer representing the number of bytes read.
 	///
-	func read(into data: NSMutableData) throws -> Int
+	func read(into data: NSMutableData, retry: UInt, wait: UInt32) throws -> Int
 }
 
 // MARK: Writer

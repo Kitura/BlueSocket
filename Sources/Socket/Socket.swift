@@ -2682,16 +2682,21 @@ public class Socket: SocketReader, SocketWriter {
 	///
 	/// Read a string from the socket
 	///
+	/// In order to deal with slow connection, the function can retry a few times.
+	///
+	/// - Parameter retry: **UInt** the number of time to retry.
+	/// - Parameter wait: **UInt32** the time to wait in-between retry.
+	///
 	/// - Returns: String containing the data read from the socket.
 	///
-	public func readString() throws -> String? {
+	public func readString(retry: UInt = 0, wait: UInt32 = 0) throws -> String? {
 
 		guard let data = NSMutableData(capacity: 2000) else {
 
 			throw Error(code: Socket.SOCKET_ERR_INTERNAL, reason: "Unable to create temporary NSMutableData...")
 		}
 
-		let rc = try self.read(into: data)
+		let rc = try self.read(into: data, retry: retry, wait: wait)
 
 		guard let str = NSString(bytes: data.bytes, length: data.length, encoding: String.Encoding.utf8.rawValue),
 			rc > 0 else {
@@ -2707,10 +2712,12 @@ public class Socket: SocketReader, SocketWriter {
 	/// Read data from the socket.
 	///
 	/// - Parameter data: The buffer to return the data in.
+	/// - Parameter retry: **UInt** the number of time to retry.
+	/// - Parameter wait: **UInt32** the time to wait in-between retry.
 	///
 	/// - Returns: The number of bytes returned in the buffer.
 	///
-	public func read(into data: NSMutableData) throws -> Int {
+	public func read(into data: NSMutableData, retry: UInt = 0, wait: UInt32 = 0) throws -> Int {
 
 		// The socket must've been created and must be connected...
 		if self.socketfd == Socket.SOCKET_INVALID_DESCRIPTOR {
@@ -2723,19 +2730,27 @@ public class Socket: SocketReader, SocketWriter {
 			throw Error(code: Socket.SOCKET_ERR_NOT_CONNECTED, reason: "Socket is not connected")
 		}
 
-		// Read all available bytes...
-		let count = try self.readDataIntoStorage()
-
-		// Did we get data?
 		var returnCount: Int = 0
-		if count > 0 {
+		var i: UInt = 0
+		while i <= retry {
+			// Read all available bytes...
+			let count = try self.readDataIntoStorage()
 
-			data.append(self.readStorage.bytes, length: self.readStorage.length)
+			// Did we get data?
+			if count > 0 {
 
-			returnCount = self.readStorage.length
-
-			// - Reset the storage buffer...
-			self.readStorage.length = 0
+				data.append(self.readStorage.bytes, length: self.readStorage.length)
+				
+				returnCount += self.readStorage.length
+				
+				// - Reset the storage buffer...
+				self.readStorage.length = 0
+				
+				break
+			} else {		
+				i += 1
+				usleep(wait)
+			}
 		}
 
 		return returnCount
@@ -2745,10 +2760,12 @@ public class Socket: SocketReader, SocketWriter {
 	/// Read data from the socket.
 	///
 	/// - Parameter data: The buffer to return the data in.
+	/// - Parameter retry: **UInt** the number of time to retry.
+	/// - Parameter wait: **UInt32** the time to wait in-between retry.
 	///
 	/// - Returns: The number of bytes returned in the buffer.
 	///
-	public func read(into data: inout Data) throws -> Int {
+	public func read(into data: inout Data, retry: UInt = 0, wait: UInt32 = 0) throws -> Int {
 
 		// The socket must've been created and must be connected...
 		if self.socketfd == Socket.SOCKET_INVALID_DESCRIPTOR {
@@ -2766,15 +2783,23 @@ public class Socket: SocketReader, SocketWriter {
 
 		// Did we get data?
 		var returnCount: Int = 0
-		if count > 0 {
+		var i: UInt = 0
+		while i <= retry {
+			if count > 0 {
 
-			// - Yes, move to caller's buffer...
-			data.append(self.readStorage.bytes.assumingMemoryBound(to: UInt8.self), count: self.readStorage.length)
+				// - Yes, move to caller's buffer...
+				data.append(self.readStorage.bytes.assumingMemoryBound(to: UInt8.self), count: self.readStorage.length)
 
-			returnCount = self.readStorage.length
+				returnCount = self.readStorage.length
 
-			// - Reset the storage buffer...
-			self.readStorage.length = 0
+				// - Reset the storage buffer...
+				self.readStorage.length = 0
+
+				break
+			} else {
+				i += 1
+				usleep(wait)
+			}
 		}
 
 		return returnCount
