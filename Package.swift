@@ -25,8 +25,26 @@ let package = Package(
         .library(
             name: "Socket",
             targets: ["Socket"]),
+        
+        .library(
+            name: "BlueSocketTestCommonLibrary",
+            targets: ["BlueSocketTestCommonLibrary"]),
+//        .library(
+//            name: "BlueSocketTestClientLibrary",
+//            targets: ["BlueSocketTestClientLibrary"]),
+//        .library(
+//            name: "BlueSocketTestServerLibrary",
+//            targets: ["BlueSocketTestServerLibrary"]),
+        .executable(
+            name: "BlueSocketTestServer",
+            targets: ["BlueSocketTestServer"]),
+        .executable(
+            name: "BlueSocketTestClient",
+            targets: ["BlueSocketTestClient"])
     ],
-    dependencies: [],
+    dependencies: [
+        .package(url: "https://github.com/apple/swift-argument-parser", from: "0.4.1"),
+    ],
     targets: [
         .target(
             name: "Socket",
@@ -35,7 +53,18 @@ let package = Package(
         ),
         .testTarget(
             name: "SocketTests",
-            dependencies: ["Socket"]
+            dependencies: ["Socket", "BlueSocketTestCommonLibrary"]
+        ),
+        
+        .target(
+            name: "BlueSocketTestCommonLibrary",
+            dependencies: [ "Socket" ]
+        ),
+        .target(name: "BlueSocketTestServer",
+                dependencies: ["BlueSocketTestCommonLibrary", "ArgumentParser", ]
+        ),
+        .target(name: "BlueSocketTestClient",
+                dependencies: ["BlueSocketTestCommonLibrary", "ArgumentParser" ]
         ),
     ]
 )

@@ -826,7 +826,9 @@ public class Socket: SocketReader, SocketWriter {
 	/// `True` if a delegate accept is pending.
 	///
 	var needsAcceptDelegateCall: Bool = false
-
+    
+    /// Only used for Hashable conformance
+    internal let uuid = UUID()
 
 	// MARK: -- Public
 
@@ -2748,7 +2750,8 @@ public class Socket: SocketReader, SocketWriter {
 	///
 	/// - Returns: The number of bytes returned in the buffer.
 	///
-	public func read(into data: inout Data) throws -> Int {
+	@discardableResult
+    public func read(into data: inout Data) throws -> Int {
 
 		// The socket must've been created and must be connected...
 		if self.socketfd == Socket.SOCKET_INVALID_DESCRIPTOR {
@@ -3256,7 +3259,7 @@ public class Socket: SocketReader, SocketWriter {
 			throw Error(code: Socket.SOCKET_ERR_BAD_DESCRIPTOR, reason: "The socket is not valid, it must be created and connected")
 		}
 
-		if !self.isConnected {
+        if !self.isConnected && !self.isListening {
 
 			throw Error(code: Socket.SOCKET_ERR_NOT_CONNECTED, reason: "The socket is not connected")
 		}
