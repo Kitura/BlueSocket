@@ -81,7 +81,6 @@ public class ClientController {
         if bytesWritten == maxBytes &&
                 bytesRead == maxBytes
         {
-            print("close client  bytesRead: \(bytesRead)  written: \(bytesWritten)")
             socket.close()
             self.state = .success
             return

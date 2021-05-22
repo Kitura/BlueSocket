@@ -32,24 +32,21 @@ public class ServerOperation: Operation {
 
     public override func main() {
         self.serverHandler.onNewConnection = { socket in
-            print("new client")
             let client = ClientHandler(socket: socket)
             client.onClose = { [weak self, weak client] in
                 guard let self = self, let client = client else { return }
                 
                 self.clientHandlers.removeAll(where: { $0 == client })
-                print("client closed  read \(client.totalReadCount) bytes  write \(client.totalWriteCount) bytes  (count: \(self.clientHandlers.count))")
+//                print("client closed  read \(client.totalReadCount) bytes  write \(client.totalWriteCount) bytes  (count: \(self.clientHandlers.count))")
             }
             self.clientHandlers.append(client)
         }
 
         while !self.isCancelled {
-            autoreleasepool {
-                let socketHandlers: [SocketHandler] = [serverHandler] + clientHandlers
-                
-                let activeHandlers = socketHandlers.wait(timeout: 12)
-                activeHandlers.process()
-            }
+            let socketHandlers: [SocketHandler] = [serverHandler] + clientHandlers
+            
+            let activeHandlers = socketHandlers.wait(timeout: 12)
+            activeHandlers.process()
         }
     }
 }
