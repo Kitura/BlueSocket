@@ -11,7 +11,7 @@ branches:
 # by .swift-version, unless SWIFT_SNAPSHOT is specified.
 matrix:
   include:
-      os: linux
+    - os: linux
       dist: xenial
       sudo: required
       services: docker
