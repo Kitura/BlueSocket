@@ -18,30 +18,30 @@
 
 import PackageDescription
 
+var products: [Product] = [
+    .library(
+        name: "Socket",
+        targets: ["Socket"]),
+
+    .library(
+        name: "BlueSocketTestCommonLibrary",
+        targets: ["BlueSocketTestCommonLibrary"]),
+    ]
+#if swift(>=5.2)
+products.append(contentsOf: [
+    .executable(
+        name: "BlueSocketTestServer",
+        targets: ["BlueSocketTestServer"]),
+    .executable(
+        name: "BlueSocketTestClient",
+        targets: ["BlueSocketTestClient"])
+])
+#endif
+
 #if os(Linux) || os(macOS) || os(iOS) || os(tvOS)
 let package = Package(
     name: "Socket",
-    products: [
-        .library(
-            name: "Socket",
-            targets: ["Socket"]),
-        
-        .library(
-            name: "BlueSocketTestCommonLibrary",
-            targets: ["BlueSocketTestCommonLibrary"]),
-//        .library(
-//            name: "BlueSocketTestClientLibrary",
-//            targets: ["BlueSocketTestClientLibrary"]),
-//        .library(
-//            name: "BlueSocketTestServerLibrary",
-//            targets: ["BlueSocketTestServerLibrary"]),
-        .executable(
-            name: "BlueSocketTestServer",
-            targets: ["BlueSocketTestServer"]),
-        .executable(
-            name: "BlueSocketTestClient",
-            targets: ["BlueSocketTestClient"])
-    ],
+    products: products,
     dependencies: [
         .package(url: "https://github.com/apple/swift-argument-parser", from: "0.1.0"),
     ],
