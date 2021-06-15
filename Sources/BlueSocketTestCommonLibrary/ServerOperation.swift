@@ -43,10 +43,22 @@ public class ServerOperation: Operation {
         }
 
         while !self.isCancelled {
-            let socketHandlers: [SocketHandler] = [serverHandler] + clientHandlers
-            
-            let activeHandlers = socketHandlers.wait(timeout: 12)
-            activeHandlers.process()
+            autoreleasepool {
+                let socketHandlers: [SocketHandler] = [serverHandler] + clientHandlers
+                
+                let activeHandlers = socketHandlers.wait(timeout: 12)
+                activeHandlers.process()
+            }
         }
     }
 }
+
+#if os(Linux)
+/// Compatibility layer for Linux.
+///
+/// Autoreleasepools are not necessary for Linux: https://forums.swift.org/t/autoreleasepool-for-ubuntu/4419/14
+@discardableResult
+func autoreleasepool<Result>(invoking body: () throws -> Result) rethrows -> Result {
+    try body()
+}
+#endif
