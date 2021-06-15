@@ -48,7 +48,7 @@ protocol BufferedSocketHandler: SocketHandler {
 }
 
 protocol ClientSocketHandler: SocketHandler {
-    var onClose: () ->Void { get set }
+    var onClose: () -> Void { get set }
 }
 
 extension BufferedSocketHandler {

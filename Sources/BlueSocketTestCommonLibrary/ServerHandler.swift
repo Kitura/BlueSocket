@@ -17,6 +17,7 @@
 //     See the License for the specific language governing permissions and
 //     limitations under the License.
 //
+// swiftlint:disable force_try
 
 import Foundation
 import Socket
@@ -31,7 +32,7 @@ class ServerHandler: SocketHandler {
         return isActive.readable
     }
     
-    public var onNewConnection: (Socket)->Void = { _ in }
+    public var onNewConnection: (Socket) -> Void = { _ in }
     
     init(port: Int) throws {
         let socket = try Socket.create(family: .inet)

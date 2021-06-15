@@ -17,6 +17,7 @@
 //     See the License for the specific language governing permissions and
 //     limitations under the License.
 //
+// swiftlint:disable force_try
 
 import Foundation
 import Socket
@@ -78,8 +79,9 @@ public class ClientController {
         guard self.state == .inProgress else {
             return
         }
-        if bytesWritten == maxBytes &&
-                bytesRead == maxBytes
+        if
+            bytesWritten == maxBytes &&
+            bytesRead == maxBytes
         {
             socket.close()
             self.state = .success
@@ -92,8 +94,9 @@ public class ClientController {
         
         let isActive = try! socket.isReadableOrWritable(waitForever: false, timeout: 1)
 
-        if bytesWritten < maxBytes,
-           isActive.writable
+        if
+            bytesWritten < maxBytes,
+            isActive.writable
         {
             let packetSize = min( maxBytes - bytesWritten, self.packetSize)
             let outputData = generateData(offset: bytesWritten, length: packetSize)
