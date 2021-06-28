@@ -24,19 +24,20 @@ Socket framework for Swift using the Swift Package Manager. Works on iOS, macOS,
 
 * Swift Open Source `swift-5.1-RELEASE` toolchain (**Minimum REQUIRED for latest release**)
 * Swift Open Source `swift-5.4-RELEASE` toolchain (**Recommended**)
-* Swift toolchain included in *Xcode Version 12.5 (12E262) or higher*.
+* Swift toolchain included in *Xcode Version 11.0 or higher*.
 
 ### macOS
 
-* macOS 10.11.6 (*El Capitan*) or higher.
-* Xcode Version 11 or higher using one of the above toolchains.
-* Xcode Version 12 or higher using the included toolchain (*Recommended*).
+* macOS 10.14.6 (*Mojave*) or higher.
+* Xcode Version 11.0 or higher using one of the above toolchains.
+* Xcode Version 12.5 or higher using the included toolchain (*Recommended*).
+* Secure Transport is provided by macOS.
 
 ### iOS
 
 * iOS 10.0 or higher
-* Xcode Version 11 or higher using one of the above toolchains.
-* Xcode Version 12 or higher using the included toolchain  (*Recommended*).
+* Xcode Version 11.0 or higher using one of the above toolchains.
+* Xcode Version 12.5 or higher using the included toolchain (*Recommended*).
 
 Note:
 
