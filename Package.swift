@@ -40,7 +40,7 @@ let libraryBuildInfo = BuildInfo(
         .target(
             name: "Socket",
             dependencies: [],
-            exclude: ["BlueSocket.xcodeproj", "BlueSocket.xcworkspace", "README.md", "Sources/Info.plist", "Sources/Socket.h"]
+            exclude: ["Info.plist", "Socket.h"]
         ),
         .testTarget(
             name: "SocketTests",
