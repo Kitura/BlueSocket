@@ -2,3 +2,4 @@
 .DS_Store
 xcuserdata/
 .swiftpm
+Examples/Package.resolved
