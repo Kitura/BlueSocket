@@ -846,7 +846,7 @@ public class Socket: SocketReader, SocketWriter {
 	///
 	/// The delegate that provides the SSL implementation.
 	///
-	public var delegate: SSLServiceDelegate? = nil {
+	public weak var delegate: SSLServiceDelegate? = nil {
 
 		didSet {
 

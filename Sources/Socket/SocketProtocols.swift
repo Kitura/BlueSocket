@@ -87,7 +87,7 @@ public protocol SocketWriter {
 ///
 /// SSL Service Delegate Protocol
 ///
-public protocol SSLServiceDelegate {
+public protocol SSLServiceDelegate : class {
 	
 	///
 	/// Initialize SSL Service
